@@ -1,0 +1,6 @@
+{
+  "$schema":"https://eshobe.com/schemas/theme-manifest.json",
+  "name":"graphite","displayName":"Graphite — Architecture Office","version":"1.0.0",
+  "contractVersion":"1","siteTypes":["portfolio"],"locales":["fa","en"],"defaultLocale":"fa",
+  "framework":"nextjs","healthCheck":"/api/health"
+}

@@ -1,0 +1,2 @@
+import {describe,expect,it} from 'vitest';import {formatDate,href} from './i18n';
+describe('localized routing',()=>{it('keeps Persian unprefixed',()=>expect(href('fa','projects')).toBe('/projects'));it('prefixes English',()=>expect(href('en','projects')).toBe('/en/projects'));it('formats valid localized dates',()=>{expect(formatDate('2024-01-01','fa')).toMatch(/[۰-۹]/);expect(formatDate('2024-01-01','en')).toContain('2024')})});
