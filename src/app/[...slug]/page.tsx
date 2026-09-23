@@ -1,1 +1,23 @@
-import {renderRoute} from '@/lib/pages';export default async function Page({params}:{params:Promise<{slug:string[]}>}){return renderRoute('fa',(await params).slug)}
+import { renderRoute, routeMetadata } from '@/lib/pages';
+import type { Locale } from '@/lib/types';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string[] }>;
+}) {
+  const slug = (await params).slug;
+  return routeMetadata('fa' as Locale, slug);
+}
+
+export default async function Page({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string[] }>;
+  searchParams: Promise<{ category?: string }>;
+}) {
+  const slug = (await params).slug;
+  const query = await searchParams;
+  return renderRoute('fa', slug, query);
+}
