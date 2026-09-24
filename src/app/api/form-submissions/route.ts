@@ -1,1 +1,6 @@
-export async function POST(req:Request){const base=process.env.ESHOBE_API_URL;if(!base)return Response.json({error:'Forms are not configured'},{status:503});const body=await req.text();const r=await fetch(`${base.replace(/\/$/,'')}/api/form-submissions`,{method:'POST',headers:{'content-type':'application/json',...(process.env.ESHOBE_SITE_API_KEY?{Authorization:`Bearer ${process.env.ESHOBE_SITE_API_KEY}`}:{})},body});return new Response(await r.text(),{status:r.status,headers:{'content-type':r.headers.get('content-type')||'application/json'}})}
+import { proxyToCms } from '@/lib/cms-proxy'
+
+/** Explicit form proxy so contact posts stay on-origin in every domain mode. */
+export async function POST(req: Request) {
+  return proxyToCms(req, 'form-submissions')
+}

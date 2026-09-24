@@ -1,11 +1,10 @@
-import type { MetadataRoute } from 'next';
-
-const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com';
+import type { MetadataRoute } from 'next'
+import { canonicalOrigin, publicOrigin } from '@/lib/env'
 
 export default function robots(): MetadataRoute.Robots {
-  const origin = base.replace(/\/$/, '');
+  const origin = (canonicalOrigin() || publicOrigin() || 'https://example.com').replace(/\/$/, '')
   return {
     rules: { userAgent: '*', allow: '/' },
     sitemap: `${origin}/sitemap.xml`,
-  };
+  }
 }
