@@ -1,6 +1,47 @@
 {
-  "$schema":"https://eshobe.com/schemas/theme-manifest.json",
-  "name":"graphite","displayName":"Graphite — Architecture Office","version":"1.0.0",
-  "contractVersion":"1","siteTypes":["portfolio"],"locales":["fa","en"],"defaultLocale":"fa",
-  "framework":"nextjs","healthCheck":"/api/health"
+  "$schema": "https://eshobe.com/schemas/theme-manifest.json",
+  "contractVersion": 1,
+  "key": "graphite",
+  "name": "Graphite",
+  "nameFa": "گرافیت — دفتر معماری",
+  "displayName": "Graphite — Architecture Office",
+  "version": "1.0.0",
+  "siteTypes": ["portfolio"],
+  "locales": ["fa", "en"],
+  "defaultLocale": "fa",
+  "framework": "nextjs",
+  "proxiesApi": true,
+  "capabilities": {
+    "blog": false,
+    "projects": true,
+    "education": true,
+    "contactForm": true,
+    "map": true
+  },
+  "build": {
+    "pack": "nixpacks",
+    "baseDirectory": "/",
+    "port": 3000,
+    "healthCheckPath": "/api/health",
+    "installCommand": "npm ci",
+    "buildCommand": "npm run build",
+    "startCommand": "npm run start"
+  },
+  "env": [
+    { "key": "ESHOBE_CMS_URL", "source": "platform" },
+    { "key": "ESHOBE_SITE_DOMAIN", "source": "platform" },
+    { "key": "ESHOBE_SITE_ID", "source": "platform" },
+    { "key": "ESHOBE_API_KEY", "source": "platform", "secret": true },
+    { "key": "ESHOBE_PUBLIC_ORIGIN", "source": "platform" },
+    { "key": "ESHOBE_REVALIDATE_SECRET", "source": "platform", "secret": true },
+    { "key": "ESHOBE_DEFAULT_LOCALE", "source": "platform" },
+    { "key": "ESHOBE_LOCALES", "source": "platform" },
+    {
+      "key": "NEXT_PUBLIC_MEDIA_ORIGIN",
+      "source": "tenant",
+      "required": false,
+      "labelFa": "مبدا رسانه",
+      "help": "اختیاری — اگر مسیرهای رسانه نسبی‌اند و origin در /api/site کافی نیست"
+    }
+  ]
 }
