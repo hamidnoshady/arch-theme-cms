@@ -35,7 +35,33 @@ jobs:
         run: npm ci
 
       - name: Validate theme manifest
-        run: node -e "const m=require('./eshobe.theme.json'); if (!m.name || !m.version || !m.contractVersion || !m.healthCheck) process.exit(1)"
+        run: |
+          node -e "
+          const m = require('./eshobe.theme.json');
+          const health = m.build?.healthCheckPath || m.healthCheck;
+          const ok =
+            m.name &&
+            m.key &&
+            m.version &&
+            m.contractVersion &&
+            Array.isArray(m.siteTypes) &&
+            m.siteTypes.length &&
+            typeof health === 'string' &&
+            health.startsWith('/') &&
+            m.build?.port >= 1;
+          if (!ok) {
+            console.error('eshobe.theme.json missing Wave 11 required fields', {
+              name: m.name,
+              key: m.key,
+              version: m.version,
+              contractVersion: m.contractVersion,
+              siteTypes: m.siteTypes,
+              healthCheckPath: health,
+              port: m.build?.port,
+            });
+            process.exit(1);
+          }
+          "
 
       - name: Type-check
         run: npm run typecheck
