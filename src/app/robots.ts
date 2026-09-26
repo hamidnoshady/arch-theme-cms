@@ -1,10 +1,16 @@
 import type { MetadataRoute } from 'next'
-import { canonicalOrigin, publicOrigin } from '@/lib/env'
 
-export default function robots(): MetadataRoute.Robots {
-  const origin = (canonicalOrigin() || publicOrigin() || 'https://example.com').replace(/\/$/, '')
+export const dynamic = 'force-dynamic'
+
+import { getSite } from '@/lib/cms'
+import { canonicalOrigin } from '@/lib/env'
+
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const site = await getSite()
+  const origin = canonicalOrigin()
+  if (site && site.status !== 'active') return { rules: { userAgent: '*', disallow: '/' } }
   return {
-    rules: { userAgent: '*', allow: '/' },
-    sitemap: `${origin}/sitemap.xml`,
+    rules: { userAgent: '*', allow: '/', disallow: ['/api/'] },
+    ...(origin ? { sitemap: `${origin}/sitemap.xml` } : {}),
   }
 }

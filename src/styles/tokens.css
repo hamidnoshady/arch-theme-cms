@@ -1,0 +1,54 @@
+:root {
+  --color-paper: #ffffff;
+  --color-ink: #171717;
+  --color-navy: #192b3a;
+  --color-muted: #777d81;
+  --color-line: #d7dce0;
+  --color-frame: #e4e8eb;
+  --color-soft: #f7f7f7;
+  --color-soft-2: #f3f4f5;
+
+  --font-fa: Shazde, 'Vazirmatn Variable', Vazirmatn, sans-serif;
+  --font-en: 'Manrope Variable', Manrope, 'Helvetica Neue', Arial, sans-serif;
+  --font-brand: 'Jost Variable', Jost, 'Helvetica Neue', Arial, sans-serif;
+
+  --page-margin: clamp(20px, 4.2vw, 72px);
+  --content: 1320px;
+  --read: 68ch;
+  --section: clamp(56px, 8vw, 112px);
+  --gutter: clamp(0px, 4vw, 56px);
+  --frame-pad: clamp(10px, 1vw, 16px);
+  --frame-inset: clamp(5px, 0.55vw, 8px);
+
+  --header-h: 78px;
+  --ease: cubic-bezier(0.22, 0.7, 0.2, 1);
+  --dur: 0.7s;
+  --leading: 1.8;
+
+  color-scheme: light;
+}
+
+@property --p {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+html[lang='en'] {
+  --leading: 1.65;
+}
+
+html[data-fonts='shazde'] {
+  --font-en: Shazde, 'Manrope Variable', Manrope, sans-serif;
+  --font-brand: Shazde, 'Jost Variable', Jost, sans-serif;
+}
+
+html[data-fonts='shazde'] .logo__wordmark {
+  letter-spacing: 0.12em;
+  margin-inline-start: 0.12em;
+}
+
+html[data-fonts='shazde'] .logo__subtitle {
+  letter-spacing: 0.28em;
+  margin-inline-start: 0.28em;
+}
