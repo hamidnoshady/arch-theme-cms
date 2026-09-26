@@ -4,4 +4,5 @@ out/
 .env*
 !.env.example
 *.tsbuildinfo
-public/fonts/*.woff*
+public/fonts/*
+!public/fonts/Shazde-*.woff2

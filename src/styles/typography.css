@@ -1,0 +1,81 @@
+/* Semantic typography roles — prefer size + color for hierarchy, not extra weights. */
+
+.text-display {
+  font-family: var(--font-ui);
+  font-size: var(--text-display);
+  font-weight: var(--text-display-weight);
+  line-height: var(--leading-display);
+  color: var(--color-navy);
+}
+
+.text-h1 {
+  font-family: var(--font-ui);
+  font-size: var(--text-h1);
+  font-weight: var(--text-h1-weight);
+  line-height: var(--leading-heading);
+  color: var(--color-navy);
+}
+
+.text-h2 {
+  font-family: var(--font-ui);
+  font-size: var(--text-h2);
+  font-weight: var(--text-heading-weight);
+  line-height: var(--leading-heading);
+  color: var(--color-navy);
+}
+
+.text-h3 {
+  font-family: var(--font-ui);
+  font-size: var(--text-h3);
+  font-weight: var(--text-heading-weight);
+  line-height: var(--leading-heading);
+  color: var(--color-navy);
+}
+
+.text-body-lg {
+  font-family: var(--font-ui);
+  font-size: var(--text-body-lg);
+  font-weight: var(--text-body-weight);
+  line-height: var(--leading-body-lg);
+}
+
+.text-body {
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  font-weight: var(--text-body-weight);
+  line-height: var(--leading-body);
+}
+
+.text-ui {
+  font-family: var(--font-ui);
+  font-size: var(--text-ui);
+  font-weight: var(--text-label-weight);
+  line-height: var(--leading-ui);
+}
+
+.text-label {
+  font-family: var(--font-ui);
+  font-size: var(--text-label);
+  font-weight: var(--text-label-weight);
+  line-height: var(--leading-label);
+}
+
+.text-meta {
+  font-family: var(--font-ui);
+  font-size: var(--text-meta);
+  font-weight: var(--text-body-weight);
+  line-height: var(--leading-meta);
+  color: var(--color-muted);
+}
+
+.text-micro {
+  font-family: var(--font-ui);
+  font-size: var(--text-micro);
+  font-weight: var(--text-body-weight);
+  line-height: var(--leading-micro);
+  color: var(--color-muted);
+}
+
+.text-emphasis {
+  font-weight: var(--text-emphasis-weight);
+}
