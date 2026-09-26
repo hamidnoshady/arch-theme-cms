@@ -19,7 +19,7 @@ export function Home({ locale }: { locale: Locale }) {
       if (reduce) setRevealed(true);
     } else {
       sessionStorage.setItem('graphite-intro', '1');
-      const id = setTimeout(() => setIntro(false), 2600);
+      const id = setTimeout(() => setIntro(false), 7000);
       return () => clearTimeout(id);
     }
   }, []);
