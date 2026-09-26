@@ -9,7 +9,7 @@ import { getRenderContext, type RenderContext } from './context'
 import { SECTIONS, copy, href, otherLocale } from './i18n'
 import { pageHref } from './links'
 import { ogImageUrl } from './media'
-import { HOME_SLUG, POSTS_SEGMENT } from './runtime'
+import { HOME_SLUG, POSTS_SEGMENT } from '@eshobe/site-runtime'
 import { buildMetadata } from './seo'
 import type { EntryKind, Locale, LocaleLink, Page, Post, Section } from './types'
 
@@ -113,7 +113,8 @@ export async function routeMetadata(locale: Locale, segments: string[]): Promise
         description: page?.meta?.description,
         path: href(locale, r.section),
         alternates: alt(r.language),
-        image: ogImageUrl(page?.meta?.image, ctx.origin),
+        image: ogImageUrl(page?.meta?.image, ctx.origin) ?? ogImageUrl(ctx.branding.defaultOgImage, ctx.origin),
+        siteName: ctx.branding.siteName,
       })
     }
     case 'entry':
@@ -126,6 +127,7 @@ export async function routeMetadata(locale: Locale, segments: string[]): Promise
         image: ogImageUrl(r.post.meta?.image, ctx.origin) ?? ogImageUrl(r.post.heroImage, ctx.origin),
         type: 'article',
         publishedTime: r.post.publishedAt,
+        siteName: ctx.branding.siteName,
       })
     case 'page':
       return buildMetadata({
@@ -134,7 +136,8 @@ export async function routeMetadata(locale: Locale, segments: string[]): Promise
         description: r.page.meta?.description,
         path: pageHref(r.page.slug, locale),
         alternates: alt(r.language),
-        image: ogImageUrl(r.page.meta?.image, ctx.origin),
+        image: ogImageUrl(r.page.meta?.image, ctx.origin) ?? ogImageUrl(ctx.branding.defaultOgImage, ctx.origin),
+        siteName: ctx.branding.siteName,
       })
     default:
       return { title: t.notFoundTitle, robots: { index: false, follow: false } }

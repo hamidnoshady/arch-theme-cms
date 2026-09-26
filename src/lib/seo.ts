@@ -30,6 +30,7 @@ export function buildMetadata({
   type = 'website',
   noindex = false,
   publishedTime,
+  siteName,
 }: {
   locale: Locale
   title?: string | null
@@ -40,9 +41,11 @@ export function buildMetadata({
   type?: 'website' | 'article'
   noindex?: boolean
   publishedTime?: string | null
+  siteName?: string | null
 }): Metadata {
   const t = copy[locale]
-  const desc = description?.trim() || t.brand
+  const name = siteName?.trim() || t.brand
+  const desc = description?.trim() || name
   const languages: Record<string, string> = {}
   const langs = { ...alternates, [locale]: path }
   for (const [code, target] of Object.entries(langs)) if (target) languages[code] = target
@@ -50,15 +53,15 @@ export function buildMetadata({
 
   return {
     metadataBase: metadataBase(),
-    title: title?.trim() ? title.trim() : { absolute: t.brand },
+    title: title?.trim() ? title.trim() : { absolute: name },
     description: desc,
     alternates: { canonical: path, languages },
     openGraph: {
       type,
-      title: title?.trim() || t.brand,
+      title: title?.trim() || name,
       description: desc,
       url: path,
-      siteName: 'GRAPHITE',
+      siteName: name,
       locale: ogLocale[locale],
       alternateLocale: Object.keys(langs)
         .filter((l) => l !== locale && (l === 'fa' || l === 'en'))

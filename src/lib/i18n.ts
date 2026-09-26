@@ -1,4 +1,6 @@
-import { formatDate as runtimeFormatDate, localeHref, toLocaleDigits } from './runtime'
+import { formatDate as runtimeFormatDate, toLocaleDigits } from '@eshobe/site-runtime'
+
+import { localeHref } from './locale'
 import type { Locale, Section } from './types'
 
 export const DEFAULT_LOCALE: Locale = 'fa'
@@ -9,12 +11,12 @@ export const SECTIONS: Section[] = ['about', 'projects', 'services', 'education'
 export const otherLocale = (locale: Locale): Locale => (locale === 'fa' ? 'en' : 'fa')
 
 const fa = {
-  about: 'درباره گرافیت',
+  about: 'درباره',
   projects: 'پروژه‌ها',
   services: 'خدمات',
   education: 'آموزش',
   contact: 'ارتباط با ما',
-  brand: 'گرافیت — دفتر معماری',
+  brand: 'وب‌سایت',
   primaryNav: 'فهرست اصلی',
   footerNav: 'پیوندهای پابرگ',
   home: 'صفحه نخست',
@@ -83,19 +85,19 @@ const fa = {
   holdingTitle: 'این وب‌سایت موقتاً در دسترس نیست.',
   holdingBody: 'لطفاً بعداً دوباره سر بزنید.',
   backToTop: 'بازگشت به بالا',
-  rights: 'گرافیت',
+  rights: '',
   mapAttribution: 'داده نقشه',
 } as const
 
 type Copy = { [K in keyof typeof fa]: string }
 
 const en: Copy = {
-  about: 'About Graphite',
+  about: 'About',
   projects: 'Projects',
   services: 'Services',
   education: 'Education',
   contact: 'Contact Us',
-  brand: 'Graphite — Architecture Office',
+  brand: 'Website',
   primaryNav: 'Primary navigation',
   footerNav: 'Footer links',
   home: 'Home',
@@ -164,7 +166,7 @@ const en: Copy = {
   holdingTitle: 'This website is temporarily unavailable.',
   holdingBody: 'Please check back later.',
   backToTop: 'Back to top',
-  rights: 'Graphite',
+  rights: '',
   mapAttribution: 'Map data',
 }
 

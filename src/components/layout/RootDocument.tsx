@@ -3,29 +3,25 @@ import '@fontsource-variable/manrope/wght.css'
 import '@fontsource-variable/vazirmatn/wght.css'
 import '@/styles/index.css'
 
+import type { Metadata } from 'next'
+
 import { Logo } from '@/components/brand/Logo'
 import { getSite } from '@/lib/cms'
 import { shazdeUiReady } from '@/lib/fonts'
 import { interFont } from '@/lib/inter-font'
 import { copy } from '@/lib/i18n'
 import { shazdeFont } from '@/lib/shazde-font'
-import { dirFor, isHexColor } from '@/lib/runtime'
-import type { Locale, SiteDescriptor } from '@/lib/types'
+import { resolveBranding } from '@/lib/theme/branding'
+import { siteThemeStyle } from '@/lib/theme/tokens'
+import { absoluteMediaUrl, mediaOrigin } from '@/lib/media'
+import { dirFor } from '@/lib/locale'
+import type { Locale } from '@/lib/types'
 
-/** The CMS default primary; a site that never set a brand colour keeps Graphite navy. */
-const PLATFORM_DEFAULT_PRIMARY = '#0f766e'
-
-function brandCss(site: SiteDescriptor | null): string {
-  const primary = site?.theme?.primary
-  if (!isHexColor(primary) || primary.toLowerCase() === PLATFORM_DEFAULT_PRIMARY) return ''
-  return `:root{--color-navy:${primary}}`
-}
-
-function Holding({ locale }: { locale: Locale }) {
+function Holding({ locale, branding }: { locale: Locale; branding: ReturnType<typeof resolveBranding> }) {
   const t = copy[locale]
   return (
     <main className="holding">
-      <Logo variant="full" label={t.brand} />
+      <Logo variant="full" label={branding.brandLabel} branding={branding} />
       <p className="holding__title">{t.holdingTitle}</p>
       <p className="muted">{t.holdingBody}</p>
     </main>
@@ -34,10 +30,12 @@ function Holding({ locale }: { locale: Locale }) {
 
 export async function RootDocument({ locale, children }: { locale: Locale; children: React.ReactNode }) {
   const site = await getSite()
+  const branding = resolveBranding(site, locale)
   const shazdeReady = shazdeUiReady()
-  const css = brandCss(site)
+  const css = siteThemeStyle(site)
   const serving = !site || site.status === 'active'
   const fontClass = `${shazdeFont.variable} ${interFont.variable}`.trim()
+  const origin = mediaOrigin(site)
 
   return (
     <html
@@ -49,19 +47,27 @@ export async function RootDocument({ locale, children }: { locale: Locale; child
     >
       <body>
         {css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null}
-        {serving ? children : <Holding locale={locale} />}
+        {serving ? children : <Holding locale={locale} branding={branding} />}
       </body>
     </html>
   )
 }
 
-export async function rootMetadata(locale: Locale) {
+export async function rootMetadata(locale: Locale): Promise<Metadata> {
   const site = await getSite()
-  const t = copy[locale]
+  const branding = resolveBranding(site, locale)
   const serving = !site || site.status === 'active'
+  const origin = mediaOrigin(site)
+  const faviconUrl =
+    branding.favicon && typeof branding.favicon === 'object' ? branding.favicon.url : null
+  const favicon = faviconUrl
+    ? absoluteMediaUrl(faviconUrl, origin)
+    : '/graphite-logo.svg'
+
   return {
-    title: { default: t.brand, template: `%s — ${locale === 'fa' ? 'گرافیت' : 'GRAPHITE'}` },
-    applicationName: 'GRAPHITE',
+    title: { default: branding.siteName, template: `%s — ${branding.siteName}` },
+    applicationName: branding.siteName,
+    icons: favicon ? { icon: favicon, shortcut: favicon } : undefined,
     ...(serving ? {} : { robots: { index: false, follow: false } }),
   }
 }

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 import { copy } from '@/lib/i18n'
-import { toLocaleDigits } from '@/lib/runtime'
+import { toLocaleDigits } from '@eshobe/site-runtime'
 import type { Locale } from '@/lib/types'
 
 export type FilterOption = { key: string; label: string; count: number }

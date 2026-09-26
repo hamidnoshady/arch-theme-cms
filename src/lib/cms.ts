@@ -1,6 +1,6 @@
 import { cache } from 'react'
 
-import { HOME_SLUG } from './runtime'
+import { HOME_SLUG } from '@eshobe/site-runtime'
 import { cmsJson } from './upstream'
 import type {
   Category,

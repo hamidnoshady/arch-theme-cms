@@ -5,6 +5,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 
 import { Logo } from '@/components/brand/Logo'
 import { copy } from '@/lib/i18n'
+import type { ResolvedBranding } from '@/lib/theme/branding'
 import type { Locale } from '@/lib/types'
 
 import { Atmosphere } from './Atmosphere'
@@ -15,11 +16,14 @@ type Props = {
   locale: Locale
   items: HomeNavItem[]
   language: { href: string; label: string; short: string; lang: Locale } | null
+  branding: ResolvedBranding
+  mediaOrigin?: string
+  introDurationMs?: number
 }
 
 /** Pixels of wheel travel for a full reveal; one mouse-wheel notch (~100px) is enough to commit. */
 const WHEEL_RANGE = 380
-const INTRO_MS = 7000
+const DEFAULT_INTRO_MS = 7000
 const REVEAL_KEYS = new Set(['ArrowDown', 'PageDown', 'End'])
 const COLLAPSE_KEYS = new Set(['ArrowUp', 'PageUp', 'Home', 'Escape'])
 
@@ -31,7 +35,8 @@ const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayout
  * (0 = logo alone, 1 = navigation revealed) driven by wheel, touch, keyboard or
  * the cue button. The page itself never scrolls.
  */
-export function HomeStage({ locale, items, language }: Props) {
+export function HomeStage({ locale, items, language, branding, mediaOrigin = '', introDurationMs }: Props) {
+  const INTRO_MS = introDurationMs ?? DEFAULT_INTRO_MS
   const t = copy[locale]
   const stageRef = useRef<HTMLDivElement>(null)
   const navRef = useRef<HTMLElement>(null)
@@ -277,7 +282,14 @@ export function HomeStage({ locale, items, language }: Props) {
       <div className="home__center">
         <div className="home__stack">
           <h1 className="home__brand">
-            <Logo variant="full" animated={introActive} className="home__logo" />
+            <Logo
+              variant="full"
+              animated={introActive}
+              className="home__logo"
+              branding={branding}
+              mediaOrigin={mediaOrigin}
+              label={branding.brandLabel}
+            />
             <span className="sr-only">{t.brand}</span>
           </h1>
 

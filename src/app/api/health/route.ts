@@ -1,5 +1,5 @@
 import { cmsOrigin } from '@/lib/env'
-import { contractVersion } from '@/lib/runtime'
+import { contractVersion } from '@eshobe/site-runtime'
 import { cmsJson } from '@/lib/upstream'
 
 export const dynamic = 'force-dynamic'

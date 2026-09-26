@@ -146,6 +146,27 @@ export type NavCollection = {
   navItems?: { id?: string; link?: LinkField | null }[] | null
 }
 
+export type SiteBranding = {
+  displayName?: string | null
+  displayNameFa?: string | null
+  shortName?: string | null
+  tagline?: string | null
+  logo?: Ref<Media>
+  logoCompact?: Ref<Media>
+  favicon?: Ref<Media>
+  defaultOgImage?: Ref<Media>
+  ogImage?: Ref<Media>
+}
+
+export type SiteBindings = {
+  homePage?: Ref<Page>
+  aboutPage?: Ref<Page>
+  servicesPage?: Ref<Page>
+  contactPage?: Ref<Page>
+  projectsCategory?: Ref<Category>
+  educationCategory?: Ref<Category>
+}
+
 export type SiteDescriptor = {
   availableLocales: string[]
   blocks: string[]
@@ -156,6 +177,9 @@ export type SiteDescriptor = {
   name?: string
   slug?: string
   status: 'active' | 'suspended' | 'archived'
+  branding?: SiteBranding | null
+  bindings?: SiteBindings | null
+  runtimeSettings?: Record<string, unknown> | null
   theme?: {
     primary?: string | null
     accent?: string | null
