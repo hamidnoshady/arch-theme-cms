@@ -1,0 +1,64 @@
+@font-face {
+  font-family: Shazde;
+  src: url('/fonts/Shazde-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Shazde;
+  src: url('/fonts/Shazde-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Shazde;
+  src: url('/fonts/Shazde-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Shazde;
+  src: url('/fonts/Shazde-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Shazde;
+  src: url('/fonts/Shazde-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Shazde;
+  src: url('/fonts/Shazde-UltraBold.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* OS/2 usWeightClass is 900; use 850 so Black can own 900. */
+@font-face {
+  font-family: Shazde;
+  src: url('/fonts/Shazde-ExtraBold.woff2') format('woff2');
+  font-weight: 850;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Shazde;
+  src: url('/fonts/Shazde-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
