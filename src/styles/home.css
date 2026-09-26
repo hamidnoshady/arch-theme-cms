@@ -24,7 +24,7 @@
 
 .logo__wordmark {
   font-family: var(--font-brand);
-  font-weight: 500;
+  font-weight: var(--text-label-weight);
   font-size: 0.09em;
   letter-spacing: 0.42em;
   line-height: 1;
@@ -33,7 +33,7 @@
 
 .logo__subtitle {
   font-family: var(--font-brand);
-  font-weight: 300;
+  font-weight: var(--text-display-weight);
   font-size: 0.026em;
   letter-spacing: 0.48em;
   line-height: 1;
@@ -51,7 +51,7 @@
   align-items: center;
   gap: 10px;
   width: auto;
-  font-size: 15px;
+  font-size: var(--text-body-lg);
 }
 
 .logo--compact .logo__symbol {
@@ -64,7 +64,7 @@
 }
 
 .logo--compact .logo__wordmark {
-  font-size: 13px;
+  font-size: var(--text-ui);
   letter-spacing: 0.32em;
   margin-inline-start: 0.32em;
 }
@@ -226,14 +226,14 @@ html:not([data-intro]) .home__nav {
 
 .home__number {
   font-family: var(--font-brand);
-  font-size: 10px;
-  letter-spacing: 0.16em;
+  font-size: var(--text-meta);
+  letter-spacing: 0.06em;
   color: var(--color-muted);
 }
 
 .home__label {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--text-ui);
+  font-weight: var(--text-label-weight);
   letter-spacing: 0.01em;
   color: var(--color-ink);
 }
@@ -255,7 +255,7 @@ html:not([data-intro]) .home__nav {
 }
 
 .home__skip {
-  font-size: 12px;
+  font-size: var(--text-meta);
   color: var(--color-muted);
   background: none;
   border: 0;
@@ -268,8 +268,8 @@ html[data-intro='play'] .home__skip {
 }
 
 .home__lang {
-  font-size: 12px;
-  letter-spacing: 0.16em;
+  font-size: var(--text-ui);
+  letter-spacing: 0.08em;
 }
 
 .home__cue {
@@ -294,8 +294,8 @@ html[data-intro='play'] .home__skip {
 
 .home__cue-label {
   font-family: var(--font-brand);
-  font-size: 10px;
-  letter-spacing: 0.22em;
+  font-size: var(--text-meta);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   opacity: calc(1 - var(--p));
 }
@@ -431,7 +431,7 @@ html[data-intro='play'] .home__skip {
   }
 
   .home__label {
-    font-size: 15px;
+    font-size: var(--text-body-lg);
   }
 }
 

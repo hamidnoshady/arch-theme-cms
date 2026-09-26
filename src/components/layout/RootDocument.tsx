@@ -1,5 +1,3 @@
-import { preload } from 'react-dom'
-
 import '@fontsource-variable/jost/wght.css'
 import '@fontsource-variable/manrope/wght.css'
 import '@fontsource-variable/vazirmatn/wght.css'
@@ -7,8 +5,10 @@ import '@/styles/index.css'
 
 import { Logo } from '@/components/brand/Logo'
 import { getSite } from '@/lib/cms'
-import { shazdeCss, shazdeFiles } from '@/lib/fonts'
+import { shazdeUiReady } from '@/lib/fonts'
+import { interFont } from '@/lib/inter-font'
 import { copy } from '@/lib/i18n'
+import { shazdeFont } from '@/lib/shazde-font'
 import { dirFor, isHexColor } from '@/lib/runtime'
 import type { Locale, SiteDescriptor } from '@/lib/types'
 
@@ -34,15 +34,19 @@ function Holding({ locale }: { locale: Locale }) {
 
 export async function RootDocument({ locale, children }: { locale: Locale; children: React.ReactNode }) {
   const site = await getSite()
-  const fonts = shazdeFiles()
-  const css = shazdeCss(fonts) + brandCss(site)
+  const shazdeReady = shazdeUiReady()
+  const css = brandCss(site)
   const serving = !site || site.status === 'active'
-  for (const face of fonts.filter((f) => f.weight === '400' || f.weight === '500')) {
-    preload(`/fonts/${face.file}`, { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' })
-  }
+  const fontClass = `${shazdeFont.variable} ${interFont.variable}`.trim()
 
   return (
-    <html lang={locale} dir={dirFor(locale)} data-fonts={fonts.length ? 'shazde' : 'fallback'} suppressHydrationWarning>
+    <html
+      lang={locale}
+      dir={dirFor(locale)}
+      className={fontClass}
+      data-fonts={shazdeReady ? 'shazde' : 'fallback'}
+      suppressHydrationWarning
+    >
       <body>
         {css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null}
         {serving ? children : <Holding locale={locale} />}

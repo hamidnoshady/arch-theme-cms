@@ -2,15 +2,15 @@ import { readdirSync } from 'node:fs'
 import path from 'node:path'
 
 /**
- * Shazde is licensed and never committed. The owner drops the files into
- * `public/fonts/` using these names; only files that exist get an `@font-face`,
- * so an unconfigured deploy makes no failing font requests and falls back to
- * Vazirmatn.
+ * Licensed Shazde files live in `public/fonts/`. Runtime `@font-face` injection is
+ * replaced by `next/font/local` in `shazde-font.ts` (four UI weights). This module
+ * detects which files exist for fallbacks and tests.
  *
- *   Shazde-Variable.woff2              → weights 100–900 (preferred)
- *   Shazde-Light.woff2 / -Regular / -Medium / -SemiBold / -Bold
- *   Shazde-ExtraBold / -UltraBold / -Black (optional static cuts)
+ * Weights 700–900 may exist on disk but are not part of the application typography
+ * system unless a future design-system change explicitly adds them.
  */
+export const APPLICATION_SHAZDE_WEIGHTS = new Set(['300', '400', '500', '600'])
+
 const WEIGHTS: Record<string, string> = {
   thin: '100',
   extralight: '200',
@@ -42,6 +42,10 @@ export function parseShazdeFiles(files: string[]): FontFile[] {
     .filter((f, i, arr) => arr.findIndex((o) => o.weight === f.weight) === i)
 }
 
+export function applicationShazdeFiles(files: FontFile[]): FontFile[] {
+  return files.filter((f) => !f.weight.includes(' ') && APPLICATION_SHAZDE_WEIGHTS.has(f.weight))
+}
+
 let cached: FontFile[] | null = null
 
 export function shazdeFiles(): FontFile[] {
@@ -54,11 +58,8 @@ export function shazdeFiles(): FontFile[] {
   return cached
 }
 
-export function shazdeCss(files = shazdeFiles()): string {
-  return files
-    .map(
-      ({ file, weight }) =>
-        `@font-face{font-family:Shazde;src:url('/fonts/${file}') format('${file.endsWith('.woff2') ? 'woff2' : 'woff'}');font-weight:${weight};font-style:normal;font-display:swap}`,
-    )
-    .join('')
+/** True when at least Regular (400) is present — UI uses next/font, this gates CSS fallbacks. */
+export function shazdeUiReady(files = shazdeFiles()): boolean {
+  const app = applicationShazdeFiles(files)
+  return app.some((f) => f.weight === '400')
 }

@@ -16,7 +16,7 @@
 
 .frame__caption {
   padding: 12px 4px 2px;
-  font-size: 12px;
+  font-size: var(--text-meta);
   line-height: 1.6;
   color: var(--color-muted);
 }
@@ -95,7 +95,7 @@
   inset-inline-end: 14px;
   bottom: 18px;
   font-family: var(--font-brand);
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--color-navy);
@@ -161,7 +161,7 @@
 
 .lightbox__count {
   font-family: var(--font-brand);
-  font-size: 12px;
+  font-size: var(--text-meta);
   letter-spacing: 0.08em;
   color: var(--color-muted);
 }
@@ -184,7 +184,7 @@
 }
 
 .lightbox__caption {
-  font-size: 13px;
+  font-size: var(--text-ui);
   color: var(--color-muted);
 }
 
@@ -258,25 +258,25 @@
   flex-wrap: wrap;
   gap: 6px 14px;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--text-micro);
   letter-spacing: 0.04em;
 }
 
 .card__title {
   margin: 0;
-  font-weight: 400;
-  font-size: 18px;
+  font-weight: var(--text-body-weight);
+  font-size: var(--text-body-lg);
   line-height: 1.45;
   color: var(--color-navy);
 }
 
 .card--editorial .card__title {
-  font-size: 17px;
+  font-size: var(--text-body-lg);
 }
 
 .card__excerpt {
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--text-ui);
   line-height: 1.7;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -318,7 +318,7 @@
   padding-bottom: 4px;
   border-bottom: 1px solid transparent;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--text-ui);
 }
 
 .filters__link:hover,
@@ -328,7 +328,7 @@
 }
 
 .filters__count {
-  font-size: 10px;
+  font-size: var(--text-micro);
   color: var(--color-muted);
 }
 

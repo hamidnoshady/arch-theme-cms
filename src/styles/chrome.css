@@ -44,16 +44,17 @@
   display: inline-flex;
   align-items: baseline;
   gap: 8px;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--text-ui);
+  font-weight: var(--text-label-weight);
+  line-height: var(--leading-ui);
   padding-block: 6px;
   border-bottom: 1px solid transparent;
 }
 
 .site-nav__number {
   font-family: var(--font-brand);
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  font-size: var(--text-meta);
+  letter-spacing: 0.06em;
   color: var(--color-muted);
 }
 
@@ -71,8 +72,8 @@
 
 .lang-switch {
   font-family: var(--font-brand);
-  font-size: 12px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-ui);
+  letter-spacing: 0.08em;
   color: var(--color-navy);
 }
 
@@ -87,7 +88,7 @@
   border: 0;
   background: none;
   padding: 8px 0;
-  font-size: 12px;
+  font-size: var(--text-ui);
   letter-spacing: 0.08em;
 }
 
@@ -140,7 +141,7 @@
 .menu-panel__close {
   background: none;
   border: 0;
-  font-size: 13px;
+  font-size: var(--text-ui);
   padding: 8px 0;
 }
 
@@ -157,8 +158,8 @@
   gap: 16px;
   padding: 14px 0;
   border-bottom: 1px solid var(--color-line);
-  font-size: 18px;
-  font-weight: 400;
+  font-size: var(--text-body-lg);
+  font-weight: var(--text-body-weight);
 }
 
 .menu-panel__link[aria-current='page'] {
@@ -167,8 +168,8 @@
 
 .menu-panel__number {
   font-family: var(--font-brand);
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  font-size: var(--text-meta);
+  letter-spacing: 0.06em;
   color: var(--color-muted);
 }
 
@@ -183,7 +184,7 @@
 .menu-panel__note {
   margin: 0;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--text-ui);
 }
 
 .site-footer {
@@ -199,8 +200,8 @@
   gap: 24px;
   padding-block: 26px;
   color: var(--color-muted);
-  font-size: 11px;
-  letter-spacing: 0.04em;
+  font-size: var(--text-micro);
+  letter-spacing: 0.02em;
 }
 
 .site-footer__nav ul {
