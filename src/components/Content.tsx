@@ -1,2 +1,0 @@
-import type {Block,Locale} from '@/lib/types';import {Gallery,MediaFrame} from './Media';
-export function Content({blocks=[],locale}:{blocks?:Block[];locale:Locale}){return <div className="content">{blocks.map((b,i)=>{switch(b.blockType){case 'content':case 'richText':return <section className="prose" key={b.id||i}>{b.heading&&<h2>{b.heading}</h2>}{b.text&&<p>{b.text}</p>}</section>;case 'mediaBlock':return b.media?<MediaFrame key={b.id||i} media={b.media}/>:null;case 'gallery':return <Gallery key={b.id||i} images={b.images||[]}/>;default:return null}})}</div>}
