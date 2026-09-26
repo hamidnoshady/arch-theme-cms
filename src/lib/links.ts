@@ -1,5 +1,5 @@
 import { SECTIONS, href } from './i18n'
-import { HOME_SLUG, POSTS_SEGMENT } from './runtime'
+import { HOME_SLUG, POSTS_SEGMENT } from '@eshobe/site-runtime'
 import type { LinkField, Locale, Page, Post, Section } from './types'
 
 export type ResolvedLink = { href: string; external: boolean; newTab: boolean }

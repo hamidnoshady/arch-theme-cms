@@ -10,7 +10,8 @@ describe('cms proxy headers', () => {
     expect(headers.host).toBe('acme.ir')
     expect(headers['x-forwarded-host']).toBe('acme.ir')
     expect(JSON.stringify(headers)).not.toContain('eshobe_live_secret')
-    expect(headers.cookie).toBe('a=b')
+    expect(headers.cookie).toBeUndefined()
+    expect(headers.authorization).toBeUndefined()
     delete process.env.ESHOBE_SITE_DOMAIN
     delete process.env.ESHOBE_API_KEY
   })

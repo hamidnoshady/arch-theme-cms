@@ -1,11 +1,12 @@
 import Link from 'next/link'
 
-import { RichText, extractFacts } from '@/components/content/RichText'
+import { RichText } from '@/components/content/RichText'
+import { projectFactsAndBody } from '@/lib/project-metadata'
 import { EmptyState, MetaList, PageTitle, type MetaItem } from '@/components/editorial/Editorial'
 import { EntryGrid, toCardEntry } from '@/components/entries/EntryCard'
 import { Filters } from '@/components/entries/Filters'
 import { RelatedEntries } from '@/components/entries/RelatedEntries'
-import { PageShell } from '@/components/layout/PageShell'
+import { PageShell, sectionActive } from '@/components/layout/PageShell'
 import { MediaFrame } from '@/components/media/MediaFrame'
 import { getEntries, getSectionCategories, type SectionCategories } from '@/lib/cms'
 import type { RenderContext } from '@/lib/context'
@@ -55,7 +56,7 @@ export async function IndexView({
   const base = href(ctx.locale, kind)
 
   return (
-    <PageShell locale={ctx.locale} section={kind} language={language}>
+    <PageShell locale={ctx.locale} active={sectionActive(ctx.locale, kind)} language={language}>
       <div className="container page">
         <PageTitle
           number={sectionNumber(kind, ctx.locale)}
@@ -93,7 +94,8 @@ export async function EntryView({
 }) {
   const t = copy[ctx.locale]
   const [section, siblings] = await Promise.all([getSectionCategories(kind, ctx.locale), getEntries(kind, ctx.locale)])
-  const { facts, body } = kind === 'projects' ? extractFacts(post.content) : { facts: [], body: post.content ?? null }
+  const { facts, body } =
+    kind === 'projects' ? projectFactsAndBody(post, ctx.locale) : { facts: [], body: post.content ?? null }
   const hero = resolveMedia(post.heroImage, ctx.origin, post.title ?? '')
   const cat = subCategory(post, section)
 
@@ -128,7 +130,7 @@ export async function EntryView({
       : t.nextEducation
 
   return (
-    <PageShell locale={ctx.locale} section={kind} exact={false} language={language}>
+    <PageShell locale={ctx.locale} active={sectionActive(ctx.locale, kind, false)} language={language}>
       <article className={`container page entry entry--${kind}`}>
         <PageTitle
           number={sectionNumber(kind, ctx.locale)}

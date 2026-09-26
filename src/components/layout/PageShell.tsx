@@ -1,19 +1,18 @@
-import { copy } from '@/lib/i18n'
-import type { Locale, LocaleLink, Section } from '@/lib/types'
+import { copy, href } from '@/lib/i18n'
+import type { ActiveNav } from '@/lib/navigation'
+import type { Locale, LocaleLink } from '@/lib/types'
 
 import { SiteFooter } from './SiteFooter'
 import { SiteHeader } from './SiteHeader'
 
 export function PageShell({
   locale,
-  section,
-  exact = true,
+  active,
   language,
   children,
 }: {
   locale: Locale
-  section?: Section | null
-  exact?: boolean
+  active?: ActiveNav | null
   language: LocaleLink | null
   children: React.ReactNode
 }) {
@@ -22,11 +21,16 @@ export function PageShell({
       <a className="skip-link" href="#content">
         {copy[locale].skipToContent}
       </a>
-      <SiteHeader locale={locale} section={section} exact={exact} language={language} />
+      <SiteHeader locale={locale} active={active} language={language} />
       <main id="content" className="shell__main" tabIndex={-1}>
         {children}
       </main>
       <SiteFooter locale={locale} />
     </div>
   )
+}
+
+/** Convenience for section index pages. */
+export function sectionActive(locale: Locale, section: string, exact = true): ActiveNav {
+  return { path: href(locale, section), exact }
 }

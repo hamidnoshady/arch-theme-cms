@@ -6,7 +6,7 @@ import { getEntries, getSite, listPublishedPages, sectionPageExists, servedLocal
 import { canonicalOrigin } from '@/lib/env'
 import { SECTIONS, href } from '@/lib/i18n'
 import { pageHref } from '@/lib/links'
-import { HOME_SLUG } from '@/lib/runtime'
+import { HOME_SLUG } from '@eshobe/site-runtime'
 import type { EntryKind, Locale } from '@/lib/types'
 
 type Url = { loc: Record<Locale, string | undefined>; lastModified?: string }

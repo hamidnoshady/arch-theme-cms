@@ -11,8 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@fontsource-variable/jost": "^5.3.0",
-    "@fontsource-variable/manrope": "^5.3.0",
+    "@eshobe/site-runtime": "file:vendor/site-runtime",
     "@fontsource-variable/vazirmatn": "^5.3.0",
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",

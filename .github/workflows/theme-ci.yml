@@ -37,7 +37,19 @@ jobs:
       - name: Validate theme manifest
         run: |
           node -e "
+          const fs = require('node:fs');
           const m = require('./eshobe.theme.json');
+          const runtimeSrc = fs.readFileSync('vendor/site-runtime/src/index.ts', 'utf8');
+          const match = runtimeSrc.match(/export const contractVersion = (\\d+)/);
+          if (!match) {
+            console.error('contractVersion not found in vendor/site-runtime');
+            process.exit(1);
+          }
+          const contractVersion = Number(match[1]);
+          if (m.contractVersion !== contractVersion) {
+            console.error('contractVersion mismatch', { manifest: m.contractVersion, runtime: contractVersion });
+            process.exit(1);
+          }
           const health = m.build?.healthCheckPath || m.healthCheck;
           const ok =
             m.name &&

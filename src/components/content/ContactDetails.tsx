@@ -1,6 +1,6 @@
 import { MetaList, type MetaItem } from '@/components/editorial/Editorial'
 import { copy } from '@/lib/i18n'
-import { toLocaleDigits } from '@/lib/runtime'
+import { toLocaleDigits } from '@eshobe/site-runtime'
 import type { Locale } from '@/lib/types'
 
 export type ContactInfo = {

@@ -3,7 +3,7 @@
   "contractVersion": 1,
   "key": "graphite",
   "name": "Graphite",
-  "nameFa": "گرافیت — دفتر معماری",
+  "nameFa": "گرافیت",
   "displayName": "Graphite — Architecture Office",
   "version": "1.0.0",
   "siteTypes": ["portfolio"],
@@ -17,6 +17,22 @@
     "education": true,
     "contactForm": true,
     "map": true
+  },
+  "runtimeSettings": {
+    "defaults": {
+      "introAnimation": true,
+      "introDuration": 7000,
+      "showSectionNumbers": true,
+      "mapStyle": "minimal"
+    }
+  },
+  "bindings": {
+    "homePage": "home",
+    "aboutPage": "about",
+    "servicesPage": "services",
+    "contactPage": "contact",
+    "projectsCategory": "projects",
+    "educationCategory": "education"
   },
   "build": {
     "pack": "nixpacks",

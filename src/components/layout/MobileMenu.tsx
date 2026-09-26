@@ -7,7 +7,15 @@ import { Logo } from '@/components/brand/Logo'
 import { copy, otherLocale } from '@/lib/i18n'
 import type { Locale, LocaleLink } from '@/lib/types'
 
-type Item = { key: string; href: string; label: string; number: string; current: boolean }
+type Item = {
+  key: string
+  href: string
+  label: string
+  number: string
+  current: boolean
+  external?: boolean
+  newTab?: boolean
+}
 
 /** Small-screen navigation as a native modal dialog: focus trap, Escape and inert page for free. */
 export function MobileMenu({
@@ -66,17 +74,32 @@ export function MobileMenu({
             <ol className="menu-panel__list">
               {items.map((item) => (
                 <li key={item.key}>
-                  <Link
-                    className="menu-panel__link"
-                    href={item.href}
-                    aria-current={item.current ? 'page' : undefined}
-                    onClick={() => setOpen(false)}
-                  >
-                    <span className="menu-panel__number" aria-hidden="true">
-                      {item.number}
-                    </span>
-                    <span>{item.label}</span>
-                  </Link>
+                  {item.external ? (
+                    <a
+                      className="menu-panel__link"
+                      href={item.href}
+                      aria-current={item.current ? 'page' : undefined}
+                      onClick={() => setOpen(false)}
+                      {...(item.newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    >
+                      <span className="menu-panel__number" aria-hidden="true">
+                        {item.number}
+                      </span>
+                      <span>{item.label}</span>
+                    </a>
+                  ) : (
+                    <Link
+                      className="menu-panel__link"
+                      href={item.href}
+                      aria-current={item.current ? 'page' : undefined}
+                      onClick={() => setOpen(false)}
+                    >
+                      <span className="menu-panel__number" aria-hidden="true">
+                        {item.number}
+                      </span>
+                      <span>{item.label}</span>
+                    </Link>
+                  )}
                 </li>
               ))}
             </ol>

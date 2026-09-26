@@ -1,6 +1,6 @@
 import { createHmac } from 'node:crypto'
 import { afterEach, describe, expect, it } from 'vitest'
-import { toThemePath, verifyRevalidateSignature } from './revalidate'
+import { pathsForResources, toThemePath, verifyRevalidateSignature } from './revalidate'
 
 afterEach(() => {
   delete process.env.ESHOBE_REVALIDATE_SECRET
@@ -15,9 +15,13 @@ describe('revalidate helpers', () => {
     expect(toThemePath('/acme.ir')).toBe('/')
   })
 
-  it('collapses /posts paths to layout root for this theme', () => {
+  it('maps post paths to theme locale paths', () => {
     process.env.ESHOBE_SITE_DOMAIN = 'acme.ir'
-    expect(toThemePath('/acme.ir/en/posts/foo')).toBe('/')
+    expect(toThemePath('/acme.ir/en/posts/foo')).toBe('/en/posts/foo')
+  })
+
+  it('maps semantic resources to listing paths', () => {
+    expect(pathsForResources(['projects', 'branding'])).toEqual(expect.arrayContaining(['/', '/projects', '/en/projects']))
   })
 
   it('verifies HMAC over the raw body', () => {

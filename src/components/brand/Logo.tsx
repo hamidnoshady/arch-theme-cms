@@ -1,9 +1,12 @@
+import Image from 'next/image'
+
+import type { ResolvedBranding } from '@/lib/theme/branding'
+
 import { GraphiteLogoMark } from './GraphiteLogoMark'
 
 /**
- * Graphite identity. The home “full” mark uses the supplied vector SVG
- * (symbol, wordmark paths, subtitle). Compact and symbol variants use the
- * lightweight stroke mark for chrome and favicon-scale contexts.
+ * Site identity mark. CMS logos take precedence; the Graphite vector remains the
+ * theme demo fallback when no tenant branding is configured.
  */
 const STROKES = [
   'M28 122V35L78 13L128 35V122L78 99Z',
@@ -56,12 +59,45 @@ type LogoProps = {
   className?: string
   /** Accessible name; omit when the logo sits inside a labelled link. */
   label?: string
+  branding?: ResolvedBranding | null
+  mediaOrigin?: string
 }
 
-export function Logo({ variant = 'full', animated = false, className = '', label }: LogoProps) {
+function cmsLogoUrl(branding: ResolvedBranding | null | undefined, variant: 'full' | 'compact', origin: string) {
+  const media = variant === 'compact' ? branding?.logoCompact ?? branding?.logo : branding?.logo
+  const url = media && typeof media === 'object' ? media.url : null
+  if (!url) return null
+  if (/^(https?:)?\/\//i.test(url) || url.startsWith('data:')) return url
+  return origin ? new URL(url.startsWith('/') ? url : `/${url}`, `${origin}/`).toString() : url
+}
+
+export function Logo({
+  variant = 'full',
+  animated = false,
+  className = '',
+  label,
+  branding,
+  mediaOrigin = '',
+}: LogoProps) {
   const classes = ['logo', `logo--${variant}`, animated ? 'logo--animated' : '', className]
     .filter(Boolean)
     .join(' ')
+
+  const remote = cmsLogoUrl(branding ?? null, variant === 'symbol' ? 'compact' : variant, mediaOrigin)
+  if (remote) {
+    return (
+      <span className={classes} role={label ? 'img' : undefined} aria-label={label}>
+        <Image
+          className="logo__image"
+          src={remote}
+          alt={label ?? branding?.brandLabel ?? ''}
+          width={variant === 'compact' ? 160 : 280}
+          height={variant === 'compact' ? 48 : 80}
+          unoptimized
+        />
+      </span>
+    )
+  }
 
   if (variant === 'full') {
     return (
@@ -78,12 +114,15 @@ export function Logo({ variant = 'full', animated = false, className = '', label
 
   if (variant === 'symbol') return <LogoSymbol className={classes} title={label} />
 
+  const wordmark = branding?.shortName?.trim() || branding?.siteName?.trim()
   return (
-    <span className={classes} dir="ltr" role={label ? 'img' : undefined} aria-label={label}>
+    <span className={classes} role={label ? 'img' : undefined} aria-label={label}>
       <LogoSymbol className="logo__symbol" />
-      <span className="logo__type" aria-hidden="true">
-        <span className="logo__wordmark">GRAPHITE</span>
-      </span>
+      {wordmark ? (
+        <span className="logo__type" aria-hidden="true">
+          <span className="logo__wordmark">{wordmark}</span>
+        </span>
+      ) : null}
     </span>
   )
 }

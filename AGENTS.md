@@ -83,3 +83,12 @@ Do not treat “font file appeared in Network” as sufficient.
 - [ ] Hard refresh / throttled network: no FOIT/FOUT layout jump.
 - [ ] Viewports: 320px, 375px, tablet, desktop; **200% zoom**.
 - [ ] Long FA and EN labels in nav/buttons do not clip; forms inherit typography.
+
+## Eshobe CMS integration (Graphite theme)
+
+- **Customer identity** comes from `GET /api/site` (`name`, optional `branding`). Never hardcode Graphite as the tenant name in metadata, footer, or accessible labels. The Graphite SVG is a **demo fallback** only.
+- **Navigation** for header, mobile menu, and homepage destinations uses `GET /api/header` (footer: `GET /api/footer`). Do not revive hardcoded `SECTIONS` for customer-facing menus.
+- **Content bindings** live in `src/lib/theme/bindings.ts` with manifest slug hints in `eshobe.theme.json`. Do not scatter legacy slug assumptions elsewhere.
+- **Runtime presentation** (`introAnimation`, `introDuration`, `showSectionNumbers`, `mapStyle`) comes from `site.runtimeSettings` + manifest defaults — not deployment env.
+- **Formatting and slugs** use `@eshobe/site-runtime` (`vendor/site-runtime` until npm publish). `eshobe.theme.json` `contractVersion` must match the package.
+- **Visitor `/api/*` proxy** must not forward `Authorization`, cookies, or the site API key.

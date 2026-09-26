@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { RenderBlocks, isContactBlock } from '@/components/content/Blocks'
 import { RichText } from '@/components/content/RichText'
 import { EmptyState, Notice, PageTitle, SectionHeading } from '@/components/editorial/Editorial'
-import { PageShell } from '@/components/layout/PageShell'
+import { PageShell, sectionActive } from '@/components/layout/PageShell'
+import { pageHref } from '@/lib/links'
 import { MinimalMap } from '@/components/map/MinimalMap'
 import { MediaFrame } from '@/components/media/MediaFrame'
 import type { RenderContext } from '@/lib/context'
@@ -76,7 +77,7 @@ export async function SectionPageView({
   const rest = section === 'contact' ? layout.filter((b) => !isContactBlock(b)) : layout
 
   return (
-    <PageShell locale={ctx.locale} section={section} language={language}>
+    <PageShell locale={ctx.locale} active={sectionActive(ctx.locale, section)} language={language}>
       <div className="container page">
         <PageTitle number={sectionNumber(section, ctx.locale)} eyebrow={t[section]} title={title} lead={<Lead page={page} ctx={ctx} />} />
 
@@ -125,7 +126,7 @@ export async function SectionPageView({
 
 export function GenericPageView({ page, ctx, language }: { page: Page; ctx: RenderContext; language: LocaleLink | null }) {
   return (
-    <PageShell locale={ctx.locale} language={language}>
+    <PageShell locale={ctx.locale} active={{ path: pageHref(page.slug, ctx.locale), exact: true }} language={language}>
       <div className="container page">
         <PageTitle eyebrow={copy[ctx.locale].home} eyebrowHref={href(ctx.locale)} title={page.title ?? ''} lead={<Lead page={page} ctx={ctx} />} />
         <Hero page={page} ctx={ctx} />

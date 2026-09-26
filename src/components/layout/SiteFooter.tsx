@@ -1,14 +1,17 @@
 import Link from 'next/link'
 
 import { Logo } from '@/components/brand/Logo'
-import { getNav } from '@/lib/cms'
+import { getNav, getSite } from '@/lib/cms'
 import { copy, href } from '@/lib/i18n'
 import { resolveLink, safeHref } from '@/lib/links'
-import { formatDate } from '@/lib/runtime'
+import { resolveBranding } from '@/lib/theme/branding'
+import { formatDate } from '@eshobe/site-runtime'
 import type { Locale } from '@/lib/types'
 
 export async function SiteFooter({ locale }: { locale: Locale }) {
   const t = copy[locale]
+  const site = await getSite()
+  const branding = resolveBranding(site, locale)
   const footer = await getNav('footer', locale)
   const links = (footer?.navItems ?? [])
     .map((item) => ({ id: item.id, label: item.link?.label, link: resolveLink(item.link, locale) }))
@@ -17,8 +20,8 @@ export async function SiteFooter({ locale }: { locale: Locale }) {
   return (
     <footer className="site-footer">
       <div className="site-footer__inner">
-        <Link className="site-footer__brand" href={href(locale)} aria-label={t.home}>
-          <Logo variant="compact" />
+        <Link className="site-footer__brand" href={href(locale)} aria-label={branding.brandLabel}>
+          <Logo variant="compact" branding={branding} />
         </Link>
 
         {links.length ? (
@@ -44,7 +47,7 @@ export async function SiteFooter({ locale }: { locale: Locale }) {
             {t.backToTop}
           </a>
           <span>
-            © {formatDate(new Date(), locale, { year: 'numeric' })} {t.rights}
+            © {formatDate(new Date(), locale, { year: 'numeric' })} {branding.shortName || t.brand}
           </span>
         </div>
       </div>

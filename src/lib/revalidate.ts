@@ -15,9 +15,46 @@ export function toThemePath(cmsPath: string, domain = siteDomain()): string {
     if (path === prefix) return '/'
     if (path.startsWith(`${prefix}/`)) path = path.slice(prefix.length) || '/'
   }
-  // Posts live under /projects|/education here, not /posts — bust the tree.
-  if (/(^|\/)posts(\/|$)/.test(path)) return '/'
   return path
+}
+
+/** Map CMS semantic resources to theme paths for path-based revalidation. */
+export function pathsForResources(resources: string[]): string[] {
+  const out = new Set<string>(['/'])
+  for (const resource of resources) {
+    const key = resource.trim().toLowerCase()
+    if (!key) continue
+    if (key === 'home' || key === 'site' || key === 'branding' || key === 'theme' || key === 'navigation') {
+      out.add('/')
+      out.add('/en')
+      continue
+    }
+    if (key === 'sitemap') {
+      out.add('/sitemap.xml')
+      continue
+    }
+    if (
+      key === 'projects' ||
+      key === 'education' ||
+      key === 'pages' ||
+      key === 'posts' ||
+      key === 'categories' ||
+      key === 'header' ||
+      key === 'footer' ||
+      key === 'forms' ||
+      key === 'bindings' ||
+      key === 'runtime-settings' ||
+      key === 'runtimeSettings'
+    ) {
+      out.add(`/${key}`)
+      out.add(`/en/${key}`)
+      if (key === 'header' || key === 'footer') {
+        out.add('/')
+        out.add('/en')
+      }
+    }
+  }
+  return [...out]
 }
 
 export function verifyRevalidateSignature(rawBody: string, header: string | null): boolean {

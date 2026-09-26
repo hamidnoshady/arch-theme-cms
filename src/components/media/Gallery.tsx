@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { copy, interpolate } from '@/lib/i18n'
 import type { ResolvedMedia } from '@/lib/media'
-import { toLocaleDigits } from '@/lib/runtime'
+import { toLocaleDigits } from '@eshobe/site-runtime'
 import type { Locale } from '@/lib/types'
 
 import { MediaFrame, type FrameRatio } from './MediaFrame'
