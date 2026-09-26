@@ -19,7 +19,7 @@ type Props = {
 
 /** Pixels of wheel travel for a full reveal; one mouse-wheel notch (~100px) is enough to commit. */
 const WHEEL_RANGE = 380
-const INTRO_MS = 2700
+const INTRO_MS = 7000
 const REVEAL_KEYS = new Set(['ArrowDown', 'PageDown', 'End'])
 const COLLAPSE_KEYS = new Set(['ArrowUp', 'PageUp', 'Home', 'Escape'])
 
@@ -43,6 +43,7 @@ export function HomeStage({ locale, items, language }: Props) {
   const settleTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
   const reduced = useRef(false)
   const [revealed, setRevealed] = useState(false)
+  const [introActive, setIntroActive] = useState(false)
 
   const apply = useCallback((value: number, motion: 'drag' | 'settle') => {
     const el = stageRef.current
@@ -88,6 +89,7 @@ export function HomeStage({ locale, items, language }: Props) {
   // Intro state is decided before paint by the inline script in HomeView.
   useIsoLayoutEffect(() => {
     const root = document.documentElement
+    setIntroActive(root.dataset.intro === 'play')
     reduced.current = matchMedia('(prefers-reduced-motion: reduce)').matches || root.dataset.intro === 'reduced'
     if (reduced.current) {
       settle(1)
@@ -275,7 +277,7 @@ export function HomeStage({ locale, items, language }: Props) {
       <div className="home__center">
         <div className="home__stack">
           <h1 className="home__brand">
-            <Logo variant="full" animated className="home__logo" />
+            <Logo variant="full" animated={introActive} className="home__logo" />
             <span className="sr-only">{t.brand}</span>
           </h1>
 

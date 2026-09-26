@@ -74,6 +74,17 @@
   font-size: inherit;
 }
 
+.logo--vector {
+  font-size: unset;
+}
+
+.logo--vector .logo__mark,
+.logo--vector .logo__mark svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 /* The drawing is constructed once per session, then stays drawn. */
 html[data-intro='play'] .logo--animated .logo__strokes path {
   stroke-dasharray: 1;

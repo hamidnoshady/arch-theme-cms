@@ -1,14 +1,13 @@
+import { GraphiteLogoMark } from './GraphiteLogoMark'
+
 /**
- * Graphite identity, reconstructed from the supplied references on a single
- * isometric grid (edge slope 0.44). Requires final brand approval — replace the
- * path data with the authoritative vector when it is supplied; every variant
- * reads from these constants.
+ * Graphite identity. The home “full” mark uses the supplied vector SVG
+ * (symbol, wordmark paths, subtitle). Compact and symbol variants use the
+ * lightweight stroke mark for chrome and favicon-scale contexts.
  */
 const STROKES = [
-  // tower: outline, then ridge
   'M28 122V35L78 13L128 35V122L78 99Z',
   'M78 13V99',
-  // wing: outline, then divider
   'M128 35L162 20L212 42V85L128 122',
   'M162 20V107',
 ] as const
@@ -64,6 +63,19 @@ export function Logo({ variant = 'full', animated = false, className = '', label
     .filter(Boolean)
     .join(' ')
 
+  if (variant === 'full') {
+    return (
+      <span
+        className={`${classes} logo--vector`}
+        dir="ltr"
+        role={label ? 'img' : undefined}
+        aria-label={label}
+      >
+        <GraphiteLogoMark animated={animated} />
+      </span>
+    )
+  }
+
   if (variant === 'symbol') return <LogoSymbol className={classes} title={label} />
 
   return (
@@ -71,7 +83,6 @@ export function Logo({ variant = 'full', animated = false, className = '', label
       <LogoSymbol className="logo__symbol" />
       <span className="logo__type" aria-hidden="true">
         <span className="logo__wordmark">GRAPHITE</span>
-        {variant === 'full' ? <span className="logo__subtitle">ARCHITECTURE OFFICE</span> : null}
       </span>
     </span>
   )
