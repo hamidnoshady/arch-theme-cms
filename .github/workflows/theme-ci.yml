@@ -37,7 +37,12 @@ jobs:
       - name: Validate theme manifest
         run: |
           node -e "
+          const { contractVersion } = require('@eshobe/site-runtime');
           const m = require('./eshobe.theme.json');
+          if (m.contractVersion !== contractVersion) {
+            console.error('contractVersion mismatch', { manifest: m.contractVersion, runtime: contractVersion });
+            process.exit(1);
+          }
           const health = m.build?.healthCheckPath || m.healthCheck;
           const ok =
             m.name &&

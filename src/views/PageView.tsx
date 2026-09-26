@@ -4,6 +4,7 @@ import { RenderBlocks, isContactBlock } from '@/components/content/Blocks'
 import { RichText } from '@/components/content/RichText'
 import { EmptyState, Notice, PageTitle, SectionHeading } from '@/components/editorial/Editorial'
 import { PageShell, sectionActive } from '@/components/layout/PageShell'
+import { pageHref } from '@/lib/links'
 import { MinimalMap } from '@/components/map/MinimalMap'
 import { MediaFrame } from '@/components/media/MediaFrame'
 import type { RenderContext } from '@/lib/context'
@@ -125,7 +126,7 @@ export async function SectionPageView({
 
 export function GenericPageView({ page, ctx, language }: { page: Page; ctx: RenderContext; language: LocaleLink | null }) {
   return (
-    <PageShell locale={ctx.locale} language={language}>
+    <PageShell locale={ctx.locale} active={{ path: pageHref(page.slug, ctx.locale), exact: true }} language={language}>
       <div className="container page">
         <PageTitle eyebrow={copy[ctx.locale].home} eyebrowHref={href(ctx.locale)} title={page.title ?? ''} lead={<Lead page={page} ctx={ctx} />} />
         <Hero page={page} ctx={ctx} />

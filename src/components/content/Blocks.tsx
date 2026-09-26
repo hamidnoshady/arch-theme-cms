@@ -229,6 +229,67 @@ function CtaBlock({ block, ctx }: { block: Block; ctx: Ctx }) {
   )
 }
 
+function LogosBlock({ block, ctx, number }: { block: Block; ctx: Ctx; number?: string }) {
+  const logos = ((block.logos as Ref<Media>[]) ?? [])
+    .map((m) => resolveMedia(m, ctx.origin))
+    .filter((m): m is NonNullable<typeof m> => m?.kind === 'image')
+  if (!logos.length) return null
+  return (
+    <>
+      <SectionHeading number={number} title={block.heading as string} intro={block.intro as string} />
+      <ul className="logo-grid" role="list">
+        {logos.map((logo, i) => (
+          <li key={logo.src + i} className="logo-grid__item">
+            <MediaFrame media={logo} locale={ctx.locale} ratio="3/2" sizes="(min-width: 900px) 12vw, 40vw" />
+          </li>
+        ))}
+      </ul>
+    </>
+  )
+}
+
+function PricingBlock({ block, ctx, number }: { block: Block; ctx: Ctx; number?: string }) {
+  const plans = ((block.plans as {
+    id?: string
+    name?: string
+    featured?: boolean
+    price?: number | null
+    unit?: string | null
+    period?: string | null
+    features?: string[] | null
+    enableLink?: boolean
+    link?: LinkField
+  }[]) ?? []).filter((p) => p.name)
+  if (!plans.length) return null
+  return (
+    <>
+      <SectionHeading number={number} title={block.heading as string} intro={block.intro as string} />
+      <ul className="pricing" role="list">
+        {plans.map((plan, i) => (
+          <li key={plan.id ?? i} className={`pricing__plan ${plan.featured ? 'pricing__plan--featured' : ''}`}>
+            <h3 className="pricing__name">{plan.name}</h3>
+            {typeof plan.price === 'number' ? (
+              <p className="pricing__price">
+                {plan.price.toLocaleString(ctx.locale === 'fa' ? 'fa-IR' : 'en-US')}
+                {plan.unit ? ` ${plan.unit}` : ''}
+                {plan.period ? <span className="muted"> / {plan.period}</span> : null}
+              </p>
+            ) : null}
+            {plan.features?.length ? (
+              <ul className="pricing__features">
+                {plan.features.map((f, j) => (
+                  <li key={j}>{f}</li>
+                ))}
+              </ul>
+            ) : null}
+            {plan.enableLink && plan.link ? <CmsLink link={plan.link} ctx={ctx} className="button" /> : null}
+          </li>
+        ))}
+      </ul>
+    </>
+  )
+}
+
 function TestimonialsBlock({ block, number }: { block: Block; number?: string }) {
   const items = ((block.items as { id?: string; quote?: string; author?: string; role?: string; avatar?: Ref<Media> }[]) ?? []).filter(
     (i) => i.quote,
@@ -256,7 +317,7 @@ function TestimonialsBlock({ block, number }: { block: Block; number?: string })
   )
 }
 
-const HEADED = new Set(['gallery', 'team', 'contact', 'features', 'faq', 'testimonials'])
+const HEADED = new Set(['gallery', 'team', 'contact', 'features', 'faq', 'testimonials', 'logos', 'pricing'])
 
 export function RenderBlocks({
   blocks,
@@ -323,8 +384,16 @@ export function RenderBlocks({
           case 'testimonials':
             body = <TestimonialsBlock block={block} number={number} />
             break
+          case 'logos':
+            body = <LogosBlock block={block} ctx={ctx} number={number} />
+            break
+          case 'pricing':
+            body = <PricingBlock block={block} ctx={ctx} number={number} />
+            break
           default:
-            if (process.env.NODE_ENV !== 'production') console.warn(`[graphite] unknown block "${block.blockType}"`)
+            if (process.env.NODE_ENV !== 'production') {
+              console.warn(`[graphite] unsupported block "${block.blockType}"`)
+            }
             return null
         }
         return (

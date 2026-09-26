@@ -8,6 +8,9 @@ export type ContactBlockData = {
   phones?: string[] | null
   email?: string | null
   hours?: string | null
+  latitude?: number | null
+  longitude?: number | null
+  mapUrl?: string | null
 }
 
 function linksInRichText(data: RichTextData | null | undefined): string[] {
@@ -52,9 +55,23 @@ export function findContactBlock(pages: (Page | null)[]): ContactBlockData | nul
   return null
 }
 
+export function locationFromContact(contact: ContactBlockData | null): MapLocation | null {
+  if (!contact) return null
+  const lat = typeof contact.latitude === 'number' ? contact.latitude : null
+  const lng = typeof contact.longitude === 'number' ? contact.longitude : null
+  if (lat !== null && lng !== null && Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
+    const url = contact.mapUrl?.trim() || `geo:${lat},${lng}`
+    return { lat, lng, url, zoom: 16 }
+  }
+  if (contact.mapUrl) return parseMapUrl(contact.mapUrl)
+  return null
+}
+
 /** Office location and address, only from published CMS content. */
 export async function getOffice(locale: Locale, current?: Page | null) {
   const contact = await getSectionPage('contact', locale)
   const pages = current ? [current, contact] : [contact]
-  return { location: findLocation(pages), contact: findContactBlock([contact, ...(current ? [current] : [])]) }
+  const contactBlock = findContactBlock([contact, ...(current ? [current] : [])])
+  const structured = locationFromContact(contactBlock)
+  return { location: structured ?? findLocation(pages), contact: contactBlock }
 }

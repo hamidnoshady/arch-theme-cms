@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState } from 'react'
 
+import { safeFormRedirect, validateFormField } from '@/lib/forms'
 import { copy } from '@/lib/i18n'
 import type { Form, FormField, Locale } from '@/lib/types'
 
@@ -9,22 +10,6 @@ type Status = 'idle' | 'sending' | 'success' | 'failure'
 type Errors = Record<string, string>
 
 const INPUT_TYPES: Record<string, string> = { text: 'text', email: 'email', number: 'number', country: 'text', state: 'text' }
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-function validate(field: FormField, value: string, t: (typeof copy)['fa']): string | null {
-  const empty = field.blockType === 'checkbox' ? value !== 'true' : !value.trim()
-  if (field.required && empty) return t.required
-  if (!value.trim()) return null
-  if (field.blockType === 'email' && !EMAIL.test(value.trim())) return t.invalidEmail
-  if (field.blockType === 'number' && Number.isNaN(Number(value))) return t.invalidNumber
-  return null
-}
-
-function safeRedirect(url: string | null | undefined): string | null {
-  if (!url) return null
-  return url.startsWith('/') || /^https?:\/\//i.test(url) ? url : null
-}
-
 /**
  * Renders a Payload form-builder form and posts to `/api/form-submissions` on
  * this origin (proxied to the CMS). The CMS derives the tenant from the form,
@@ -61,7 +46,7 @@ export function CmsForm({
     const next: Errors = {}
     for (const field of fields) {
       if (field.blockType === 'message') continue
-      const error = validate(field, read(el, field), t)
+      const error = validateFormField(field, read(el, field), t)
       if (error) next[field.name!] = error
     }
     setErrors(next)
@@ -94,7 +79,7 @@ export function CmsForm({
         body: JSON.stringify({ form: form.id, submissionData }),
       })
       if (!res.ok) throw new Error(String(res.status))
-      const redirect = form.confirmationType === 'redirect' ? safeRedirect(form.redirect?.url) : null
+      const redirect = form.confirmationType === 'redirect' ? safeFormRedirect(form.redirect?.url) : null
       if (redirect) {
         window.location.assign(redirect)
         return

@@ -142,7 +142,9 @@ function renderNode(node: Grouped, ctx: Ctx, key: string): React.ReactNode {
       )
     }
     case 'heading': {
-      const level = Math.min(Math.max(Number(String(n.tag ?? 'h2').replace('h', '')) || 2, 2), 4)
+      const raw = Number(String(n.tag ?? 'h2').replace('h', '')) || 2
+      // Page templates own h1; rich text starts at h2 for valid outline.
+      const level = Math.min(Math.max(raw === 1 ? 2 : raw, 2), 4)
       const Tag = `h${level}` as 'h2' | 'h3' | 'h4'
       if (!nodeText(n).trim()) return null
       return (

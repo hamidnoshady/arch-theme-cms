@@ -38,10 +38,14 @@ const PASS_BACK = [
  * tenant is resolved by the CMS from `Host`, which is why this uses node:http —
  * WHATWG `fetch` silently drops a custom `Host` header.
  */
+const STRIP = new Set(['authorization', 'cookie', 'x-api-key'])
+
 export function proxyHeaders(incoming: Headers, requestHost: string | null): Record<string, string> {
   const out: Record<string, string> = {}
   incoming.forEach((value, key) => {
-    if (!HOP_BY_HOP.has(key.toLowerCase())) out[key] = value
+    const lower = key.toLowerCase()
+    if (HOP_BY_HOP.has(lower) || STRIP.has(lower)) return
+    out[key] = value
   })
   const host = siteDomain() || requestHost || ''
   if (host) {

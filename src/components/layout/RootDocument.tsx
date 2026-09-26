@@ -1,5 +1,3 @@
-import '@fontsource-variable/jost/wght.css'
-import '@fontsource-variable/manrope/wght.css'
 import '@fontsource-variable/vazirmatn/wght.css'
 import '@/styles/index.css'
 

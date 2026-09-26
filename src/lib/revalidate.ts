@@ -33,9 +33,25 @@ export function pathsForResources(resources: string[]): string[] {
       out.add('/sitemap.xml')
       continue
     }
-    if (key === 'projects' || key === 'education' || key === 'pages' || key === 'posts' || key === 'categories') {
+    if (
+      key === 'projects' ||
+      key === 'education' ||
+      key === 'pages' ||
+      key === 'posts' ||
+      key === 'categories' ||
+      key === 'header' ||
+      key === 'footer' ||
+      key === 'forms' ||
+      key === 'bindings' ||
+      key === 'runtime-settings' ||
+      key === 'runtimeSettings'
+    ) {
       out.add(`/${key}`)
       out.add(`/en/${key}`)
+      if (key === 'header' || key === 'footer') {
+        out.add('/')
+        out.add('/en')
+      }
     }
   }
   return [...out]

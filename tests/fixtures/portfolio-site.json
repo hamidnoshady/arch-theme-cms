@@ -1,0 +1,41 @@
+{
+  "site": {
+    "availableLocales": ["fa", "en"],
+    "blocks": ["content", "mediaBlock", "cta", "features", "testimonials", "faq", "contact", "formBlock", "gallery", "team", "archive", "logos", "pricing"],
+    "contractVersion": 1,
+    "defaultLocale": "fa",
+    "domain": "studio.example",
+    "name": "Studio Example",
+    "status": "active",
+    "type": "portfolio",
+    "branding": {
+      "displayName": "Studio Example",
+      "displayNameFa": "استودیو نمونه",
+      "shortName": "Studio",
+      "tagline": "Architecture"
+    },
+    "bindings": {
+      "homePage": "home",
+      "aboutPage": "about",
+      "projectsCategory": "projects"
+    },
+    "runtimeSettings": {
+      "introAnimation": true,
+      "showSectionNumbers": true
+    },
+    "theme": {
+      "primary": "#192b3a",
+      "accent": "#c4a574",
+      "background": "#ffffff",
+      "foreground": "#171717",
+      "radius": "md",
+      "lineHeight": 1.8
+    }
+  },
+  "header": {
+    "navItems": [
+      { "id": "1", "link": { "type": "custom", "label": "About", "url": "/about" } },
+      { "id": "2", "link": { "type": "custom", "label": "Projects", "url": "/projects" } }
+    ]
+  }
+}

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
-import { RichText, extractFacts } from '@/components/content/RichText'
+import { RichText } from '@/components/content/RichText'
+import { projectFactsAndBody } from '@/lib/project-metadata'
 import { EmptyState, MetaList, PageTitle, type MetaItem } from '@/components/editorial/Editorial'
 import { EntryGrid, toCardEntry } from '@/components/entries/EntryCard'
 import { Filters } from '@/components/entries/Filters'
@@ -93,7 +94,8 @@ export async function EntryView({
 }) {
   const t = copy[ctx.locale]
   const [section, siblings] = await Promise.all([getSectionCategories(kind, ctx.locale), getEntries(kind, ctx.locale)])
-  const { facts, body } = kind === 'projects' ? extractFacts(post.content) : { facts: [], body: post.content ?? null }
+  const { facts, body } =
+    kind === 'projects' ? projectFactsAndBody(post, ctx.locale) : { facts: [], body: post.content ?? null }
   const hero = resolveMedia(post.heroImage, ctx.origin, post.title ?? '')
   const cat = subCategory(post, section)
 
