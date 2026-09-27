@@ -62,6 +62,8 @@ Locale path helpers (`localeHref`, `dirFor`) live in `src/lib/locale.ts` (platfo
 
 `eshobe.theme.json` is the Wave 11 manifest (`proxiesApi`, nixpacks, `/api/health`). `GET /api/health` is ready only when the CMS answers `GET /api/site` with a matching `contractVersion`.
 
+Coolify builds and runs this theme with **Nixpacks**, not the Next.js `standalone` output — `build.startCommand` is `npm run start` (`next start`), so `next.config.ts` must not set `output: 'standalone'` (that mode requires running `node .next/standalone/server.js` instead, which Nixpacks does not do here).
+
 `/api/*` except health and revalidate is proxied to the CMS without the site API key. Server-side reads attach the key and `Host`.
 
 `POST /api/revalidate` verifies `x-eshobe-signature` on the **raw body**, then invalidates the `cms` cache tag, optional semantic `tags` / `resources`, and mapped paths.
