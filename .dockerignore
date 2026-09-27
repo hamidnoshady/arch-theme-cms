@@ -1,0 +1,16 @@
+.git
+.github
+node_modules
+.next
+out
+coverage
+tests
+*.log
+.env*
+!.env.example
+*.tsbuildinfo
+README.md
+CLAUDE.md
+AGENTS.md
+Dockerfile
+.dockerignore
