@@ -19,6 +19,8 @@ if ($Group -in @('all', 'content')) {
     if ($content -notmatch "'$name'") { throw "Missing content model $name" }
   }
   if ($content -notmatch "\$type \. '_category'") { throw 'Missing hierarchical category registration pattern' }
+  $meta = Get-Content -Raw (Join-Path $root 'plugins/graphite-core/src/ProjectMeta.php')
+  if (-not $meta.Contains("current_user_can('edit_post', `$objectId)")) { throw 'Project metadata must authorize the specific post' }
 }
 
 if ($Group -in @('all', 'settings')) {

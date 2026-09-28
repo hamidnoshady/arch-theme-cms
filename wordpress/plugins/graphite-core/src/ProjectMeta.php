@@ -18,7 +18,7 @@ final class ProjectMeta {
         return [
             'single' => true, 'type' => $type, 'show_in_rest' => ['schema' => ['type' => $type]],
             'sanitize_callback' => $sanitize,
-            'auth_callback' => static fn (): bool => current_user_can('edit_posts'),
+            'auth_callback' => static fn (bool $allowed, string $metaKey, int $objectId): bool => current_user_can('edit_post', $objectId),
             'revisions_enabled' => true,
         ];
     }
