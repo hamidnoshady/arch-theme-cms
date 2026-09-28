@@ -103,12 +103,23 @@ jobs:
           ESHOBE_CMS_URL="${ESHOBE_CMS_URL%/}"
           export ESHOBE_THEME_ARTIFACT_SECRET IMAGE_DIGEST
 
+          present=()
           missing=()
-          [ -n "$ESHOBE_CMS_URL" ] || missing+=(ESHOBE_CMS_URL)
-          [ -n "$ESHOBE_THEME_PACKAGE_ID" ] || missing+=(ESHOBE_THEME_PACKAGE_ID)
-          [ -n "$ESHOBE_THEME_ARTIFACT_SECRET" ] || missing+=(ESHOBE_THEME_ARTIFACT_SECRET)
+          for name in ESHOBE_CMS_URL ESHOBE_THEME_PACKAGE_ID ESHOBE_THEME_ARTIFACT_SECRET; do
+            if [ -n "${!name}" ]; then present+=("$name"); else missing+=("$name"); fi
+          done
+
+          # Registration is an optional post-publish integration. When none of the
+          # secrets are configured, skip it (the image is already built and pushed)
+          # instead of failing the whole workflow.
+          if [ "${#present[@]}" -eq 0 ]; then
+            echo "::warning::Eshobe CMS registration secrets are not configured; skipping artifact registration. Set ESHOBE_CMS_URL, ESHOBE_THEME_PACKAGE_ID and ESHOBE_THEME_ARTIFACT_SECRET to enable it."
+            exit 0
+          fi
+
+          # Partial configuration is a mistake worth surfacing loudly.
           if [ "${#missing[@]}" -gt 0 ]; then
-            echo "::error::Cannot register theme artifact; missing/empty secrets: ${missing[*]}"
+            echo "::error::Eshobe CMS registration is partially configured; missing/empty secrets: ${missing[*]}"
             exit 1
           fi
 
