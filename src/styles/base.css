@@ -6,6 +6,13 @@
 
 html {
   background: var(--color-paper);
+  /*
+   * Anchor targets land below the sticky header instead of underneath it. Paired
+   * with `SmoothAnchors`, which owns the scrolling gesture: a global
+   * `scroll-behavior: smooth` would also animate the `documentElement.scrollTop = 0`
+   * that the router performs on every route change.
+   */
+  scroll-padding-top: calc(var(--header-h) + env(safe-area-inset-top) + 12px);
 }
 
 html,
