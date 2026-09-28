@@ -30,16 +30,16 @@
     "introAnimation": {
       "type": "boolean",
       "default": true,
-      "labelEn": "Intro animation",
-      "labelFa": "انیمیشن ورود"
+      "labelEn": "Home logo intro animation",
+      "labelFa": "انیمیشن لوگوی صفحه اول"
     },
     "introDuration": {
       "type": "number",
       "default": 7000,
       "min": 0,
       "max": 20000,
-      "labelEn": "Intro duration",
-      "labelFa": "مدت انیمیشن ورود",
+      "labelEn": "Intro duration in milliseconds",
+      "labelFa": "مدت انیمیشن به میلی‌ثانیه",
       "help": "Milliseconds."
     },
     "showSectionNumbers": {
