@@ -1,0 +1,1 @@
+{"apiVersion":3,"name":"graphite/project-grid","title":"Graphite Project Grid","category":"widgets","attributes":{"perPage":{"type":"number","default":12}},"supports":{"html":false}}
