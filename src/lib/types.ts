@@ -158,13 +158,23 @@ export type SiteBranding = {
   ogImage?: Ref<Media>
 }
 
+/**
+ * One resolved content binding. `GET /api/site` sends `{ id, type, slug, title }`; older
+ * descriptors and the manifest's slug hints send a bare string.
+ */
+export type BindingValue =
+  | string
+  | { id?: string | null; type?: string | null; slug?: string | null; title?: string | null }
+  | null
+  | undefined
+
 export type SiteBindings = {
-  homePage?: Ref<Page>
-  aboutPage?: Ref<Page>
-  servicesPage?: Ref<Page>
-  contactPage?: Ref<Page>
-  projectsCategory?: Ref<Category>
-  educationCategory?: Ref<Category>
+  homePage?: BindingValue
+  aboutPage?: BindingValue
+  servicesPage?: BindingValue
+  contactPage?: BindingValue
+  projectsCategory?: BindingValue
+  educationCategory?: BindingValue
 }
 
 export type SiteDescriptor = {
