@@ -37,9 +37,9 @@ Without a CMS the site still renders with **Graphite demo branding**; customer i
 | Design tokens | `GET /api/site` → `theme` (mapped via `@eshobe/site-runtime` `themeCss`) |
 | Runtime presentation settings | `GET /api/site` → `themeRuntime.settings` (legacy `runtimeSettings` supported); defaults in `eshobe.theme.json` |
 | Content bindings | `GET /api/site` → `themeRuntime.bindings` (legacy `bindings` supported); manifest slug fallbacks |
-
-The deployment path is the public GHCR registry image (`ghcr.io/hamidnoshady/arch-theme-cms`). The workflow registers each immutable image digest with Eshobe CMS. Nixpacks/source builds remain legacy/fallback only. Configure the GitHub Actions secrets `ESHOBE_CMS_URL`, `ESHOBE_THEME_PACKAGE_ID`, and `ESHOBE_THEME_ARTIFACT_SECRET` for artifact registration.
 | Blocks allowlist | `GET /api/site` → `blocks` |
+
+Production deploys use the public GHCR image `ghcr.io/hamidnoshady/arch-theme-cms` at an immutable digest (`eshobe.theme.json` → `deployment.strategy: registry_image`). CI pushes the image and registers each digest with Eshobe CMS. Set GitHub Actions secrets `ESHOBE_CMS_URL`, `ESHOBE_THEME_PACKAGE_ID`, and `ESHOBE_THEME_ARTIFACT_SECRET` for artifact registration, then sync the theme package in the CMS so it picks up the manifest.
 
 ### Content model
 
@@ -62,9 +62,9 @@ Locale path helpers (`localeHref`, `dirFor`) live in `src/lib/locale.ts` (platfo
 
 ## Deploy
 
-`eshobe.theme.json` is the Wave 11 manifest (`proxiesApi`, nixpacks, `/api/health`). `GET /api/health` is ready only when the CMS answers `GET /api/site` with a matching `contractVersion`.
+`eshobe.theme.json` is the Wave 11 manifest: `proxiesApi`, `deployment.strategy: registry_image`, `build.buildPack: dockerfile` (see root `Dockerfile`), and `/api/health`. After a CMS sync, preview and production pull `ghcr.io/hamidnoshady/arch-theme-cms@sha256:…` — not a mutable tag.
 
-Coolify builds and runs this theme with **Nixpacks**, not the Next.js `standalone` output — `build.startCommand` is `npm run start` (`next start`), so `next.config.ts` must not set `output: 'standalone'` (that mode requires running `node .next/standalone/server.js` instead, which Nixpacks does not do here).
+The container runs the Next.js **standalone** bundle (`node server.js` in the Dockerfile). `GET /api/health` is ready only when the CMS answers `GET /api/site` with a matching `contractVersion` (use `?live` for process-only probes).
 
 `/api/*` except health and revalidate is proxied to the CMS without the site API key. Server-side reads attach the key and `Host`.
 

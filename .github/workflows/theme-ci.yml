@@ -60,7 +60,12 @@ jobs:
             m.siteTypes.length &&
             typeof health === 'string' &&
             health.startsWith('/') &&
-            m.build?.port >= 1;
+            m.build?.port >= 1 &&
+            m.build?.buildPack === 'dockerfile' &&
+            m.build?.dockerfileLocation === 'Dockerfile' &&
+            m.deployment?.strategy === 'registry_image' &&
+            m.deployment?.registryProvider === 'ghcr' &&
+            m.deployment?.registryImageRepository === 'ghcr.io/hamidnoshady/arch-theme-cms';
           if (!ok) {
             console.error('eshobe.theme.json missing Wave 11 required fields', {
               name: m.name,
