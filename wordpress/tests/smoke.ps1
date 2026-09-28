@@ -35,9 +35,11 @@ if ($Group -in @('all', 'theme')) {
 }
 
 if ($Group -in @('all', 'blocks')) {
-  foreach ($block in 'project-grid', 'project-facts', 'language-switch') {
+  foreach ($block in 'home-stage', 'project-grid', 'project-facts', 'language-switch') {
     if (-not (Test-Path -LiteralPath (Join-Path $root "plugins/graphite-core/blocks/$block/block.json"))) { throw "Missing block $block" }
   }
+  $frontPage = Get-Content -Raw (Join-Path $root 'theme/graphite/templates/front-page.html')
+  if ($frontPage -notmatch 'graphite/home-stage') { throw 'Fresh installs must render the Graphite home stage' }
 }
 
 Write-Output "WordPress $Group smoke checks passed"
