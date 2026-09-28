@@ -4,6 +4,7 @@ import type { Locale, LocaleLink } from '@/lib/types'
 
 import { SiteFooter } from './SiteFooter'
 import { SiteHeader } from './SiteHeader'
+import { SmoothAnchors } from './SmoothAnchors'
 
 export function PageShell({
   locale,
@@ -18,6 +19,7 @@ export function PageShell({
 }) {
   return (
     <div className="shell" id="top">
+      <SmoothAnchors />
       <a className="skip-link" href="#content">
         {copy[locale].skipToContent}
       </a>
