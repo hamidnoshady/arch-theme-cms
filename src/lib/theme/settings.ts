@@ -21,8 +21,24 @@ type ManifestRuntime = {
   mapStyle?: string
 }
 
-const manifestSettings = (themeManifest as { runtimeSettings?: { defaults?: ManifestRuntime } }).runtimeSettings
-  ?.defaults
+const manifestRow = themeManifest as {
+  settings?: Record<string, { default?: unknown }>
+  runtimeSettings?: { defaults?: ManifestRuntime }
+}
+const currentSettings = manifestRow.settings ?? {}
+const legacySettings = manifestRow.runtimeSettings?.defaults
+const manifestSettings: ManifestRuntime = {
+  introAnimation: currentSettings.introAnimation?.default as boolean | undefined,
+  introDuration: currentSettings.introDuration?.default as number | undefined,
+  showSectionNumbers: currentSettings.showSectionNumbers?.default as boolean | undefined,
+  mapStyle: currentSettings.mapStyle?.default as string | undefined,
+}
+// Legacy defaults are only used for fields absent from the current schema.
+for (const key of ['introAnimation', 'introDuration', 'showSectionNumbers', 'mapStyle'] as const) {
+  if (manifestSettings[key] === undefined && legacySettings?.[key] !== undefined) {
+    Object.assign(manifestSettings, { [key]: legacySettings[key] })
+  }
+}
 
 /** Opinionated Graphite presentation settings (manifest defaults + optional CMS override). */
 export function resolveRuntimeSettings(

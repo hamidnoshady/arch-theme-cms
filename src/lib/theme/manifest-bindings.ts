@@ -5,13 +5,16 @@ import type { SiteBindings, SiteDescriptor } from '@/lib/types'
 type ManifestBindings = Record<string, string>
 
 const manifestBindings = (): ManifestBindings => {
-  const row = themeManifest as { bindings?: ManifestBindings }
-  return row.bindings && typeof row.bindings === 'object' ? row.bindings : {}
+  const row = themeManifest as { bindings?: ManifestBindings; contentSlots?: { key: string }[] }
+  if (row.bindings && typeof row.bindings === 'object') return row.bindings
+  return Object.fromEntries(
+    (row.contentSlots ?? []).map(({ key }) => [key, key.replace(/Page$|Category$/, '')]),
+  )
 }
 
 /** Site descriptor bindings win; manifest slug hints fill gaps for transitional deploys. */
 export function effectiveBindings(site: SiteDescriptor | null): SiteBindings | null {
-  const fromSite = site?.bindings ?? null
+  const fromSite = site?.themeRuntime?.bindings ?? site?.bindings ?? null
   const hints = manifestBindings()
   if (!fromSite && !Object.keys(hints).length) return null
   return {
