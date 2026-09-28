@@ -11,25 +11,131 @@
   "defaultLocale": "fa",
   "framework": "nextjs",
   "proxiesApi": true,
-  "capabilities": { "blog": false, "projects": true, "education": true, "contactForm": true, "map": true },
-  "design": { "primary": "#111111", "accent": "#8c6f4a", "background": "#f7f3ea", "foreground": "#171717", "radius": "md", "lineHeight": 1.8 },
+  "capabilities": {
+    "blog": false,
+    "projects": true,
+    "education": true,
+    "contactForm": true,
+    "map": true
+  },
+  "design": {
+    "primary": "#111111",
+    "accent": "#8c6f4a",
+    "background": "#f7f3ea",
+    "foreground": "#171717",
+    "radius": "md",
+    "lineHeight": 1.8
+  },
   "settings": {
-    "introAnimation": { "type": "boolean", "default": true, "labelEn": "Intro animation", "labelFa": "انیمیشن ورود" },
-    "introDuration": { "type": "number", "default": 7000, "min": 0, "max": 20000, "labelEn": "Intro duration", "labelFa": "مدت انیمیشن ورود", "help": "Milliseconds." },
-    "showSectionNumbers": { "type": "boolean", "default": true, "labelEn": "Show section numbers", "labelFa": "نمایش شماره بخش‌ها" },
-    "mapStyle": { "type": "select", "default": "minimal", "labelEn": "Map style", "labelFa": "سبک نقشه", "options": [{ "value": "minimal", "labelEn": "Minimal", "labelFa": "ساده" }, { "value": "osm", "labelEn": "OpenStreetMap", "labelFa": "OpenStreetMap" }] }
+    "introAnimation": {
+      "type": "boolean",
+      "default": true,
+      "labelEn": "Intro animation",
+      "labelFa": "انیمیشن ورود"
+    },
+    "introDuration": {
+      "type": "number",
+      "default": 7000,
+      "min": 0,
+      "max": 20000,
+      "labelEn": "Intro duration",
+      "labelFa": "مدت انیمیشن ورود",
+      "help": "Milliseconds."
+    },
+    "showSectionNumbers": {
+      "type": "boolean",
+      "default": true,
+      "labelEn": "Show section numbers",
+      "labelFa": "نمایش شماره بخش‌ها"
+    },
+    "mapStyle": {
+      "type": "select",
+      "default": "minimal",
+      "labelEn": "Map style",
+      "labelFa": "سبک نقشه",
+      "options": [
+        { "value": "minimal", "labelEn": "Minimal", "labelFa": "ساده" },
+        { "value": "osm", "labelEn": "OpenStreetMap", "labelFa": "OpenStreetMap" }
+      ]
+    }
   },
   "contentSlots": [
-    { "key": "homePage", "type": "page", "labelEn": "Home page", "labelFa": "صفحه خانه", "required": true },
-    { "key": "aboutPage", "type": "page", "labelEn": "About page", "labelFa": "صفحه درباره", "required": false },
-    { "key": "servicesPage", "type": "page", "labelEn": "Services page", "labelFa": "صفحه خدمات", "required": false },
-    { "key": "contactPage", "type": "page", "labelEn": "Contact page", "labelFa": "صفحه تماس", "required": false },
-    { "key": "projectsCategory", "type": "category", "labelEn": "Projects category", "labelFa": "دسته پروژه‌ها", "required": false },
-    { "key": "educationCategory", "type": "category", "labelEn": "Education category", "labelFa": "دسته آموزش", "required": false }
+    {
+      "key": "homePage",
+      "type": "page",
+      "labelEn": "Home page",
+      "labelFa": "صفحه خانه",
+      "required": true
+    },
+    {
+      "key": "aboutPage",
+      "type": "page",
+      "labelEn": "About page",
+      "labelFa": "صفحه درباره",
+      "required": false
+    },
+    {
+      "key": "servicesPage",
+      "type": "page",
+      "labelEn": "Services page",
+      "labelFa": "صفحه خدمات",
+      "required": false
+    },
+    {
+      "key": "contactPage",
+      "type": "page",
+      "labelEn": "Contact page",
+      "labelFa": "صفحه تماس",
+      "required": false
+    },
+    {
+      "key": "projectsCategory",
+      "type": "category",
+      "labelEn": "Projects category",
+      "labelFa": "دسته پروژه‌ها",
+      "required": false
+    },
+    {
+      "key": "educationCategory",
+      "type": "category",
+      "labelEn": "Education category",
+      "labelFa": "دسته آموزش",
+      "required": false
+    }
   ],
-  "build": { "buildPack": "nixpacks", "baseDirectory": "/", "port": 3000, "healthCheckPath": "/api/health", "installCommand": "npm ci", "buildCommand": "npm run build", "startCommand": "npm run start" },
+  "deployment": {
+    "strategy": "registry_image",
+    "registryProvider": "ghcr",
+    "registryImageRepository": "ghcr.io/hamidnoshady/arch-theme-cms",
+    "registryVisibility": "public"
+  },
+  "build": {
+    "buildPack": "dockerfile",
+    "baseDirectory": "/",
+    "dockerfileLocation": "Dockerfile",
+    "installCommand": null,
+    "buildCommand": null,
+    "startCommand": null,
+    "publishDirectory": null,
+    "port": 3000,
+    "healthCheckPath": "/api/health",
+    "isStatic": false
+  },
   "env": [
-    { "key": "ESHOBE_CMS_URL", "source": "platform" }, { "key": "ESHOBE_SITE_DOMAIN", "source": "platform" }, { "key": "ESHOBE_SITE_ID", "source": "platform" }, { "key": "ESHOBE_API_KEY", "source": "platform", "secret": true }, { "key": "ESHOBE_PUBLIC_ORIGIN", "source": "platform" }, { "key": "ESHOBE_REVALIDATE_SECRET", "source": "platform", "secret": true }, { "key": "ESHOBE_DEFAULT_LOCALE", "source": "platform" }, { "key": "ESHOBE_LOCALES", "source": "platform" },
-    { "key": "NEXT_PUBLIC_MEDIA_ORIGIN", "source": "tenant", "required": false, "labelFa": "مبدا رسانه", "help": "اختیاری — اگر مسیرهای رسانه نسبی‌اند و origin در /api/site کافی نیست" }
+    { "key": "ESHOBE_CMS_URL", "source": "platform" },
+    { "key": "ESHOBE_SITE_DOMAIN", "source": "platform" },
+    { "key": "ESHOBE_SITE_ID", "source": "platform" },
+    { "key": "ESHOBE_API_KEY", "source": "platform", "secret": true },
+    { "key": "ESHOBE_PUBLIC_ORIGIN", "source": "platform" },
+    { "key": "ESHOBE_REVALIDATE_SECRET", "source": "platform", "secret": true },
+    { "key": "ESHOBE_DEFAULT_LOCALE", "source": "platform" },
+    { "key": "ESHOBE_LOCALES", "source": "platform" },
+    {
+      "key": "NEXT_PUBLIC_MEDIA_ORIGIN",
+      "source": "tenant",
+      "required": false,
+      "labelFa": "مبدا رسانه",
+      "help": "اختیاری — اگر مسیرهای رسانه نسبی‌اند و origin در /api/site کافی نیست"
+    }
   ]
 }

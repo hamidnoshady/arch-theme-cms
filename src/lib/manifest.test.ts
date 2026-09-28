@@ -8,4 +8,15 @@ describe('eshobe.theme.json', () => {
     const manifest = JSON.parse(readFileSync('eshobe.theme.json', 'utf8')) as { contractVersion: number }
     expect(manifest.contractVersion).toBe(contractVersion)
   })
+
+  it('declares GHCR registry deployment and Dockerfile build contract', () => {
+    const manifest = JSON.parse(readFileSync('eshobe.theme.json', 'utf8')) as {
+      build: { buildPack: string; dockerfileLocation: string }
+      deployment: { registryImageRepository: string; strategy: string }
+    }
+    expect(manifest.deployment.strategy).toBe('registry_image')
+    expect(manifest.deployment.registryImageRepository).toBe('ghcr.io/hamidnoshady/arch-theme-cms')
+    expect(manifest.build.buildPack).toBe('dockerfile')
+    expect(manifest.build.dockerfileLocation).toBe('Dockerfile')
+  })
 })
