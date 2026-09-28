@@ -86,7 +86,45 @@ jobs:
           IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
         run: |
           set -euo pipefail
-          test -n "$ESHOBE_CMS_URL" && test -n "$ESHOBE_THEME_PACKAGE_ID" && test -n "$ESHOBE_THEME_ARTIFACT_SECRET"
+
+          # GitHub Actions secrets are frequently stored with a trailing newline
+          # or stray surrounding whitespace. Such a value still passes a bare
+          # `test -n` check (it is non-empty) but, once concatenated into the
+          # request URL / path / header, the embedded newline produces a
+          # malformed URL and curl aborts with exit code 3. Normalise every
+          # value before use so registration is deterministic.
+          trim() { printf '%s' "${1:-}" | tr -d '\r\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'; }
+
+          ESHOBE_CMS_URL="$(trim "${ESHOBE_CMS_URL:-}")"
+          ESHOBE_THEME_PACKAGE_ID="$(trim "${ESHOBE_THEME_PACKAGE_ID:-}")"
+          ESHOBE_THEME_ARTIFACT_SECRET="$(trim "${ESHOBE_THEME_ARTIFACT_SECRET:-}")"
+          IMAGE_DIGEST="$(trim "${IMAGE_DIGEST:-}")"
+          # Never build a "//api" path from a trailing slash.
+          ESHOBE_CMS_URL="${ESHOBE_CMS_URL%/}"
+          export ESHOBE_THEME_ARTIFACT_SECRET IMAGE_DIGEST
+
+          missing=()
+          [ -n "$ESHOBE_CMS_URL" ] || missing+=(ESHOBE_CMS_URL)
+          [ -n "$ESHOBE_THEME_PACKAGE_ID" ] || missing+=(ESHOBE_THEME_PACKAGE_ID)
+          [ -n "$ESHOBE_THEME_ARTIFACT_SECRET" ] || missing+=(ESHOBE_THEME_ARTIFACT_SECRET)
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "::error::Cannot register theme artifact; missing/empty secrets: ${missing[*]}"
+            exit 1
+          fi
+
+          case "$ESHOBE_CMS_URL" in
+            http://*|https://*) ;;
+            *)
+              echo "::error::ESHOBE_CMS_URL must start with http:// or https:// (got '${ESHOBE_CMS_URL}')"
+              exit 1
+              ;;
+          esac
+
+          if [ -z "$IMAGE_DIGEST" ]; then
+            echo "::error::Image digest is empty; the build/push step did not publish an image."
+            exit 1
+          fi
+
           python3 - <<'PY'
           import hashlib, hmac, json, os
           body = {
@@ -101,8 +139,12 @@ jobs:
           open("artifact.json", "wb").write(raw)
           open("artifact.signature", "w").write("sha256=" + hmac.new(os.environ["ESHOBE_THEME_ARTIFACT_SECRET"].encode(), raw, hashlib.sha256).hexdigest())
           PY
-          curl --fail-with-body --retry 3 -X POST "$ESHOBE_CMS_URL/api/platform/theme-packages/$ESHOBE_THEME_PACKAGE_ID/artifacts" \
-            -H 'Content-Type: application/json' -H "X-Eshobe-Signature-256: $(cat artifact.signature)" --data-binary @artifact.json
+
+          curl --fail-with-body --retry 3 --connect-timeout 15 --max-time 120 \
+            -X POST "${ESHOBE_CMS_URL}/api/platform/theme-packages/${ESHOBE_THEME_PACKAGE_ID}/artifacts" \
+            -H 'Content-Type: application/json' \
+            -H "X-Eshobe-Signature-256: $(cat artifact.signature)" \
+            --data-binary @artifact.json
 
       - name: Summary
         if: github.event_name != 'pull_request'
