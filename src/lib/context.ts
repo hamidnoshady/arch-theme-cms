@@ -27,7 +27,7 @@ export const getRenderContext = cache(async (locale: Locale): Promise<RenderCont
     site,
     origin: mediaOrigin(site),
     branding: resolveBranding(site, locale),
-    settings: resolveRuntimeSettings(site?.runtimeSettings),
+    settings: resolveRuntimeSettings(site?.themeRuntime?.settings ?? site?.runtimeSettings),
     allowed: site?.blocks?.length ? site.blocks : null,
     served,
     otherServed: served.includes(otherLocale(locale)),

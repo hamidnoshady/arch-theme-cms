@@ -35,8 +35,10 @@ Without a CMS the site still renders with **Graphite demo branding**; customer i
 | Site name, logos, favicon, default OG | `GET /api/site` → `name` and optional `branding` |
 | Header / footer navigation | `GET /api/header`, `GET /api/footer` |
 | Design tokens | `GET /api/site` → `theme` (mapped via `@eshobe/site-runtime` `themeCss`) |
-| Runtime presentation settings | `GET /api/site` → `runtimeSettings` when present; defaults in `eshobe.theme.json` |
-| Content bindings | `GET /api/site` → `bindings` when present; legacy slug fallbacks in `src/lib/theme/bindings.ts` |
+| Runtime presentation settings | `GET /api/site` → `themeRuntime.settings` (legacy `runtimeSettings` supported); defaults in `eshobe.theme.json` |
+| Content bindings | `GET /api/site` → `themeRuntime.bindings` (legacy `bindings` supported); manifest slug fallbacks |
+
+The deployment path is the public GHCR registry image (`ghcr.io/hamidnoshady/arch-theme-cms`). The workflow registers each immutable image digest with Eshobe CMS. Nixpacks/source builds remain legacy/fallback only. Configure the GitHub Actions secrets `ESHOBE_CMS_URL`, `ESHOBE_THEME_PACKAGE_ID`, and `ESHOBE_THEME_ARTIFACT_SECRET` for artifact registration.
 | Blocks allowlist | `GET /api/site` → `blocks` |
 
 ### Content model

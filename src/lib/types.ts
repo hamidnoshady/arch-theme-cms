@@ -178,6 +178,14 @@ export type SiteDescriptor = {
   slug?: string
   status: 'active' | 'suspended' | 'archived'
   branding?: SiteBranding | null
+  /** New theme-package runtime descriptor. */
+  themeRuntime?: {
+    theme?: { key?: string | null } | null
+    package?: { key?: string | null } | null
+    settings?: Record<string, unknown> | null
+    bindings?: SiteBindings | null
+  } | null
+  /** Legacy descriptor fields retained for rolling upgrades. */
   bindings?: SiteBindings | null
   runtimeSettings?: Record<string, unknown> | null
   theme?: {

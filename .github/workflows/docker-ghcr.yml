@@ -77,6 +77,33 @@ jobs:
           build-args: |
             NEXT_TELEMETRY_DISABLED=1
 
+      - name: Register immutable artifact with Eshobe CMS
+        if: github.event_name != 'pull_request'
+        env:
+          ESHOBE_CMS_URL: ${{ secrets.ESHOBE_CMS_URL }}
+          ESHOBE_THEME_PACKAGE_ID: ${{ secrets.ESHOBE_THEME_PACKAGE_ID }}
+          ESHOBE_THEME_ARTIFACT_SECRET: ${{ secrets.ESHOBE_THEME_ARTIFACT_SECRET }}
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          test -n "$ESHOBE_CMS_URL" && test -n "$ESHOBE_THEME_PACKAGE_ID" && test -n "$ESHOBE_THEME_ARTIFACT_SECRET"
+          python3 - <<'PY'
+          import hashlib, hmac, json, os
+          body = {
+            "repository": "hamidnoshady/arch-theme-cms", "ref": os.environ["GITHUB_REF_NAME"],
+            "commit": os.environ["GITHUB_SHA"], "registry": "ghcr",
+            "image": "ghcr.io/hamidnoshady/arch-theme-cms", "tag": "sha-" + os.environ["GITHUB_SHA"],
+            "digest": os.environ["IMAGE_DIGEST"], "workflowRunId": os.environ["GITHUB_RUN_ID"],
+            "workflowRunUrl": "https://github.com/hamidnoshady/arch-theme-cms/actions/runs/" + os.environ["GITHUB_RUN_ID"],
+            "platform": "linux/amd64", "provenanceAvailable": False, "sbomAvailable": False
+          }
+          raw = json.dumps(body, separators=(",", ":"), ensure_ascii=False).encode()
+          open("artifact.json", "wb").write(raw)
+          open("artifact.signature", "w").write("sha256=" + hmac.new(os.environ["ESHOBE_THEME_ARTIFACT_SECRET"].encode(), raw, hashlib.sha256).hexdigest())
+          PY
+          curl --fail-with-body --retry 3 -X POST "$ESHOBE_CMS_URL/api/platform/theme-packages/$ESHOBE_THEME_PACKAGE_ID/artifacts" \
+            -H 'Content-Type: application/json' -H "X-Eshobe-Signature-256: $(cat artifact.signature)" --data-binary @artifact.json
+
       - name: Summary
         if: github.event_name != 'pull_request'
         run: |
