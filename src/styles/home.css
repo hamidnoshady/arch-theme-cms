@@ -85,27 +85,45 @@
   height: auto;
 }
 
+.logo--vector .logo__strokes path {
+  vector-effect: non-scaling-stroke;
+}
+
+.logo--vector .logo__shade,
+.logo--vector .logo__wordmark,
+.logo--vector .logo__subtitle {
+  opacity: 1;
+}
+
+.logo--vector .logo__strokes path {
+  stroke-dashoffset: 0;
+}
+
 /* The drawing is constructed once per session, then stays drawn. */
 html[data-intro='play'] .logo--animated .logo__strokes path {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  animation: logo-draw 1.15s cubic-bezier(0.45, 0, 0.2, 1) forwards;
-  animation-delay: calc(var(--i) * 0.16s);
+  animation: logo-draw calc(var(--intro-duration, 7000ms) * 0.16) cubic-bezier(0.45, 0, 0.2, 1)
+    forwards;
+  animation-delay: calc(var(--i) * var(--intro-duration, 7000ms) * 0.022);
 }
 
 html[data-intro='play'] .logo--animated .logo__shade {
   opacity: 0;
-  animation: logo-in 0.5s 1.35s forwards;
+  animation: logo-in calc(var(--intro-duration, 7000ms) * 0.07) calc(var(--intro-duration, 7000ms) * 0.19)
+    forwards;
 }
 
 html[data-intro='play'] .logo--animated .logo__wordmark {
   opacity: 0;
-  animation: logo-in 0.45s 1.6s forwards;
+  animation: logo-in calc(var(--intro-duration, 7000ms) * 0.065)
+    calc(var(--intro-duration, 7000ms) * 0.23) forwards;
 }
 
 html[data-intro='play'] .logo--animated .logo__subtitle {
   opacity: 0;
-  animation: logo-in 0.5s 1.95s forwards;
+  animation: logo-in calc(var(--intro-duration, 7000ms) * 0.07) calc(var(--intro-duration, 7000ms) * 0.28)
+    forwards;
 }
 
 @keyframes logo-draw {

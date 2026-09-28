@@ -1,6 +1,6 @@
 'use client'
 
-import logoSvg from '@/assets/graphite-logo'
+import { graphiteLogoMarkup } from '@/lib/graphite-logo-markup'
 
 type Props = {
   animated?: boolean
@@ -8,9 +8,10 @@ type Props = {
 }
 
 export function GraphiteLogoMark({ animated = false, className = '' }: Props) {
-  const html = logoSvg.replace(
-    '<svg ',
-    `<svg class="${animated ? 'logo--animated' : ''}" `,
+  return (
+    <div
+      className={`logo__mark ${className}`.trim()}
+      dangerouslySetInnerHTML={{ __html: graphiteLogoMarkup(animated) }}
+    />
   )
-  return <div className={`logo__mark ${className}`.trim()} dangerouslySetInnerHTML={{ __html: html }} />
 }

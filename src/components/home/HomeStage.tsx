@@ -19,6 +19,7 @@ type Props = {
   branding: ResolvedBranding
   mediaOrigin?: string
   introDurationMs?: number
+  introAnimation?: boolean
 }
 
 /** Pixels of wheel travel for a full reveal; one mouse-wheel notch (~100px) is enough to commit. */
@@ -35,7 +36,15 @@ const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayout
  * (0 = logo alone, 1 = navigation revealed) driven by wheel, touch, keyboard or
  * the cue button. The page itself never scrolls.
  */
-export function HomeStage({ locale, items, language, branding, mediaOrigin = '', introDurationMs }: Props) {
+export function HomeStage({
+  locale,
+  items,
+  language,
+  branding,
+  mediaOrigin = '',
+  introDurationMs,
+  introAnimation = true,
+}: Props) {
   const INTRO_MS = introDurationMs ?? DEFAULT_INTRO_MS
   const t = copy[locale]
   const stageRef = useRef<HTMLDivElement>(null)
@@ -104,7 +113,7 @@ export function HomeStage({ locale, items, language, branding, mediaOrigin = '',
       const id = setTimeout(finishIntro, INTRO_MS)
       return () => clearTimeout(id)
     }
-  }, [finishIntro, settle])
+  }, [INTRO_MS, finishIntro, settle])
 
   const measureNav = useCallback(() => {
     const nav = navRef.current
@@ -284,7 +293,7 @@ export function HomeStage({ locale, items, language, branding, mediaOrigin = '',
           <h1 className="home__brand">
             <Logo
               variant="full"
-              animated={introActive}
+              animated={introAnimation && introActive}
               className="home__logo"
               branding={branding}
               mediaOrigin={mediaOrigin}
