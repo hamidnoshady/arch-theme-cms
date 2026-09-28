@@ -1,6 +1,7 @@
 import { cache } from 'react'
 
 import { HOME_SLUG } from '@eshobe/site-runtime'
+import { ENTRY_KINDS, sectionRef } from './theme/sections'
 import { cmsJson } from './upstream'
 import type {
   Category,
@@ -74,10 +75,6 @@ export async function servedLocales(): Promise<Locale[]> {
   return (['fa', 'en'] as Locale[]).filter((l) => site.availableLocales.includes(l))
 }
 
-export async function isLocaleServed(locale: Locale): Promise<boolean> {
-  return (await servedLocales()).includes(locale)
-}
-
 /* ----------------------------------------------------------------- pages */
 
 const hasLocalizedContent = (doc: { slug?: string | null; title?: string | null } | null) =>
@@ -105,13 +102,18 @@ export const getPageById = cache(async (id: string, locale: Locale): Promise<Pag
 })
 
 /**
- * A section page is identified by its section key (`about`, `services`, …) as
- * the page slug in either locale, so a Persian page may keep a Persian slug as
- * long as its English slug is the key. Returns the page in `locale`, or null
- * when that translation does not exist.
+ * The page behind a section route (`/about`, `/services`, `/contact`). The document the site
+ * owner bound to the matching content slot wins, whatever its slug; a bound page that has no
+ * translation in `locale` is reported as missing rather than swapped for an unrelated page.
+ * With nothing bound, the page whose slug is the section key (in either locale, so a Persian
+ * page may keep a Persian slug as long as its English slug is the key) is used.
  */
 export const getSectionPage = cache(async (section: Section, locale: Locale) => {
-  const direct = await getPageBySlug(section, locale)
+  const { id, slug } = sectionRef(await getSite(), section)
+  if (id) return getPageById(id, locale)
+
+  const key = slug ?? section
+  const direct = await getPageBySlug(key, locale)
   if (direct) return direct
   for (const other of ['en', 'fa'] as Locale[]) {
     if (other === locale) continue
@@ -121,7 +123,7 @@ export const getSectionPage = cache(async (section: Section, locale: Locale) => 
       limit: 1,
       fallbackLocale: false,
       'select[slug]': true,
-      'where[slug][equals]': section,
+      'where[slug][equals]': key,
       'where[_status][equals]': 'published',
     })
     if (docs[0]?.id) return getPageById(docs[0].id, locale)
@@ -134,7 +136,12 @@ export async function sectionPageExists(section: Section, locale: Locale) {
   return Boolean(await getSectionPage(section, locale))
 }
 
-export const getHomePage = cache((locale: Locale) => getPageBySlug(HOME_SLUG, locale))
+/** The home page: the bound document when there is one, else the page with the reserved `home` slug. */
+export const getHomePage = cache(async (locale: Locale): Promise<Page | null> => {
+  const { id, slug } = sectionRef(await getSite(), 'home')
+  if (id) return getPageById(id, locale)
+  return getPageBySlug(slug ?? HOME_SLUG, locale)
+})
 
 /** Slug of a document in another locale, or null when it is not translated. */
 export const getTranslatedSlug = cache(
@@ -178,14 +185,19 @@ export type SectionCategories = {
 const parentId = (c: Category) => (typeof c.parent === 'string' ? c.parent : c.parent?.id ?? null)
 
 /**
- * Projects and Education are Posts filed under a root category whose slug is
- * `projects` / `education` in either locale. Sub-categories (by `parent`) become
- * the Projects filter.
+ * Projects and Education are Posts filed under a root category. The root is the category the
+ * site owner bound to the section's content slot; with nothing bound (or a binding that no
+ * longer exists) it is the category whose slug is `projects` / `education` in either locale.
+ * Sub-categories (by `parent`) become the filter.
  */
 export const getSectionCategories = cache(
   async (kind: EntryKind, locale: Locale): Promise<SectionCategories> => {
-    const [fa, en] = await Promise.all([getCategories('fa'), getCategories('en')])
-    const rootId = [...en, ...fa].find((c) => c.slug === kind)?.id
+    const [fa, en, site] = await Promise.all([getCategories('fa'), getCategories('en'), getSite()])
+    const { id: boundId, slug: hint } = sectionRef(site, kind)
+    const every = [...en, ...fa]
+    const bySlug = (slug: string | null) => (slug ? every.find((c) => c.slug === slug)?.id : undefined)
+    const rootId =
+      (boundId && every.some((c) => c.id === boundId) ? boundId : undefined) ?? bySlug(hint) ?? bySlug(kind)
     if (!rootId) return { root: null, ids: [], children: [] }
 
     const all = locale === 'fa' ? fa : en
@@ -280,7 +292,7 @@ const categoryIds = (post: Post) =>
 /** Which theme section a post belongs to, from its categories. */
 export async function sectionOfPost(post: Post, locale: Locale): Promise<EntryKind | null> {
   const ids = categoryIds(post)
-  for (const kind of ['projects', 'education'] as EntryKind[]) {
+  for (const kind of ENTRY_KINDS) {
     const section = await getSectionCategories(kind, locale)
     if (ids.some((id) => section.ids.includes(id))) return kind
   }

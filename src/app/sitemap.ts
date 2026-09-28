@@ -6,6 +6,7 @@ import { getEntries, getSite, listPublishedPages, sectionPageExists, servedLocal
 import { canonicalOrigin } from '@/lib/env'
 import { SECTIONS, href } from '@/lib/i18n'
 import { pageHref } from '@/lib/links'
+import { ENTRY_KINDS, pageRoleIndex } from '@/lib/theme/sections'
 import { HOME_SLUG } from '@eshobe/site-runtime'
 import type { EntryKind, Locale } from '@/lib/types'
 
@@ -42,15 +43,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   const pages = new Map(await Promise.all(locales.map(async (l) => [l, await listPublishedPages(l)] as const)))
-  const reserved = new Set(
-    [...pages.values()]
+  // Pages with their own route (home + sections) are listed once, at that route — by binding
+  // when the site owner made one, else by the legacy reserved slugs.
+  const roles = pageRoleIndex(site)
+  const reserved = new Set([
+    ...roles.keys(),
+    ...[...pages.values()]
       .flat()
       .filter((p) => p.slug === HOME_SLUG || (SECTIONS as string[]).includes(p.slug ?? ''))
       .map((p) => p.id),
-  )
+  ])
 
   for (const locale of locales) {
-    for (const kind of ['projects', 'education'] as EntryKind[]) {
+    for (const kind of ENTRY_KINDS) {
       for (const post of await getEntries(kind, locale)) {
         add(post.id, locale, href(locale, `${kind}/${encodeURIComponent(post.slug!)}`), post.updatedAt)
       }

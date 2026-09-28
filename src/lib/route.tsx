@@ -11,9 +11,9 @@ import { pageHref } from './links'
 import { ogImageUrl } from './media'
 import { HOME_SLUG, POSTS_SEGMENT } from '@eshobe/site-runtime'
 import { buildMetadata } from './seo'
+import { ENTRY_KINDS, pageRoleIndex } from './theme/sections'
 import type { EntryKind, Locale, LocaleLink, Page, Post, Section } from './types'
 
-const ENTRY_KINDS: EntryKind[] = ['projects', 'education']
 const PAGE_SECTIONS = ['about', 'services', 'contact'] as const
 type PageSection = (typeof PAGE_SECTIONS)[number]
 
@@ -84,7 +84,10 @@ export async function resolve(locale: Locale, rawSegments: string[]): Promise<Re
 
   const page = await getPageBySlug(first, locale)
   if (!page) return { kind: 'missing' }
-  // A section page reached through its localized slug has one canonical URL.
+  // A page bound to a section («about», home, …) has one canonical URL, whatever its own slug.
+  const role = pageRoleIndex(ctx.site).get(page.id)
+  if (role) return { kind: 'redirect', to: role === 'home' ? href(locale) : href(locale, role), permanent: true }
+  // Sites with no binding saved: a page whose English slug is the section key is that section.
   const enSlug = locale === 'en' ? page.slug : await getTranslatedSlug('pages', page.id, 'en')
   if (enSlug && (SECTIONS as string[]).includes(enSlug)) return { kind: 'redirect', to: href(locale, enSlug), permanent: true }
 

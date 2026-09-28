@@ -35,24 +35,33 @@ Without a CMS the site still renders with **Graphite demo branding**; customer i
 | Site name, logos, favicon, default OG | `GET /api/site` → `name` and optional `branding` |
 | Header / footer navigation | `GET /api/header`, `GET /api/footer` |
 | Design tokens | `GET /api/site` → `theme` (mapped via `@eshobe/site-runtime` `themeCss`) |
-| Runtime presentation settings | `GET /api/site` → `themeRuntime.settings` (legacy `runtimeSettings` supported); defaults in `eshobe.theme.json` |
-| Content bindings | `GET /api/site` → `themeRuntime.bindings` (legacy `bindings` supported); manifest slug fallbacks |
+| Runtime presentation settings | `GET /api/site` → `themeRuntime.settings`; defaults in `eshobe.theme.json` |
+| Content bindings | `GET /api/site` → `themeRuntime.bindings`; manifest slug fallbacks |
 | Blocks allowlist | `GET /api/site` → `blocks` |
 
 Production deploys use the public GHCR image `ghcr.io/hamidnoshady/arch-theme-cms` at an immutable digest (`eshobe.theme.json` → `deployment.strategy: registry_image`). CI pushes the image and registers each digest with Eshobe CMS. Set GitHub Actions secrets `ESHOBE_CMS_URL`, `ESHOBE_THEME_PACKAGE_ID`, and `ESHOBE_THEME_ARTIFACT_SECRET` for artifact registration, then sync the theme package in the CMS so it picks up the manifest.
 
 ### Content model
 
-| Section | Source |
+**URLs belong to the theme; content belongs to the customer.** `/about`, `/services`, `/contact`, `/projects` and `/education` are fixed routes, so navigation, sitemap and the mobile menu never depend on what somebody typed as a slug. What each route *shows* is whatever the site owner chose in the CMS «تنظیمات پوسته» (a `contentSlots` binding, delivered as `GET /api/site` → `themeRuntime.bindings`). A page may be called `درباره-ما`; it still renders at `/about`, and any link to it by its own slug redirects there.
+
+| Route | Filled by (binding) | Used when nothing is bound |
+| --- | --- | --- |
+| `/` (home) | `homePage` | page slug `home` |
+| `/about` · `/services` · `/contact` | `aboutPage` · `servicesPage` · `contactPage` | page whose slug is `about` / `services` / `contact` |
+| `/projects` · `/education` | posts under the `projectsCategory` · `educationCategory` root; its child categories are filters | category whose slug is `projects` / `education` |
+
+- A bound page with **no translation** in the requested locale is treated as missing (`fallbackLocale=false` on every read) — the theme never swaps in an unrelated page that shares a slug.
+- The slug fallback is a **first-run convenience** for a freshly provisioned site, not a second opinion beside a binding.
+- Every lookup goes through `getHomePage` / `getSectionPage` / `getSectionCategories` in `src/lib/cms.ts`, driven by the pure rules in `src/lib/theme/sections.ts`. Navigation, routes, sitemap and the office map share them.
+- Adding a section means: a `contentSlots` entry in `eshobe.theme.json`, a row in `SECTION_SLOT`, and a route case — nothing else knows slot names.
+
+| Other content | Source |
 | --- | --- |
-| Homepage | Binding `homePage` or page slug `home` (SEO); navigation from **header** nav |
-| About, Services, Contact | Bindings or pages whose slug is `about` / `services` / `contact` |
-| Projects, Education | Posts under category binding or slug `projects` / `education`; child categories are filters |
+| Header / footer menus | `GET /api/header`, `GET /api/footer` (CMS pages are linked by id, so a bound page always lands on its section URL) |
 | Project facts | Structured CMS project metadata when available; else first `Label: Value` bullet list |
 | Office map | Structured coordinates on contact blocks when available; else safe map URL parsing |
 | Contact form | `formBlock` proxied via `/api/form-submissions` |
-
-`fallbackLocale=false` on every content read.
 
 ## Runtime package
 

@@ -4,7 +4,6 @@ import { localeHref } from './locale'
 import type { Locale, Section } from './types'
 
 export const DEFAULT_LOCALE: Locale = 'fa'
-export const LOCALES: Locale[] = ['fa', 'en']
 
 export const SECTIONS: Section[] = ['about', 'projects', 'services', 'education', 'contact']
 
@@ -191,11 +190,6 @@ export function indexNumber(index: number, locale: Locale): string {
 export function formatDate(value: string | null | undefined, locale: Locale): string {
   if (!value || Number.isNaN(Date.parse(value))) return ''
   return runtimeFormatDate(value, locale)
-}
-
-export function formatYear(value: string | null | undefined, locale: Locale): string {
-  if (!value || Number.isNaN(Date.parse(value))) return ''
-  return runtimeFormatDate(value, locale, { year: 'numeric' })
 }
 
 export function interpolate(template: string, values: Record<string, string | number>): string {

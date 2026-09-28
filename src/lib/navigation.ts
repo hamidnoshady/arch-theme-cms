@@ -4,6 +4,7 @@ import { getNav } from '@/lib/cms'
 import { href, indexNumber } from '@/lib/i18n'
 import { resolveLink, safeHref } from '@/lib/links'
 import { resolveBindings } from '@/lib/theme/bindings'
+import { pageRoleIndex } from '@/lib/theme/sections'
 import type { Locale, SiteDescriptor } from '@/lib/types'
 
 export type PrimaryNavItem = {
@@ -38,8 +39,8 @@ export function navItemActive(
   return undefined
 }
 
-async function legacyNav(locale: Locale, site: SiteDescriptor | null): Promise<PrimaryNavItem[]> {
-  const bindings = await resolveBindings(site, locale)
+async function fallbackNav(locale: Locale): Promise<PrimaryNavItem[]> {
+  const bindings = await resolveBindings(locale)
   const entries: { slug: string; label: string }[] = []
   if (bindings.aboutPage?.title) entries.push({ slug: 'about', label: bindings.aboutPage.title! })
   if (bindings.projectsCategory?.title) entries.push({ slug: 'projects', label: bindings.projectsCategory.title! })
@@ -60,10 +61,11 @@ async function legacyNav(locale: Locale, site: SiteDescriptor | null): Promise<P
 export const getPrimaryNavigation = cache(
   async (locale: Locale, site: SiteDescriptor | null): Promise<PrimaryNavItem[]> => {
     const header = await getNav('header', locale)
+    const roles = pageRoleIndex(site)
     const fromCms = (header?.navItems ?? [])
       .map((item, index) => {
         const label = item.link?.label?.trim()
-        const resolved = resolveLink(item.link, locale)
+        const resolved = resolveLink(item.link, locale, roles)
         const href = resolved?.href && safeHref(resolved.href)
         if (!label || !href) return null
         return {
@@ -78,6 +80,6 @@ export const getPrimaryNavigation = cache(
       .filter((item): item is PrimaryNavItem => Boolean(item))
 
     if (fromCms.length) return fromCms
-    return legacyNav(locale, site)
+    return fallbackNav(locale)
   },
 )

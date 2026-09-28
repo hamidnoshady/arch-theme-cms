@@ -1,5 +1,6 @@
 import { SECTIONS, href } from './i18n'
 import { HOME_SLUG, POSTS_SEGMENT } from '@eshobe/site-runtime'
+import type { PageRole } from './theme/sections'
 import type { LinkField, Locale, Page, Post, Section } from './types'
 
 export type ResolvedLink = { href: string; external: boolean; newTab: boolean }
@@ -20,19 +21,31 @@ export function postHref(slug: string | null | undefined, locale: Locale): strin
   return href(locale, slug ? `${POSTS_SEGMENT}/${encodeURIComponent(slug)}` : '')
 }
 
+/**
+ * `roles` (page id → role, from `pageRoleIndex(site)`) sends a page the site owner bound to
+ * «about» / «home» / … to that role's canonical URL whatever its own slug is. Without it only
+ * the legacy rule applies: a page whose slug equals a section key.
+ */
 export function referenceHref(
   reference: { relationTo?: string; value?: unknown } | null | undefined,
   locale: Locale,
+  roles?: ReadonlyMap<string, PageRole>,
 ): string | null {
   const value = reference?.value
   if (!value || typeof value !== 'object') return null
-  const slug = (value as Page | Post).slug
+  const { id, slug } = value as Page | Post
+  if (reference?.relationTo === 'posts') return slug ? postHref(slug, locale) : null
+  const role = id ? roles?.get(id) : undefined
+  if (role) return role === 'home' ? href(locale) : href(locale, role)
   if (!slug) return null
-  if (reference?.relationTo === 'posts') return postHref(slug, locale)
   return isSection(slug) ? href(locale, slug) : pageHref(slug, locale)
 }
 
-export function resolveLink(link: LinkField | null | undefined, locale: Locale): ResolvedLink | null {
+export function resolveLink(
+  link: LinkField | null | undefined,
+  locale: Locale,
+  roles?: ReadonlyMap<string, PageRole>,
+): ResolvedLink | null {
   if (!link) return null
   const newTab = Boolean(link.newTab)
   if (link.type === 'custom' || (!link.type && link.url)) {
@@ -40,7 +53,7 @@ export function resolveLink(link: LinkField | null | undefined, locale: Locale):
     if (!url) return null
     return { href: url, external: /^(https?:)?\/\//i.test(url) || /^(mailto|tel|geo):/i.test(url), newTab }
   }
-  const target = referenceHref(link.reference, locale)
+  const target = referenceHref(link.reference, locale, roles)
   return target ? { href: target, external: false, newTab } : null
 }
 

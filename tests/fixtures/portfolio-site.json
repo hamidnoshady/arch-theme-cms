@@ -1,7 +1,24 @@
 {
   "site": {
-    "availableLocales": ["fa", "en"],
-    "blocks": ["content", "mediaBlock", "cta", "features", "testimonials", "faq", "contact", "formBlock", "gallery", "team", "archive", "logos", "pricing"],
+    "availableLocales": [
+      "fa",
+      "en"
+    ],
+    "blocks": [
+      "content",
+      "mediaBlock",
+      "cta",
+      "features",
+      "testimonials",
+      "faq",
+      "contact",
+      "formBlock",
+      "gallery",
+      "team",
+      "archive",
+      "logos",
+      "pricing"
+    ],
     "contractVersion": 1,
     "defaultLocale": "fa",
     "domain": "studio.example",
@@ -14,15 +31,6 @@
       "shortName": "Studio",
       "tagline": "Architecture"
     },
-    "bindings": {
-      "homePage": "home",
-      "aboutPage": "about",
-      "projectsCategory": "projects"
-    },
-    "runtimeSettings": {
-      "introAnimation": true,
-      "showSectionNumbers": true
-    },
     "theme": {
       "primary": "#192b3a",
       "accent": "#c4a574",
@@ -30,12 +38,55 @@
       "foreground": "#171717",
       "radius": "md",
       "lineHeight": 1.8
+    },
+    "themeRuntime": {
+      "theme": {
+        "key": "graphite"
+      },
+      "settings": {
+        "introAnimation": true,
+        "showSectionNumbers": true
+      },
+      "bindings": {
+        "homePage": {
+          "id": "0a7f1c6e-1111-4a2b-8c3d-000000000002",
+          "type": "page",
+          "slug": "home",
+          "title": "خانه"
+        },
+        "aboutPage": {
+          "id": "0a7f1c6e-1111-4a2b-8c3d-000000000001",
+          "type": "page",
+          "slug": "درباره-ما",
+          "title": "درباره ما"
+        },
+        "projectsCategory": {
+          "id": "0a7f1c6e-1111-4a2b-8c3d-000000000003",
+          "type": "category",
+          "slug": "projects",
+          "title": "پروژه‌ها"
+        }
+      }
     }
   },
   "header": {
     "navItems": [
-      { "id": "1", "link": { "type": "custom", "label": "About", "url": "/about" } },
-      { "id": "2", "link": { "type": "custom", "label": "Projects", "url": "/projects" } }
+      {
+        "id": "1",
+        "link": {
+          "type": "custom",
+          "label": "About",
+          "url": "/about"
+        }
+      },
+      {
+        "id": "2",
+        "link": {
+          "type": "custom",
+          "label": "Projects",
+          "url": "/projects"
+        }
+      }
     ]
   }
 }

@@ -5,6 +5,7 @@ import { getNav, getSite } from '@/lib/cms'
 import { copy, href } from '@/lib/i18n'
 import { resolveLink, safeHref } from '@/lib/links'
 import { resolveBranding } from '@/lib/theme/branding'
+import { pageRoleIndex } from '@/lib/theme/sections'
 import { formatDate } from '@eshobe/site-runtime'
 import type { Locale } from '@/lib/types'
 
@@ -13,8 +14,9 @@ export async function SiteFooter({ locale }: { locale: Locale }) {
   const site = await getSite()
   const branding = resolveBranding(site, locale)
   const footer = await getNav('footer', locale)
+  const roles = pageRoleIndex(site)
   const links = (footer?.navItems ?? [])
-    .map((item) => ({ id: item.id, label: item.link?.label, link: resolveLink(item.link, locale) }))
+    .map((item) => ({ id: item.id, label: item.link?.label, link: resolveLink(item.link, locale, roles) }))
     .filter((l) => l.label && l.link && safeHref(l.link.href))
 
   return (
