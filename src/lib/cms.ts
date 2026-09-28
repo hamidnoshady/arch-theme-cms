@@ -75,10 +75,6 @@ export async function servedLocales(): Promise<Locale[]> {
   return (['fa', 'en'] as Locale[]).filter((l) => site.availableLocales.includes(l))
 }
 
-export async function isLocaleServed(locale: Locale): Promise<boolean> {
-  return (await servedLocales()).includes(locale)
-}
-
 /* ----------------------------------------------------------------- pages */
 
 const hasLocalizedContent = (doc: { slug?: string | null; title?: string | null } | null) =>

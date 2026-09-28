@@ -11,7 +11,7 @@ describe('effectiveBindings', () => {
       defaultLocale: 'fa',
       domain: 'x.ir',
       status: 'active',
-      bindings: { homePage: 'home' },
+      themeRuntime: { bindings: { homePage: 'home' } },
     })
     expect(bindings?.contactPage).toBe('contact')
     expect(bindings?.servicesPage).toBe('services')

@@ -1,6 +1,6 @@
 import { getHomePage, getSectionCategories, getSectionPage } from '@/lib/cms'
 
-import type { Category, Locale, Page, SiteDescriptor } from '@/lib/types'
+import type { Category, Locale, Page } from '@/lib/types'
 
 export type ContentBindings = {
   homePage: Page | null
@@ -16,10 +16,7 @@ export type ContentBindings = {
  * this calls the same lookups the routes use, so navigation can never point at a page the
  * route would not render (see `sections.ts` for the binding rules).
  */
-export async function resolveBindings(
-  _site: SiteDescriptor | null,
-  locale: Locale,
-): Promise<ContentBindings> {
+export async function resolveBindings(locale: Locale): Promise<ContentBindings> {
   const [homePage, aboutPage, servicesPage, contactPage, projects, education] = await Promise.all([
     getHomePage(locale),
     getSectionPage('about', locale),

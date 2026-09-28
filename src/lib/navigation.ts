@@ -39,8 +39,8 @@ export function navItemActive(
   return undefined
 }
 
-async function legacyNav(locale: Locale, site: SiteDescriptor | null): Promise<PrimaryNavItem[]> {
-  const bindings = await resolveBindings(site, locale)
+async function fallbackNav(locale: Locale): Promise<PrimaryNavItem[]> {
+  const bindings = await resolveBindings(locale)
   const entries: { slug: string; label: string }[] = []
   if (bindings.aboutPage?.title) entries.push({ slug: 'about', label: bindings.aboutPage.title! })
   if (bindings.projectsCategory?.title) entries.push({ slug: 'projects', label: bindings.projectsCategory.title! })
@@ -80,6 +80,6 @@ export const getPrimaryNavigation = cache(
       .filter((item): item is PrimaryNavItem => Boolean(item))
 
     if (fromCms.length) return fromCms
-    return legacyNav(locale, site)
+    return fallbackNav(locale)
   },
 )

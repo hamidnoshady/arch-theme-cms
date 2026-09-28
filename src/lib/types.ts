@@ -195,9 +195,6 @@ export type SiteDescriptor = {
     settings?: Record<string, unknown> | null
     bindings?: SiteBindings | null
   } | null
-  /** Legacy descriptor fields retained for rolling upgrades. */
-  bindings?: SiteBindings | null
-  runtimeSettings?: Record<string, unknown> | null
   theme?: {
     primary?: string | null
     accent?: string | null

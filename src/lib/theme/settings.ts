@@ -14,37 +14,22 @@ const defaults: GraphiteRuntimeSettings = {
   mapStyle: 'minimal',
 }
 
-type ManifestRuntime = {
-  introAnimation?: boolean
-  introDuration?: number
-  showSectionNumbers?: boolean
-  mapStyle?: string
-}
+type ManifestSettings = Record<string, { default?: unknown }>
 
-const manifestRow = themeManifest as {
-  settings?: Record<string, { default?: unknown }>
-  runtimeSettings?: { defaults?: ManifestRuntime }
-}
-const currentSettings = manifestRow.settings ?? {}
-const legacySettings = manifestRow.runtimeSettings?.defaults
-const manifestSettings: ManifestRuntime = {
-  introAnimation: currentSettings.introAnimation?.default as boolean | undefined,
-  introDuration: currentSettings.introDuration?.default as number | undefined,
-  showSectionNumbers: currentSettings.showSectionNumbers?.default as boolean | undefined,
-  mapStyle: currentSettings.mapStyle?.default as string | undefined,
-}
-// Legacy defaults are only used for fields absent from the current schema.
-for (const key of ['introAnimation', 'introDuration', 'showSectionNumbers', 'mapStyle'] as const) {
-  if (manifestSettings[key] === undefined && legacySettings?.[key] !== undefined) {
-    Object.assign(manifestSettings, { [key]: legacySettings[key] })
-  }
+/** Defaults come from the manifest's `settings` schema — the single source the CMS validates against. */
+const manifestDefaults = (themeManifest as { settings?: ManifestSettings }).settings ?? {}
+const manifestSettings = {
+  introAnimation: manifestDefaults.introAnimation?.default as boolean | undefined,
+  introDuration: manifestDefaults.introDuration?.default as number | undefined,
+  showSectionNumbers: manifestDefaults.showSectionNumbers?.default as boolean | undefined,
+  mapStyle: manifestDefaults.mapStyle?.default as string | undefined,
 }
 
 /** Opinionated Graphite presentation settings (manifest defaults + optional CMS override). */
 export function resolveRuntimeSettings(
   siteSettings?: Record<string, unknown> | null,
 ): GraphiteRuntimeSettings {
-  const fromManifest = manifestSettings ?? {}
+  const fromManifest = manifestSettings
   const fromSite = siteSettings ?? {}
   const introDuration =
     typeof fromSite.introDuration === 'number'

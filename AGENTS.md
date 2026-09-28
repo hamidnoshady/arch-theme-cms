@@ -89,6 +89,6 @@ Do not treat “font file appeared in Network” as sufficient.
 - **Customer identity** comes from `GET /api/site` (`name`, optional `branding`). Never hardcode Graphite as the tenant name in metadata, footer, or accessible labels. The Graphite SVG is a **demo fallback** only.
 - **Navigation** for header, mobile menu, and homepage destinations uses `GET /api/header` (footer: `GET /api/footer`). Do not revive hardcoded `SECTIONS` for customer-facing menus.
 - **Content bindings**: routes are theme-owned, content is bound. Look pages/categories up through `getHomePage` / `getSectionPage` / `getSectionCategories` (`src/lib/cms.ts`), which apply the rules in `src/lib/theme/sections.ts` — bound id first, section-key slug only when nothing is bound. Never call `getPageBySlug('about' | …)` from a view, sitemap or nav; that is the hardcoding this replaced.
-- **Runtime presentation** (`introAnimation`, `introDuration`, `showSectionNumbers`, `mapStyle`) comes from `site.themeRuntime.settings` (legacy `runtimeSettings` fallback) plus manifest defaults — not deployment env.
+- **Runtime presentation** (`introAnimation`, `introDuration`, `showSectionNumbers`, `mapStyle`) comes from `site.themeRuntime.settings` plus manifest defaults — not deployment env.
 - **Formatting and slugs** use `@eshobe/site-runtime` (`vendor/site-runtime` until npm publish). `eshobe.theme.json` `contractVersion` must match the package.
 - **Visitor `/api/*` proxy** must not forward `Authorization`, cookies, or the site API key.

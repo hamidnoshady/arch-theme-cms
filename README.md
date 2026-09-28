@@ -35,8 +35,8 @@ Without a CMS the site still renders with **Graphite demo branding**; customer i
 | Site name, logos, favicon, default OG | `GET /api/site` → `name` and optional `branding` |
 | Header / footer navigation | `GET /api/header`, `GET /api/footer` |
 | Design tokens | `GET /api/site` → `theme` (mapped via `@eshobe/site-runtime` `themeCss`) |
-| Runtime presentation settings | `GET /api/site` → `themeRuntime.settings` (legacy `runtimeSettings` supported); defaults in `eshobe.theme.json` |
-| Content bindings | `GET /api/site` → `themeRuntime.bindings` (legacy `bindings` supported); manifest slug fallbacks |
+| Runtime presentation settings | `GET /api/site` → `themeRuntime.settings`; defaults in `eshobe.theme.json` |
+| Content bindings | `GET /api/site` → `themeRuntime.bindings`; manifest slug fallbacks |
 | Blocks allowlist | `GET /api/site` → `blocks` |
 
 Production deploys use the public GHCR image `ghcr.io/hamidnoshady/arch-theme-cms` at an immutable digest (`eshobe.theme.json` → `deployment.strategy: registry_image`). CI pushes the image and registers each digest with Eshobe CMS. Set GitHub Actions secrets `ESHOBE_CMS_URL`, `ESHOBE_THEME_PACKAGE_ID`, and `ESHOBE_THEME_ARTIFACT_SECRET` for artifact registration, then sync the theme package in the CMS so it picks up the manifest.
