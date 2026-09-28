@@ -9,5 +9,6 @@ final class Plugin {
         add_action('admin_menu', [Settings::class, 'menu']);
         add_action('admin_init', [Settings::class, 'register']);
         add_action('enqueue_block_editor_assets', [ProjectMeta::class, 'editor_assets']);
+        if (defined('WP_CLI') && WP_CLI) Migration\Importer::register();
     }
 }

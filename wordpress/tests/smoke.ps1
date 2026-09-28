@@ -1,4 +1,4 @@
-param([ValidateSet('all', 'activation', 'content', 'settings', 'theme', 'blocks', 'docs')][string]$Group = 'all')
+param([ValidateSet('all', 'activation', 'content', 'settings', 'theme', 'blocks', 'migration', 'docs')][string]$Group = 'all')
 
 $root = Split-Path -Parent $PSScriptRoot
 $required = @(
@@ -40,6 +40,15 @@ if ($Group -in @('all', 'blocks')) {
   }
   $frontPage = Get-Content -Raw (Join-Path $root 'theme/graphite/templates/front-page.html')
   if ($frontPage -notmatch 'graphite/home-stage') { throw 'Fresh installs must render the Graphite home stage' }
+}
+
+if ($Group -in @('all', 'migration')) {
+  $migrationPath = Join-Path $root 'plugins/graphite-core/src/Migration/Importer.php'
+  if (-not (Test-Path -LiteralPath $migrationPath)) { throw 'Missing migration importer' }
+  $migration = Get-Content -Raw $migrationPath
+  foreach ($token in '_eshobe_source_id', '--dry-run', 'wp_remote_get', 'WP_CLI') {
+    if (-not $migration.Contains($token)) { throw "Migration importer must support $token" }
+  }
 }
 
 Write-Output "WordPress $Group smoke checks passed"

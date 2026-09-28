@@ -13,6 +13,7 @@ defined('ABSPATH') || exit;
 foreach (['ContentTypes', 'ProjectMeta', 'Settings', 'Blocks', 'Plugin'] as $class) {
     require_once __DIR__ . '/src/' . $class . '.php';
 }
+require_once __DIR__ . '/src/Migration/Importer.php';
 
 register_activation_hook(__FILE__, ['Graphite\\Core\\ContentTypes', 'activate']);
 add_action('plugins_loaded', ['Graphite\\Core\\Plugin', 'boot']);
