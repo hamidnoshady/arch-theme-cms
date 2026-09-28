@@ -14,8 +14,8 @@
   "capabilities": { "blog": false, "projects": true, "education": true, "contactForm": true, "map": true },
   "design": { "primary": "#111111", "accent": "#8c6f4a", "background": "#f7f3ea", "foreground": "#171717", "radius": "md", "lineHeight": 1.8 },
   "settings": {
-    "introAnimation": { "type": "boolean", "default": true, "labelEn": "Intro animation", "labelFa": "انیمیشن ورود" },
-    "introDuration": { "type": "number", "default": 7000, "min": 0, "max": 20000, "labelEn": "Intro duration", "labelFa": "مدت انیمیشن ورود", "help": "Milliseconds." },
+    "introAnimation": { "type": "boolean", "default": true, "labelEn": "Home logo intro animation", "labelFa": "انیمیشن لوگوی صفحه اول" },
+    "introDuration": { "type": "number", "default": 7000, "min": 0, "max": 20000, "labelEn": "Intro duration in milliseconds", "labelFa": "مدت انیمیشن به میلی‌ثانیه", "help": "Milliseconds." },
     "showSectionNumbers": { "type": "boolean", "default": true, "labelEn": "Show section numbers", "labelFa": "نمایش شماره بخش‌ها" },
     "mapStyle": { "type": "select", "default": "minimal", "labelEn": "Map style", "labelFa": "سبک نقشه", "options": [{ "value": "minimal", "labelEn": "Minimal", "labelFa": "ساده" }, { "value": "osm", "labelEn": "OpenStreetMap", "labelFa": "OpenStreetMap" }] }
   },

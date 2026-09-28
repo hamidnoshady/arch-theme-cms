@@ -62,6 +62,7 @@ export async function HomeView({ locale }: { locale: Locale }) {
         branding={ctx.branding}
         mediaOrigin={ctx.origin}
         introDurationMs={ctx.settings.introDurationMs}
+        introAnimation={ctx.settings.introAnimation}
       />
     </>
   )
