@@ -1,12 +1,19 @@
+/*
+ * Graphite is strictly monochrome: black and white are the only UI colours.
+ * Opacity steps of ink create the grey range; gradients are prohibited.
+ */
 :root {
   --color-paper: #ffffff;
-  --color-ink: #171717;
-  --color-navy: #192b3a;
-  --color-muted: #777d81;
-  --color-line: #d7dce0;
-  --color-frame: #e4e8eb;
-  --color-soft: #f7f7f7;
-  --color-soft-2: #f3f4f5;
+  --color-ink: #000000;
+  /* Legacy alias kept so CMS token mapping and existing styles keep one name. */
+  --color-navy: #000000;
+  --color-muted: rgba(0, 0, 0, 0.55);
+  --color-line: rgba(0, 0, 0, 0.18);
+  --color-frame: rgba(0, 0, 0, 0.12);
+  --color-soft: rgba(0, 0, 0, 0.03);
+  --color-soft-2: rgba(0, 0, 0, 0.06);
+  /* Accent for active rules, indicators, markers — pure black, full strength. */
+  --color-accent: #000000;
 
   /* Font stacks (next/font sets --font-shazde / --font-inter on <html>) */
   --font-brand: var(--font-shazde), 'Jost Variable', Jost, system-ui, sans-serif;
@@ -26,26 +33,29 @@
   --text-label-weight: var(--font-weight-medium);
   --text-emphasis-weight: var(--font-weight-semibold);
 
-  /* Type scale */
-  --text-display: clamp(3rem, 6vw, 5.75rem);
-  --text-h1: clamp(2rem, 4vw, 3.5rem);
-  --text-h2: clamp(1.5rem, 2.5vw, 2.25rem);
-  --text-h3: 1.375rem;
+  /*
+   * Type scale (AGENTS size standards):
+   * display 42–72 · h1 36–56 · h2 26–36 · h3 20–24 · body-lg 18 · body 17 ·
+   * ui 15 · label 14 · meta 13. The old micro scale is retired; secondary
+   * metadata uses --text-meta and the smallest token is the label floor.
+   */
+  --text-display: clamp(2.625rem, 1.5rem + 4.6vw, 4.5rem);
+  --text-h1: clamp(2.25rem, 1.5rem + 3.1vw, 3.5rem);
+  --text-h2: clamp(1.625rem, 1.375rem + 1.1vw, 2.25rem);
+  --text-h3: clamp(1.25rem, 1.1875rem + 0.26vw, 1.5rem);
   --text-body-lg: 1.125rem;
-  --text-body: 1rem;
-  --text-ui: 0.875rem;
-  --text-label: 0.8125rem;
-  --text-meta: 0.75rem;
-  --text-micro: 0.6875rem;
+  --text-body: 1.0625rem;
+  --text-ui: 0.9375rem;
+  --text-label: 0.875rem;
+  --text-meta: 0.8125rem;
 
-  --leading-display: 1.1;
-  --leading-heading: 1.3;
-  --leading-body-lg: 1.85;
+  --leading-display: 1.08;
+  --leading-heading: 1.25;
+  --leading-body-lg: 1.8;
   --leading-body: 1.75;
   --leading-ui: 1.5;
   --leading-label: 1.5;
   --leading-meta: 1.5;
-  --leading-micro: 1.4;
 
   --page-margin: clamp(20px, 4.2vw, 72px);
   --content: 1320px;
@@ -55,9 +65,13 @@
   --frame-pad: clamp(10px, 1vw, 16px);
   --frame-inset: clamp(5px, 0.55vw, 8px);
 
-  --header-h: 78px;
+  --header-h: 64px;
   --ease: cubic-bezier(0.22, 0.7, 0.2, 1);
   --dur: 0.7s;
+  /* Choreography durations; the intro clock itself lives in --intro-duration. */
+  --reveal-dur: 0.7s;
+  --reveal-stagger: 70ms;
+  --entrance-dur: 0.4s;
 
   color-scheme: light;
 }
@@ -101,4 +115,43 @@ html[data-fonts='shazde'] .logo__wordmark {
 html[data-fonts='shazde'] .logo__subtitle {
   letter-spacing: 0.28em;
   margin-inline-start: 0.28em;
+}
+
+/*
+ * Per-site CMS theming: primary/accent colours are reallocated to the monochrome
+ * pair (theme.reallocateRootVariables) and `--radius` is pinned square so the
+ * runtime's `border-radius: var(--radius)` declarations stay sharp.
+ */
+body {
+  --radius: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+}
+
+/*
+ * Viewport-entrance choreography. `data-reveal` is set by the shared observer in
+ * Reveal.tsx once an element enters the viewport; reduced-motion users and
+ * unsupported browsers get the final state immediately (see base.css media query).
+ */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity var(--reveal-dur) var(--ease) var(--reveal-delay, 0ms),
+    transform var(--reveal-dur) var(--ease) var(--reveal-delay, 0ms);
+}
+
+[data-reveal~='in'] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }

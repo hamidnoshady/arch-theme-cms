@@ -108,7 +108,7 @@ export function EntryGrid({
   prioritise?: number
 }) {
   return (
-    <ul className={`entry-grid entry-grid--${variant}`} role="list">
+    <ul className={`entry-grid entry-grid--${variant}`} role="list" data-reveal="">
       {entries.map((entry, i) => (
         <li key={entry.id}>
           <EntryCard

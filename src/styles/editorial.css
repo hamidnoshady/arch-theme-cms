@@ -29,7 +29,7 @@
   align-items: baseline;
   margin: 0;
   color: var(--color-muted);
-  font-size: var(--text-meta);
+  font-size: var(--text-label);
   letter-spacing: 0.04em;
 }
 
@@ -40,7 +40,7 @@
   font-size: var(--text-display);
   line-height: var(--leading-display);
   letter-spacing: -0.015em;
-  color: var(--color-navy);
+  color: var(--color-ink);
   text-wrap: balance;
 }
 
@@ -80,7 +80,7 @@ html[lang='fa'] .page-title__heading {
 
 .section-heading__number {
   color: var(--color-muted);
-  font-size: var(--text-meta);
+  font-size: var(--text-label);
   padding-top: 0.7em;
 }
 
@@ -89,7 +89,7 @@ html[lang='fa'] .page-title__heading {
   font-weight: var(--text-h1-weight);
   font-size: var(--text-h1);
   line-height: var(--leading-heading);
-  color: var(--color-navy);
+  color: var(--color-ink);
 }
 
 .section-heading__intro {
@@ -115,7 +115,7 @@ html[lang='fa'] .page-title__heading {
 }
 
 .meta-list dt {
-  font-size: var(--text-meta);
+  font-size: var(--text-label);
   letter-spacing: 0.04em;
   color: var(--color-muted);
 }
@@ -162,7 +162,7 @@ html[lang='fa'] .page-title__heading {
 .empty-state__mark {
   width: 28px;
   height: 1px;
-  background: var(--color-navy);
+  background: var(--color-ink);
 }
 
 .related {

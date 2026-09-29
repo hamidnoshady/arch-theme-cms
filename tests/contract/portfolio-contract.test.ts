@@ -37,8 +37,11 @@ describe('portfolio fixture contract', () => {
     expect(settings.showSectionNumbers).toBe(true)
   })
 
-  it('emits theme CSS for custom tokens', () => {
-    expect(siteThemeStyle(fixture.site)).toContain('--primary:#192b3a')
+  it('reallocates theme CSS colours to the monochrome pair', () => {
+    const css = siteThemeStyle(fixture.site)
+    expect(css).toContain('--primary:#000000')
+    expect(css).not.toContain('#192b3a')
+    expect(css).not.toContain('#c4a574')
   })
 
   it('models CMS header navigation active states', () => {

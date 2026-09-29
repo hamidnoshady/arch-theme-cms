@@ -17,7 +17,7 @@ export function PageTitle({
   children?: React.ReactNode
 }) {
   return (
-    <header className="page-title">
+    <header className="page-title" data-reveal="">
       <span className="rule rule--marked" aria-hidden="true" />
       <div className="page-title__grid">
         {number || eyebrow ? (
@@ -56,7 +56,7 @@ export function SectionHeading({
 }) {
   if (!title && !intro) return null
   return (
-    <div className="section-heading">
+    <div className="section-heading" data-reveal="">
       <span className="rule" aria-hidden="true" />
       <div className="section-heading__grid">
         {number ? <span className="num section-heading__number">{number}</span> : <span />}
@@ -74,7 +74,7 @@ export type MetaItem = { label: string; value: React.ReactNode }
 export function MetaList({ items, className = '' }: { items: MetaItem[]; className?: string }) {
   if (!items.length) return null
   return (
-    <dl className={`meta-list ${className}`}>
+    <dl className={`meta-list ${className}`} data-reveal="">
       {items.map((item) => (
         <div className="meta-list__item" key={item.label}>
           <dt>{item.label}</dt>

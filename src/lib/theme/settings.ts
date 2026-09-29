@@ -9,7 +9,7 @@ export type GraphiteRuntimeSettings = {
 
 const defaults: GraphiteRuntimeSettings = {
   introAnimation: true,
-  introDurationMs: 7000,
+  introDurationMs: 2500,
   showSectionNumbers: true,
   mapStyle: 'minimal',
 }

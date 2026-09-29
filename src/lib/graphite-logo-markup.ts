@@ -6,7 +6,8 @@ let prepared: string | null = null
 const baseMarkup = (): string => {
   if (prepared) return prepared
   let svg = logoSvg.replace(/<style>[\s\S]*?<\/style>/, '')
-  svg = svg.replace('<g fill="#1b3556">', '<g class="logo__shade" fill="#1b3556">')
+  // Strict monochrome: the navy shade planes of the demo mark print as black.
+  svg = svg.replace('<g fill="#1b3556">', '<g class="logo__shade" fill="#000">')
   svg = svg.replace(
     '<g id="cube-lines" fill="none"',
     '<g id="cube-lines" class="logo__strokes" fill="none"',

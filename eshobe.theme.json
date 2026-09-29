@@ -35,7 +35,7 @@
     },
     "introDuration": {
       "type": "number",
-      "default": 7000,
+      "default": 2500,
       "min": 0,
       "max": 20000,
       "labelEn": "Intro duration in milliseconds",

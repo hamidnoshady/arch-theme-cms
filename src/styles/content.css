@@ -61,18 +61,18 @@
 .rt-h2 {
   margin: 0.6em 0 0;
   font-weight: var(--text-body-weight);
-  font-size: clamp(26px, 3vw, 40px);
+  font-size: clamp(1.625rem, 1.375rem + 1.1vw, 2.25rem);
   line-height: 1.3;
-  color: var(--color-navy);
+  color: var(--color-ink);
 }
 
 .rich-text h3,
 .rt-h3 {
   margin: 0.4em 0 0;
   font-weight: var(--text-label-weight);
-  font-size: clamp(20px, 2vw, 28px);
+  font-size: var(--text-h3);
   line-height: 1.4;
-  color: var(--color-navy);
+  color: var(--color-ink);
 }
 
 .rich-text h4,
@@ -97,8 +97,8 @@
 .rich-text blockquote {
   margin: 0;
   padding-inline-start: 18px;
-  border-inline-start: 1px solid var(--color-navy);
-  color: var(--color-navy);
+  border-inline-start: 1px solid var(--color-ink);
+  color: var(--color-ink);
 }
 
 .rt-rule {
@@ -149,15 +149,15 @@
 
 .numbered-list__number {
   color: var(--color-muted);
-  font-size: var(--text-meta);
+  font-size: var(--text-label);
   padding-top: 0.55em;
 }
 
 .numbered-list__title {
   margin: 0 0 6px;
   font-weight: var(--text-label-weight);
-  font-size: 20px;
-  color: var(--color-navy);
+  font-size: var(--text-h3);
+  color: var(--color-ink);
 }
 
 .numbered-list__text {
@@ -178,7 +178,7 @@
   margin: 14px 0 0;
   font-weight: var(--text-label-weight);
   font-size: var(--text-body);
-  color: var(--color-navy);
+  color: var(--color-ink);
 }
 
 .team__role,
@@ -205,7 +205,7 @@
   cursor: pointer;
   list-style: none;
   font-size: var(--text-body);
-  color: var(--color-navy);
+  color: var(--color-ink);
 }
 
 .faq__item summary::-webkit-details-marker {
@@ -215,8 +215,8 @@
 .faq__icon {
   width: 10px;
   height: 10px;
-  border-inline-end: 1px solid var(--color-navy);
-  border-bottom: 1px solid var(--color-navy);
+  border-inline-end: 1px solid var(--color-ink);
+  border-bottom: 1px solid var(--color-ink);
   transform: rotate(45deg);
   flex: none;
 }
@@ -249,9 +249,9 @@
 .quote blockquote {
   margin: 0;
   font-weight: var(--text-display-weight);
-  font-size: clamp(20px, 2.4vw, 30px);
+  font-size: clamp(1.25rem, 1.125rem + 0.5vw, 1.875rem);
   line-height: 1.55;
-  color: var(--color-navy);
+  color: var(--color-ink);
 }
 
 .quote figcaption {
@@ -263,7 +263,7 @@
   display: grid;
   gap: 18px;
   padding-top: 22px;
-  border-top: 1px solid var(--color-navy);
+  border-top: 1px solid var(--color-ink);
 }
 
 .cta__links {
@@ -340,14 +340,14 @@
 .field__control {
   width: 100%;
   border: 0;
-  border-bottom: 1px solid #8b9196;
+  border-bottom: 1px solid var(--color-ink);
   border-radius: 0;
   background: transparent;
   padding: 10px 2px;
 }
 
 .field__control:focus {
-  outline: 1px solid var(--color-navy);
+  outline: 1px solid var(--color-ink);
   outline-offset: 4px;
 }
 
@@ -360,7 +360,7 @@
 .field--checkbox input {
   width: 15px;
   height: 15px;
-  accent-color: var(--color-navy);
+  accent-color: var(--color-ink);
 }
 
 .field--checkbox .field__error {
@@ -369,7 +369,8 @@
 
 .field__error {
   margin: 0;
-  color: #7a2e2e;
+  color: var(--color-ink);
+  font-weight: var(--text-emphasis-weight);
   font-size: var(--text-meta);
 }
 
@@ -411,7 +412,7 @@
   position: relative;
   aspect-ratio: 2 / 1;
   overflow: hidden;
-  background: #eee;
+  background: var(--color-soft);
 }
 
 .map__tiles {
@@ -436,10 +437,10 @@
   width: 11px;
   height: 11px;
   transform: translate(-50%, -50%);
-  background: var(--color-navy);
-  border: 2px solid #fff;
+  background: var(--color-ink);
+  border: 2px solid var(--color-paper);
   border-radius: 50%;
-  box-shadow: 0 0 0 1px var(--color-navy);
+  box-shadow: 0 0 0 1px var(--color-ink);
 }
 
 .map__caption {
@@ -457,7 +458,7 @@
 
 .map__credit {
   color: var(--color-muted);
-  font-size: var(--text-micro);
+  font-size: var(--text-label);
   margin-inline-start: auto;
 }
 
@@ -515,7 +516,7 @@
 }
 
 .pricing__plan--featured {
-  border-color: var(--color-navy);
+  border-color: var(--color-ink);
 }
 
 .pricing__features {

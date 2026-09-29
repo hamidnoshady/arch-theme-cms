@@ -5,7 +5,7 @@
   font-size: var(--text-display);
   font-weight: var(--text-display-weight);
   line-height: var(--leading-display);
-  color: var(--color-navy);
+  color: var(--color-ink);
 }
 
 .text-h1 {
@@ -13,7 +13,7 @@
   font-size: var(--text-h1);
   font-weight: var(--text-h1-weight);
   line-height: var(--leading-heading);
-  color: var(--color-navy);
+  color: var(--color-ink);
 }
 
 .text-h2 {
@@ -21,7 +21,7 @@
   font-size: var(--text-h2);
   font-weight: var(--text-heading-weight);
   line-height: var(--leading-heading);
-  color: var(--color-navy);
+  color: var(--color-ink);
 }
 
 .text-h3 {
@@ -29,7 +29,7 @@
   font-size: var(--text-h3);
   font-weight: var(--text-heading-weight);
   line-height: var(--leading-heading);
-  color: var(--color-navy);
+  color: var(--color-ink);
 }
 
 .text-body-lg {
@@ -65,15 +65,6 @@
   font-size: var(--text-meta);
   font-weight: var(--text-body-weight);
   line-height: var(--leading-meta);
-  color: var(--color-muted);
-}
-
-.text-micro {
-  font-family: var(--font-ui);
-  font-size: var(--text-micro);
-  font-weight: var(--text-body-weight);
-  line-height: var(--leading-micro);
-  color: var(--color-muted);
 }
 
 .text-emphasis {
