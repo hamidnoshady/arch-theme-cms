@@ -2,17 +2,23 @@ import { themeCss, type Theme } from '@eshobe/site-runtime'
 
 import type { SiteDescriptor } from '@/lib/types'
 
+/** CMS `primary`/`accent` values are reallocated to Graphite's monochrome pair. */
+const MONO = { primary: '#000000', accent: '#000000' } as const
+
 /**
- * Maps CMS design tokens onto Graphite's semantic palette without accepting arbitrary CSS.
- * CMS `primary` tints Graphite navy; full `themeCss` handles background, foreground, radius, line-height.
+ * Graphite renders strictly in black and white, so a tenant's CMS `primary`
+ * cannot tint the UI. `themeCss` handles contrast pairing, radius and
+ * line-height for the *reallocated* colours, and its `--radius` output is
+ * pinned square by the theme stylesheet so geometry stays architectural.
  */
 export function siteThemeStyle(site: SiteDescriptor | null): string {
   const theme = (site?.theme ?? null) as Theme | null
-  const base = themeCss(theme)
-  const navy = theme?.primary
-  const extra =
-    navy && /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(navy) ? `:root{--color-navy:${navy};}` : ''
-  return `${base}${extra}`
+  if (!theme) return ''
+  return themeCss({
+    ...theme,
+    primary: MONO.primary,
+    accent: MONO.accent,
+  })
 }
 
 export function themeForTests(overrides: Partial<Theme> = {}): Theme {

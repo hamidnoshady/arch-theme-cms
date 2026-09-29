@@ -8,8 +8,6 @@ import { copy } from '@/lib/i18n'
 import type { ResolvedBranding } from '@/lib/theme/branding'
 import type { Locale } from '@/lib/types'
 
-import { Atmosphere } from './Atmosphere'
-
 export type HomeNavItem = { href: string; label: string; number: string }
 
 type Props = {
@@ -24,7 +22,7 @@ type Props = {
 
 /** Pixels of wheel travel for a full reveal; one mouse-wheel notch (~100px) is enough to commit. */
 const WHEEL_RANGE = 380
-const DEFAULT_INTRO_MS = 7000
+const DEFAULT_INTRO_MS = 2500
 const REVEAL_KEYS = new Set(['ArrowDown', 'PageDown', 'End'])
 const COLLAPSE_KEYS = new Set(['ArrowUp', 'PageUp', 'Home', 'Escape'])
 
@@ -274,7 +272,10 @@ export function HomeStage({
       data-revealed={revealed ? 'true' : 'false'}
       data-motion="settle"
     >
-      <Atmosphere />
+      <div className="home__grid" aria-hidden="true">
+        <span className="home__line home__line--v" />
+        <span className="home__line home__line--h" />
+      </div>
 
       <div className="home__top">
         <button type="button" className="home__skip text-link" onClick={onSkip}>

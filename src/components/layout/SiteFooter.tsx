@@ -20,7 +20,7 @@ export async function SiteFooter({ locale }: { locale: Locale }) {
     .filter((l) => l.label && l.link && safeHref(l.link.href))
 
   return (
-    <footer className="site-footer">
+    <footer className="site-footer" data-reveal="">
       <div className="site-footer__inner">
         <Link className="site-footer__brand" href={href(locale)} aria-label={branding.brandLabel}>
           <Logo variant="compact" branding={branding} />

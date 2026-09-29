@@ -12,7 +12,8 @@ import type { Locale } from '@/lib/types'
 
 /**
  * Runs before first paint: the intro plays once per session, never under
- * reduced motion, and `?intro` forces a replay for review.
+ * reduced motion, and `?intro` forces a replay for review. The default clock
+ * is ~2.5s (manifest); the logo's internal build fractions derive from it.
  */
 const introScript = (enabled: boolean, durationMs: number) =>
   `(function(){try{var d=document.documentElement,k='graphite:intro';if(!${enabled ? 'true' : 'false'}||matchMedia('(prefers-reduced-motion: reduce)').matches){d.dataset.intro='reduced';return}var f=/[?&]intro(=|&|$)/.test(location.search);if(!f&&sessionStorage.getItem(k)){d.dataset.intro='done';return}sessionStorage.setItem(k,'1');d.dataset.intro='play';d.style.setProperty('--intro-duration','${durationMs}ms')}catch(e){document.documentElement.dataset.intro='done'}})()`

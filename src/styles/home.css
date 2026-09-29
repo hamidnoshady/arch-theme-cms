@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: var(--color-navy);
+  color: var(--color-ink);
   width: clamp(220px, 28vw, 420px);
 }
 
@@ -99,31 +99,32 @@
   stroke-dashoffset: 0;
 }
 
-/* The drawing is constructed once per session, then stays drawn. */
+/*
+ * Logo construction. The manifest default is ~2.5s; every delay below is a
+ * fraction of that clock, so the CMS `introDuration` setting retimes the whole
+ * build. Reduced motion (media query at the end of this file) shows the
+ * completed mark immediately.
+ */
 html[data-intro='play'] .logo--animated .logo__strokes path {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  animation: logo-draw calc(var(--intro-duration, 7000ms) * 0.16) cubic-bezier(0.45, 0, 0.2, 1)
-    forwards;
-  animation-delay: calc(var(--i) * var(--intro-duration, 7000ms) * 0.022);
+  animation: logo-draw calc(var(--intro-duration, 2500ms) * 0.16) cubic-bezier(0.45, 0, 0.2, 1) forwards;
+  animation-delay: calc(var(--i) * var(--intro-duration, 2500ms) * 0.022);
 }
 
 html[data-intro='play'] .logo--animated .logo__shade {
   opacity: 0;
-  animation: logo-in calc(var(--intro-duration, 7000ms) * 0.07) calc(var(--intro-duration, 7000ms) * 0.19)
-    forwards;
+  animation: logo-in calc(var(--intro-duration, 2500ms) * 0.07) calc(var(--intro-duration, 2500ms) * 0.19) forwards;
 }
 
 html[data-intro='play'] .logo--animated .logo__wordmark {
   opacity: 0;
-  animation: logo-in calc(var(--intro-duration, 7000ms) * 0.065)
-    calc(var(--intro-duration, 7000ms) * 0.23) forwards;
+  animation: logo-in calc(var(--intro-duration, 2500ms) * 0.065) calc(var(--intro-duration, 2500ms) * 0.23) forwards;
 }
 
 html[data-intro='play'] .logo--animated .logo__subtitle {
   opacity: 0;
-  animation: logo-in calc(var(--intro-duration, 7000ms) * 0.07) calc(var(--intro-duration, 7000ms) * 0.28)
-    forwards;
+  animation: logo-in calc(var(--intro-duration, 2500ms) * 0.07) calc(var(--intro-duration, 2500ms) * 0.28) forwards;
 }
 
 @keyframes logo-draw {
@@ -220,7 +221,7 @@ html:not([data-intro]) .home__nav {
   position: relative;
   display: block;
   height: 1px;
-  background: var(--color-line);
+  background: var(--color-ink);
 }
 
 .home__indicator {
@@ -229,7 +230,7 @@ html:not([data-intro]) .home__nav {
   height: 2px;
   width: var(--indicator-w, 0px);
   inset-inline-start: var(--indicator-x, 0px);
-  background: var(--color-navy);
+  background: var(--color-ink);
   transition: inset-inline-start 0.35s var(--ease), width 0.35s var(--ease);
 }
 
@@ -269,7 +270,9 @@ html:not([data-intro]) .home__nav {
 
 .home__link:hover .home__label,
 .home__link:focus-visible .home__label {
-  color: var(--color-navy);
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 6px;
 }
 
 .home__top {
@@ -317,7 +320,7 @@ html[data-intro='play'] .home__skip {
 .home__cue-line {
   width: 1px;
   height: calc(26px * (1 - var(--p)));
-  background: var(--color-navy);
+  background: var(--color-ink);
   opacity: calc(1 - var(--p));
 }
 
@@ -335,83 +338,83 @@ html[data-intro='play'] .home__skip {
   height: 26px;
 }
 
-/* ---------- atmosphere ---------- */
+/* ---------- architectural setting: rules only, no planes, no gradients ---------- */
 
-.atmos {
+.home__grid {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  overflow: hidden;
 }
 
-.atmos__planes {
+.home__line {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  background: var(--color-ink);
+  opacity: 0;
 }
 
-.atmos__planes--tall {
-  display: none;
-}
-
-.atmos__edge {
-  stroke: var(--color-line);
-  stroke-width: 1;
-  fill: none;
-}
-
-.atmos__light {
-  opacity: 0.9;
-}
-
-.atmos__column {
-  position: absolute;
-  left: 17.5%;
+/* The vertical rule stands in the left margin, full height, 1px — a datum. */
+.home__line--v {
+  inset-inline-start: clamp(20px, 6vw, 96px);
   top: 0;
   width: 1px;
-  height: 72%;
-  background: #e7eaec;
+  height: 100%;
+  transform: scaleY(0);
+  transform-origin: top;
 }
 
-.atmos__line {
-  position: absolute;
-  background: #e7eaec;
+html[data-intro='play'] .home__line--v {
+  animation: home-rule-y calc(var(--intro-duration, 2500ms) * 0.22) var(--ease)
+    calc(var(--intro-duration, 2500ms) * 0.06) forwards;
 }
 
-.atmos__line--floor {
+/* The horizon rule crosses at the upper third — a datum for the composition. */
+.home__line--h {
   left: 0;
   right: 0;
-  top: 76%;
+  top: 30%;
   height: 1px;
+  transform: scaleX(0);
+  transform-origin: inline-start;
 }
 
-.atmos__line--corner {
-  left: 9%;
-  top: 0;
-  width: 1px;
-  height: 76%;
-  background: #eef0f2;
+html[data-intro='play'] .home__line--h {
+  animation: home-rule-x calc(var(--intro-duration, 2500ms) * 0.24) var(--ease)
+    calc(var(--intro-duration, 2500ms) * 0.12) forwards;
 }
 
-@media (max-aspect-ratio: 4/5) {
-  .atmos__planes--wide {
-    display: none;
+@keyframes home-rule-y {
+  from {
+    opacity: 0.14;
+    transform: scaleY(0);
   }
-  .atmos__planes--tall {
-    display: block;
+  to {
+    opacity: 0.14;
+    transform: scaleY(1);
   }
-  .atmos__column {
-    left: 12%;
-    height: 78%;
+}
+
+@keyframes home-rule-x {
+  from {
+    opacity: 0.1;
+    transform: scaleX(0);
   }
-  .atmos__line--floor {
-    top: 80%;
+  to {
+    opacity: 0.1;
+    transform: scaleX(1);
   }
-  .atmos__line--corner {
-    left: 6%;
-    height: 80%;
-  }
+}
+
+/* Without an intro (no script, reduced motion, replay done) the datums simply stand. */
+html:not([data-intro='play']) .home__line {
+  opacity: 0.14;
+}
+
+html:not([data-intro='play']) .home__line--v {
+  transform: scaleY(1);
+}
+
+html:not([data-intro='play']) .home__line--h {
+  transform: scaleX(1);
 }
 
 /* ---------- small screens: a vertical index, not a shrunk row ---------- */
@@ -462,6 +465,10 @@ html[data-intro='play'] .home__skip {
   .home__label {
     font-size: var(--text-body-lg);
   }
+
+  .home__center {
+    padding-top: max(64px, calc(env(safe-area-inset-top) + 48px));
+  }
 }
 
 @media (max-height: 680px) and (min-width: 821px) {
@@ -487,6 +494,19 @@ html[data-intro='play'] .home__skip {
     animation: none;
     opacity: 1;
     stroke-dashoffset: 0;
+  }
+
+  .home__line {
+    animation: none;
+    opacity: 0.14;
+  }
+
+  .home__line--v {
+    transform: scaleY(1);
+  }
+
+  .home__line--h {
+    transform: scaleX(1);
   }
 
   .home__indicator,

@@ -38,6 +38,21 @@ export function MobileMenu({
     if (!open && dialog.open) dialog.close()
   }, [open])
 
+  // A short, one-way entrance: the panel class flips after commit so the CSS
+  // transition plays exactly once per open. Reduced motion sees the final state
+  // immediately (media query in chrome.css).
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!open || !dialog) return
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    if (mq.matches) return
+    const id = requestAnimationFrame(() => dialog.setAttribute('data-enter', 'in'))
+    return () => {
+      cancelAnimationFrame(id)
+      dialog.removeAttribute('data-enter')
+    }
+  }, [open])
+
   const target = otherLocale(locale)
 
   return (
@@ -72,7 +87,7 @@ export function MobileMenu({
 
           <nav aria-label={t.primaryNav}>
             <ol className="menu-panel__list">
-              {items.map((item) => (
+              {items.map((item, i) => (
                 <li key={item.key}>
                   {item.external ? (
                     <a
@@ -80,6 +95,7 @@ export function MobileMenu({
                       href={item.href}
                       aria-current={item.current ? 'page' : undefined}
                       onClick={() => setOpen(false)}
+                      style={{ ['--menu-i' as string]: i }}
                       {...(item.newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                     >
                       <span className="menu-panel__number" aria-hidden="true">
@@ -93,6 +109,7 @@ export function MobileMenu({
                       href={item.href}
                       aria-current={item.current ? 'page' : undefined}
                       onClick={() => setOpen(false)}
+                      style={{ ['--menu-i' as string]: i }}
                     >
                       <span className="menu-panel__number" aria-hidden="true">
                         {item.number}

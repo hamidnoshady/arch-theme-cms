@@ -54,4 +54,27 @@ describe('typography policy', () => {
       expect(tokens, key).toContain(key)
     }
   })
+
+  it('retires the micro scale and keeps the smallest size at the 13px meta floor', () => {
+    const tokens = readFileSync(path.join(STYLE_DIR, 'tokens.css'), 'utf8')
+    expect(tokens).not.toContain('--text-micro')
+    expect(tokens).toMatch(/--text-meta:\s*0\.8125rem/)
+    for (const file of styleFiles()) {
+      const css = readFileSync(file, 'utf8')
+      expect(css, file).not.toMatch(/--text-micro\b/)
+    }
+  })
+
+  it('bounds the display scale to the 42–72px band', () => {
+    const tokens = readFileSync(path.join(STYLE_DIR, 'tokens.css'), 'utf8')
+    expect(tokens).toMatch(/--text-display:[^;]*4\.5rem/)
+    expect(tokens).toMatch(/--text-display:[^;]*2\.625rem/)
+    expect(tokens).not.toMatch(/5\.75rem|92px/)
+  })
+
+  it('sizes rich-text headings from semantic tokens, not raw pixels', () => {
+    const content = readFileSync(path.join(STYLE_DIR, 'content.css'), 'utf8')
+    expect(content).not.toMatch(/\.rt-h3[^}]*font-size:\s*\d+px/)
+    expect(content).not.toMatch(/\.numbered-list__title[^}]*font-size:\s*20px/)
+  })
 })

@@ -34,7 +34,7 @@ export function MediaFrame({
 }) {
   const fixed = ratio !== 'natural'
   const style = fixed ? ({ ['--ratio' as string]: ratio } as React.CSSProperties) : undefined
-  const classes = `frame frame--${variant} ${fixed ? 'frame--fixed' : ''} ${className}`
+  const classes = `frame frame--${variant} ${fixed ? 'frame--fixed' : ''} ${className}`.trim()
   const body =
     media.kind === 'video' && as === 'figure' ? (
       <VideoPlayer media={media} locale={locale} />
@@ -44,13 +44,13 @@ export function MediaFrame({
 
   if (as === 'span') {
     return (
-      <span className={classes} style={style}>
+      <span className={classes} style={style} data-reveal="">
         <span className="frame__media">{body}</span>
       </span>
     )
   }
   return (
-    <figure className={classes} style={style}>
+    <figure className={classes} style={style} data-reveal="">
       <div className="frame__media">{body}</div>
       {caption ? <figcaption className="frame__caption">{caption}</figcaption> : null}
     </figure>

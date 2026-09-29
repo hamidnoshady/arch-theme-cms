@@ -46,6 +46,16 @@
   background: var(--color-soft-2);
 }
 
+/* Entering frames crossfade from the paper; nothing is hidden from readers
+   without JS or with reduced motion (final states guaranteed in tokens.css). */
+.frame[data-reveal]:not([data-reveal='in']) {
+  opacity: 0;
+}
+
+.frame[data-reveal='in'] {
+  transition: opacity var(--reveal-dur) var(--ease);
+}
+
 .video {
   position: relative;
   background: var(--color-soft);
@@ -81,8 +91,8 @@
   display: grid;
   place-items: center;
   background: var(--color-paper);
-  color: var(--color-navy);
-  border: 1px solid var(--color-navy);
+  color: var(--color-ink);
+  border: 1px solid var(--color-ink);
 }
 
 .video__play svg {
@@ -95,10 +105,10 @@
   inset-inline-end: 14px;
   bottom: 18px;
   font-family: var(--font-brand);
-  font-size: var(--text-micro);
+  font-size: var(--text-label);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--color-navy);
+  color: var(--color-ink);
   background: var(--color-paper);
   border: 1px solid var(--color-line);
   padding: 3px 7px;
@@ -125,7 +135,7 @@
 
 .gallery__item:hover .frame,
 .gallery__item:focus-visible .frame {
-  border-color: var(--color-navy);
+  border-color: var(--color-ink);
 }
 
 .lightbox {
@@ -136,11 +146,11 @@
   margin: 0;
   padding: 0;
   border: 0;
-  background: rgba(255, 255, 255, 0.98);
+  background: var(--color-paper);
 }
 
 .lightbox::backdrop {
-  background: rgba(255, 255, 255, 0.98);
+  background: var(--color-paper);
 }
 
 .lightbox__inner {
@@ -225,7 +235,7 @@
 
 .card:hover,
 .card:focus-within {
-  border-color: var(--color-navy);
+  border-color: var(--color-ink);
 }
 
 .card__link {
@@ -246,6 +256,12 @@
   border-color: var(--color-frame);
 }
 
+/* Card bodies ride in with their grid; the title keeps full contrast. */
+.card[data-reveal='in'] .card__title,
+.entry-grid[data-reveal='in'] .card__title {
+  color: var(--color-ink);
+}
+
 .card__body {
   display: grid;
   align-content: start;
@@ -258,7 +274,7 @@
   flex-wrap: wrap;
   gap: 6px 14px;
   color: var(--color-muted);
-  font-size: var(--text-micro);
+  font-size: var(--text-meta);
   letter-spacing: 0.04em;
 }
 
@@ -267,7 +283,7 @@
   font-weight: var(--text-body-weight);
   font-size: var(--text-body-lg);
   line-height: 1.45;
-  color: var(--color-navy);
+  color: var(--color-ink);
 }
 
 .card--editorial .card__title {
@@ -288,7 +304,7 @@
   position: absolute;
   inset-inline-end: 16px;
   bottom: 16px;
-  color: var(--color-navy);
+  color: var(--color-ink);
   opacity: 0;
   transition: opacity 0.2s var(--ease);
 }
@@ -323,12 +339,12 @@
 
 .filters__link:hover,
 .filters__link[aria-current='page'] {
-  color: var(--color-navy);
-  border-bottom-color: var(--color-navy);
+  color: var(--color-ink);
+  border-bottom-color: var(--color-ink);
 }
 
 .filters__count {
-  font-size: var(--text-micro);
+  font-size: var(--text-label);
   color: var(--color-muted);
 }
 
@@ -354,5 +370,12 @@
     flex-wrap: nowrap;
     width: max-content;
     padding-bottom: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame[data-reveal] {
+    opacity: 1;
+    transition: none;
   }
 }
