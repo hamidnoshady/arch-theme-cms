@@ -1,0 +1,363 @@
+/*
+ * Shared motion and hover polish. Everything here is transform/opacity only,
+ * short, and switched off under prefers-reduced-motion at the end of the file.
+ * Smooth scrolling itself is `scroll-behavior` on <html> (base.css); Next opts
+ * route changes out of it through `data-scroll-behavior` (RootDocument).
+ */
+
+/* A page settles in instead of snapping: each route mounts its own shell. */
+.shell__main {
+  animation: page-in 0.55s var(--ease) both;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Grid entries rise one after another once the grid is in view. */
+.entry-grid[data-reveal='in'] > li {
+  animation: rise 0.7s var(--ease) both;
+}
+
+.entry-grid[data-reveal='in'] > li:nth-child(2) {
+  animation-delay: 70ms;
+}
+.entry-grid[data-reveal='in'] > li:nth-child(3) {
+  animation-delay: 140ms;
+}
+.entry-grid[data-reveal='in'] > li:nth-child(4) {
+  animation-delay: 210ms;
+}
+.entry-grid[data-reveal='in'] > li:nth-child(5) {
+  animation-delay: 280ms;
+}
+.entry-grid[data-reveal='in'] > li:nth-child(n + 6) {
+  animation-delay: 350ms;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- cards ---------- */
+
+.card {
+  transition: border-color 0.25s var(--ease), transform 0.45s var(--ease);
+}
+
+.card:hover,
+.card:focus-within {
+  transform: translateY(-4px);
+}
+
+.card .frame__media {
+  overflow: hidden;
+}
+
+.card .picture {
+  transition: transform 0.9s var(--ease);
+}
+
+.card:hover .picture,
+.card:focus-within .picture {
+  transform: scale(1.045);
+}
+
+.card__arrow {
+  transform: translateX(calc(var(--nudge, 6px) * -1));
+  transition: opacity 0.25s var(--ease), transform 0.4s var(--ease);
+}
+
+html[dir='rtl'] .card__arrow {
+  --nudge: -6px;
+}
+
+.card:hover .card__arrow,
+.card:focus-within .card__arrow {
+  transform: none;
+}
+
+.card__title {
+  transition: transform 0.4s var(--ease);
+}
+
+.card:hover .card__title {
+  transform: translateX(3px);
+}
+
+html[dir='rtl'] .card:hover .card__title {
+  transform: translateX(-3px);
+}
+
+/* ---------- links, buttons, filters ---------- */
+
+.text-link .arrow {
+  transition: transform 0.35s var(--ease);
+}
+
+.text-link:hover .arrow,
+.text-link:focus-visible .arrow {
+  transform: translateX(4px);
+}
+
+.text-link:hover .arrow--back,
+.text-link:focus-visible .arrow--back {
+  transform: translateX(-4px);
+}
+
+html[dir='rtl'] .text-link:hover .arrow,
+html[dir='rtl'] .text-link:focus-visible .arrow {
+  transform: translateX(-4px);
+}
+
+html[dir='rtl'] .text-link:hover .arrow--back,
+html[dir='rtl'] .text-link:focus-visible .arrow--back {
+  transform: translateX(4px);
+}
+
+.button {
+  transition: background 0.25s var(--ease), color 0.25s var(--ease), transform 0.25s var(--ease);
+}
+
+.button:active {
+  transform: scale(0.97);
+}
+
+.filters__link {
+  transition: color 0.25s var(--ease), border-color 0.25s var(--ease), transform 0.3s var(--ease);
+}
+
+.filters__link:hover {
+  transform: translateY(-1px);
+}
+
+.site-nav__link {
+  position: relative;
+}
+
+.site-nav__link::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: inline-start;
+  transition: transform 0.35s var(--ease);
+}
+
+.site-nav__link:hover::after,
+.site-nav__link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.site-nav__link[aria-current='page']::after {
+  transform: scaleX(0);
+}
+
+.site-footer a,
+.lang-switch {
+  transition: opacity 0.25s var(--ease), color 0.25s var(--ease);
+}
+
+.site-footer a:hover {
+  color: var(--color-ink);
+}
+
+.lang-switch:hover {
+  opacity: 0.6;
+}
+
+.menu-button__icon,
+.menu-button__icon::before,
+.menu-button__icon::after {
+  transition: width 0.3s var(--ease);
+}
+
+.menu-button:hover .menu-button__icon::before {
+  width: 10px;
+}
+
+.menu-button:hover .menu-button__icon::after {
+  width: 13px;
+}
+
+.menu-panel__link {
+  transition: padding-inline-start 0.35s var(--ease), color 0.25s var(--ease);
+}
+
+.menu-panel__link:hover {
+  padding-inline-start: 8px;
+}
+
+/* ---------- media ---------- */
+
+.gallery__item .frame__media {
+  overflow: hidden;
+}
+
+.gallery__item .picture {
+  transition: transform 0.9s var(--ease);
+}
+
+.gallery__item:hover .picture,
+.gallery__item:focus-visible .picture {
+  transform: scale(1.035);
+}
+
+/* ---------- single entries (project / education / blog) ---------- */
+
+/* Scroll-linked, no script: a 2px rule fills across the top as the entry is read. */
+.reading-progress {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 30;
+  height: 2px;
+  background: var(--color-ink);
+  transform: scaleX(0);
+  transform-origin: inline-start;
+  pointer-events: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  .reading-progress {
+    animation: reading-progress linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+
+@keyframes reading-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.entry__hero .frame__media {
+  overflow: hidden;
+}
+
+.entry__hero .picture {
+  animation: hero-settle 1.4s var(--ease) both;
+}
+
+@keyframes hero-settle {
+  from {
+    transform: scale(1.05);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.entry__pager {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-block: 1px solid var(--color-line);
+}
+
+.entry__pager-link {
+  display: grid;
+  gap: 8px;
+  padding: 26px 4px;
+  color: var(--color-ink);
+  transition: background 0.3s var(--ease), padding 0.4s var(--ease);
+}
+
+.entry__pager-link--next {
+  text-align: end;
+  border-inline-start: 1px solid var(--color-line);
+  padding-inline-start: 24px;
+}
+
+.entry__pager-link--prev {
+  padding-inline-end: 24px;
+}
+
+.entry__pager-link:hover {
+  background: var(--color-soft);
+}
+
+.entry__pager-link--prev:hover {
+  padding-inline-start: 16px;
+}
+
+.entry__pager-link--next:hover {
+  padding-inline-end: 16px;
+}
+
+.entry__pager-label {
+  color: var(--color-muted);
+  font-size: var(--text-label);
+  letter-spacing: 0.04em;
+}
+
+.entry__pager-title {
+  font-size: var(--text-body-lg);
+  line-height: 1.45;
+  text-wrap: balance;
+}
+
+@media (max-width: 640px) {
+  .entry__pager {
+    grid-template-columns: 1fr;
+  }
+
+  .entry__pager-link--next {
+    border-inline-start: 0;
+    border-top: 1px solid var(--color-line);
+    padding-inline-start: 4px;
+    text-align: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell__main,
+  .entry-grid[data-reveal='in'] > li,
+  .entry__hero .picture,
+  .reading-progress {
+    animation: none;
+  }
+
+  .reading-progress {
+    display: none;
+  }
+
+  .card,
+  .card .picture,
+  .card__arrow,
+  .card__title,
+  .text-link .arrow,
+  .button,
+  .filters__link,
+  .site-nav__link::after,
+  .gallery__item .picture,
+  .menu-panel__link,
+  .entry__pager-link {
+    transition: none;
+  }
+
+  .card:hover,
+  .card:focus-within,
+  .card:hover .picture,
+  .card:hover .card__title,
+  .gallery__item:hover .picture,
+  .filters__link:hover {
+    transform: none;
+  }
+}

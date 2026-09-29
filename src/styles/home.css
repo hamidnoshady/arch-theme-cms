@@ -1,139 +1,117 @@
-/* ---------- identity ---------- */
+/* ---------- identity ----------
+ * No artwork ships with the theme. The tenant uploads a logo (SVG or raster)
+ * in the CMS site branding; without one the site name is set as a wordmark.
+ */
 
 .logo {
   display: flex;
   flex-direction: column;
   align-items: center;
   color: var(--color-ink);
-  width: clamp(220px, 28vw, 420px);
 }
 
-.logo__symbol {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.logo__type {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 7%;
-  width: 100%;
+.logo--text {
+  gap: 0.6em;
 }
 
 .logo__wordmark {
   font-family: var(--font-brand);
   font-weight: var(--text-label-weight);
-  font-size: 0.09em;
-  letter-spacing: 0.42em;
-  line-height: 1;
-  margin-inline-start: 0.42em;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  text-wrap: balance;
+  text-align: center;
+}
+
+.logo__wordmark--large {
+  font-weight: var(--text-display-weight);
+  font-size: clamp(2.25rem, 1.2rem + 4vw, 4.25rem);
+  letter-spacing: 0.06em;
+}
+
+html[lang='fa'] .logo__wordmark,
+html[lang='fa'] .logo__wordmark--large {
+  letter-spacing: 0;
 }
 
 .logo__subtitle {
-  font-family: var(--font-brand);
-  font-weight: var(--text-display-weight);
-  font-size: 0.026em;
-  letter-spacing: 0.48em;
-  line-height: 1;
-  margin-top: 1.15em;
-  margin-inline-start: 0.48em;
+  font-size: var(--text-label);
+  color: var(--color-muted);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
-/* em sizes above are relative to the logo box via font-size on .logo */
-.logo {
-  font-size: clamp(220px, 28vw, 420px);
+html[lang='fa'] .logo__subtitle {
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .logo--compact {
   flex-direction: row;
   align-items: center;
   gap: 10px;
-  width: auto;
   font-size: var(--text-body-lg);
-}
-
-.logo--compact .logo__symbol {
-  width: 30px;
-}
-
-.logo--compact .logo__type {
-  margin-top: 0;
-  align-items: flex-start;
 }
 
 .logo--compact .logo__wordmark {
   font-size: var(--text-ui);
-  letter-spacing: 0.32em;
-  margin-inline-start: 0.32em;
+  letter-spacing: 0.28em;
 }
 
-.logo--symbol {
-  width: 100%;
-  font-size: inherit;
+html[lang='fa'] .logo--compact .logo__wordmark {
+  letter-spacing: 0;
 }
 
-.logo--vector {
-  font-size: unset;
-}
-
-.logo--vector .logo__mark,
-.logo--vector .logo__mark svg {
+.logo--compact .logo__image {
   display: block;
-  width: 100%;
+  width: auto;
+  height: 32px;
+  max-width: 180px;
+  object-fit: contain;
+}
+
+.logo--full .logo__image {
+  display: block;
+  width: auto;
   height: auto;
-}
-
-.logo--vector .logo__strokes path {
-  vector-effect: non-scaling-stroke;
-}
-
-.logo--vector .logo__shade,
-.logo--vector .logo__wordmark,
-.logo--vector .logo__subtitle {
-  opacity: 1;
-}
-
-.logo--vector .logo__strokes path {
-  stroke-dashoffset: 0;
+  max-width: 100%;
+  max-height: clamp(150px, 26vh, 300px);
+  object-fit: contain;
 }
 
 /*
- * Logo construction. The manifest default is ~2.5s; every delay below is a
- * fraction of that clock, so the CMS `introDuration` setting retimes the whole
- * build. Reduced motion (media query at the end of this file) shows the
- * completed mark immediately.
+ * Intro reveal for an uploaded mark. An <img> cannot expose its strokes, so the
+ * mark is uncovered with a clip that wipes down while it fades and settles in;
+ * every timing is a fraction of --intro-duration, so the CMS setting retimes it.
  */
-html[data-intro='play'] .logo--animated .logo__strokes path {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: logo-draw calc(var(--intro-duration, 2500ms) * 0.16) cubic-bezier(0.45, 0, 0.2, 1) forwards;
-  animation-delay: calc(var(--i) * var(--intro-duration, 2500ms) * 0.022);
-}
-
-html[data-intro='play'] .logo--animated .logo__shade {
-  opacity: 0;
-  animation: logo-in calc(var(--intro-duration, 2500ms) * 0.07) calc(var(--intro-duration, 2500ms) * 0.19) forwards;
-}
-
-html[data-intro='play'] .logo--animated .logo__wordmark {
-  opacity: 0;
-  animation: logo-in calc(var(--intro-duration, 2500ms) * 0.065) calc(var(--intro-duration, 2500ms) * 0.23) forwards;
+html[data-intro='play'] .logo--animated .logo__image,
+html[data-intro='play'] .logo--animated .logo__wordmark,
+html[data-intro='play'] .logo--animated .logo__subtitle {
+  animation: logo-reveal calc(var(--intro-duration, 2500ms) * 0.5) cubic-bezier(0.22, 0.7, 0.2, 1) both;
 }
 
 html[data-intro='play'] .logo--animated .logo__subtitle {
-  opacity: 0;
-  animation: logo-in calc(var(--intro-duration, 2500ms) * 0.07) calc(var(--intro-duration, 2500ms) * 0.28) forwards;
+  animation-name: logo-in;
+  animation-delay: calc(var(--intro-duration, 2500ms) * 0.3);
 }
 
-@keyframes logo-draw {
+@keyframes logo-reveal {
+  from {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(10px) scale(0.985);
+  }
   to {
-    stroke-dashoffset: 0;
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    transform: none;
   }
 }
 
 @keyframes logo-in {
+  from {
+    opacity: 0;
+  }
   to {
     opacity: 1;
   }
@@ -156,10 +134,6 @@ body:has(.home) {
   height: 100dvh;
 }
 
-.home[data-motion='settle'] {
-  transition: --p var(--dur) var(--ease);
-}
-
 /* No script: the navigation is the page. Reduced motion: the same, immediately. */
 html:not([data-intro]) .home,
 html[data-intro='reduced'] .home {
@@ -175,10 +149,13 @@ html[data-intro='reduced'] .home {
 }
 
 .home__stack {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  transform: translateY(calc(var(--p) * (var(--nav-h) + var(--nav-gap)) * -0.5));
+  /* Transform-only: the stack glides up by half the space the navigation takes. */
+  transform: translate3d(0, calc(var(--p) * (var(--nav-h) + var(--nav-gap)) * -0.5), 0);
+  will-change: transform;
 }
 
 .home__brand {
@@ -189,17 +166,28 @@ html[data-intro='reduced'] .home {
 
 .home__logo {
   width: clamp(230px, 30vw, 440px);
-  font-size: clamp(230px, 30vw, 440px);
+  transform-origin: 50% 100%;
+  transform: scale(calc(1 - var(--p) * var(--logo-shrink, 0)));
+  will-change: transform;
 }
 
+/* Out of flow: the navigation fades and slides in under the logo without moving layout. */
 .home__nav {
+  position: absolute;
+  top: 100%;
+  inset-inline-start: 50%;
+  translate: -50% 0;
+  margin-top: var(--nav-gap);
   width: max-content;
   max-width: calc(100vw - 40px);
-  max-height: calc(var(--p) * var(--nav-h));
-  margin-top: calc(var(--p) * var(--nav-gap));
-  opacity: clamp(0, calc((var(--p) - 0.28) / 0.72), 1);
-  overflow: hidden;
+  opacity: clamp(0, calc((var(--p) - 0.2) / 0.8), 1);
+  transform: translate3d(0, calc((1 - var(--p)) * 18px), 0);
+  will-change: transform, opacity;
   pointer-events: none;
+}
+
+html[dir='rtl'] .home__nav {
+  translate: 50% 0;
 }
 
 .home[data-revealed='true'] .home__nav,
@@ -268,11 +256,37 @@ html:not([data-intro]) .home__nav {
   color: var(--color-ink);
 }
 
-.home__link:hover .home__label,
-.home__link:focus-visible .home__label {
+.home__label {
+  position: relative;
+  padding-bottom: 4px;
+}
+
+/* Hairline that draws in from the reading-start edge; no gradients in this theme. */
+.home__label::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: inline-start;
+  transition: transform 0.35s var(--ease);
+}
+
+.home__number {
+  transition: color 0.25s var(--ease), transform 0.35s var(--ease);
+}
+
+.home__link:hover .home__label::after,
+.home__link:focus-visible .home__label::after {
+  transform: scaleX(1);
+}
+
+.home__link:hover .home__number,
+.home__link:focus-visible .home__number {
   color: var(--color-ink);
-  text-decoration: underline;
-  text-underline-offset: 6px;
+  transform: translateY(-2px);
 }
 
 .home__top {
@@ -319,9 +333,26 @@ html[data-intro='play'] .home__skip {
 
 .home__cue-line {
   width: 1px;
-  height: calc(26px * (1 - var(--p)));
+  height: 26px;
   background: var(--color-ink);
   opacity: calc(1 - var(--p));
+  transform: scaleY(calc(1 - var(--p)));
+  transform-origin: top;
+}
+
+/* A quiet pulse invites the first scroll while the stage rests at p=0. */
+.home[data-revealed='false'] .home__cue-line {
+  animation: cue-pulse 2.4s var(--ease) 1.2s infinite;
+}
+
+@keyframes cue-pulse {
+  0%,
+  100% {
+    transform: scaleY(calc(1 - var(--p)));
+  }
+  50% {
+    transform: scaleY(calc((1 - var(--p)) * 0.55));
+  }
 }
 
 .home__cue-label {
@@ -335,7 +366,8 @@ html[data-intro='play'] .home__skip {
 .home__cue:focus-visible .home__cue-label,
 .home__cue:focus-visible .home__cue-line {
   opacity: 1;
-  height: 26px;
+  transform: none;
+  animation: none;
 }
 
 /* ---------- architectural setting: rules only, no planes, no gradients ---------- */
@@ -426,14 +458,12 @@ html:not([data-intro='play']) .home__line--h {
     --nav-h: 360px;
   }
 
-  .home__logo {
-    width: min(70vw, 280px);
-    font-size: min(70vw, 280px);
+  .home {
+    --logo-shrink: 0.26;
   }
 
-  .home[data-revealed='true'] .home__logo {
-    width: min(52vw, 210px);
-    font-size: min(52vw, 210px);
+  .home__logo {
+    width: min(70vw, 280px);
   }
 
   .home__nav {
@@ -474,7 +504,6 @@ html:not([data-intro='play']) .home__line--h {
 @media (max-height: 680px) and (min-width: 821px) {
   .home__logo {
     width: min(26vw, 300px);
-    font-size: min(26vw, 300px);
   }
   .home {
     --nav-gap: 18px;
@@ -484,16 +513,13 @@ html:not([data-intro='play']) .home__line--h {
 @media (prefers-reduced-motion: reduce) {
   .home {
     --p: 1;
-    transition: none;
   }
 
-  .logo--animated .logo__strokes path,
-  .logo--animated .logo__shade,
+  .logo--animated .logo__image,
   .logo--animated .logo__wordmark,
-  .logo--animated .logo__subtitle {
+  .logo--animated .logo__subtitle,
+  .home__cue-line {
     animation: none;
-    opacity: 1;
-    stroke-dashoffset: 0;
   }
 
   .home__line {

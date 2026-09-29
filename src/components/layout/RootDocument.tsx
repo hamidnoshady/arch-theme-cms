@@ -41,6 +41,7 @@ export async function RootDocument({ locale, children }: { locale: Locale; child
       dir={dirFor(locale)}
       className={fontClass}
       data-fonts={shazdeReady ? 'shazde' : 'fallback'}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <body>
@@ -58,9 +59,7 @@ export async function rootMetadata(locale: Locale): Promise<Metadata> {
   const origin = mediaOrigin(site)
   const faviconUrl =
     branding.favicon && typeof branding.favicon === 'object' ? branding.favicon.url : null
-  const favicon = faviconUrl
-    ? absoluteMediaUrl(faviconUrl, origin)
-    : '/graphite-logo.svg'
+  const favicon = faviconUrl ? absoluteMediaUrl(faviconUrl, origin) : null
 
   return {
     title: { default: branding.siteName, template: `%s — ${branding.siteName}` },

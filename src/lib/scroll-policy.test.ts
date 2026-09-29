@@ -16,13 +16,18 @@ describe('smooth scroll policy', () => {
     expect(baseCss()).toMatch(/scroll-padding-top:\s*calc\(var\(--header-h\)/)
   })
 
-  it('never applies smooth scrolling globally', () => {
-    // The router resets `documentElement.scrollTop` on every route change, and a
-    // global `scroll-behavior: smooth` animates that reset across the new page.
-    expect(baseCss()).not.toMatch(/scroll-behavior:\s*smooth/)
+  it('smooth-scrolls site-wide, but never under reduced motion', () => {
+    expect(baseCss()).toMatch(
+      /@media \(prefers-reduced-motion: no-preference\)\s*\{\s*html\s*\{\s*scroll-behavior:\s*smooth/,
+    )
   })
 
-  it('scopes the gesture to same-document anchors', () => {
+  it('lets Next disable smooth scrolling for the router\'s own scroll reset', () => {
+    // Without this, a route change animates the old scroll position across the new page.
+    expect(read('src', 'components', 'layout', 'RootDocument.tsx')).toMatch(/data-scroll-behavior="smooth"/)
+  })
+
+  it('keeps in-page anchors shareable and focusable', () => {
     const source = smoothAnchors()
     expect(source).toMatch(/scrollIntoView\(/)
     expect(source).toMatch(/url\.pathname !== location\.pathname/)

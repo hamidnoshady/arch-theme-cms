@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { Logo } from '@/components/brand/Logo'
 import { copy, otherLocale } from '@/lib/i18n'
+import type { ResolvedBranding } from '@/lib/theme/branding'
 import type { Locale, LocaleLink } from '@/lib/types'
 
 type Item = {
@@ -22,8 +23,10 @@ export function MobileMenu({
   locale,
   items,
   language,
+  branding,
 }: {
   locale: Locale
+  branding: ResolvedBranding
   items: Item[]
   language: LocaleLink | null
 }) {
@@ -79,7 +82,7 @@ export function MobileMenu({
       >
         <div className="menu-panel__inner">
           <div className="menu-panel__top">
-            <Logo variant="compact" />
+            <Logo variant="compact" branding={branding} />
             <button type="button" className="menu-panel__close text-link" onClick={() => setOpen(false)}>
               {t.close}
             </button>

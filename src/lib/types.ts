@@ -6,9 +6,9 @@
 
 export type Locale = 'fa' | 'en'
 
-export type Section = 'about' | 'projects' | 'services' | 'education' | 'contact'
+export type Section = 'about' | 'projects' | 'services' | 'education' | 'contact' | 'blog'
 
-export type EntryKind = 'projects' | 'education'
+export type EntryKind = 'projects' | 'education' | 'blog'
 
 export type Ref<T> = T | string | null | undefined
 
@@ -153,6 +153,8 @@ export type SiteBranding = {
   tagline?: string | null
   logo?: Ref<Media>
   logoCompact?: Ref<Media>
+  /** Optional dedicated mark for the home intro (SVG recommended); falls back to `logo`. */
+  homeLogo?: Ref<Media>
   favicon?: Ref<Media>
   defaultOgImage?: Ref<Media>
   ogImage?: Ref<Media>
@@ -175,6 +177,7 @@ export type SiteBindings = {
   contactPage?: BindingValue
   projectsCategory?: BindingValue
   educationCategory?: BindingValue
+  blogCategory?: BindingValue
 }
 
 export type SiteDescriptor = {

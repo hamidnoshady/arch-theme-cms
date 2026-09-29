@@ -23,6 +23,9 @@ type Props = {
 /** Pixels of wheel travel for a full reveal; one mouse-wheel notch (~100px) is enough to commit. */
 const WHEEL_RANGE = 380
 const DEFAULT_INTRO_MS = 2500
+/** Follow time-constants (ms) of the progress spring: tight while a finger/wheel drives it, softer when it settles. */
+const TAU_DRAG = 70
+const TAU_SETTLE = 150
 const REVEAL_KEYS = new Set(['ArrowDown', 'PageDown', 'End'])
 const COLLAPSE_KEYS = new Set(['ArrowUp', 'PageUp', 'Home', 'Escape'])
 
@@ -33,6 +36,11 @@ const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayout
  * The single-screen entrance. One bounded interaction: a progress value `--p`
  * (0 = logo alone, 1 = navigation revealed) driven by wheel, touch, keyboard or
  * the cue button. The page itself never scrolls.
+ *
+ * `--p` is eased toward a target by one requestAnimationFrame loop (exponential
+ * smoothing), so wheel notches, touch drags and button presses all glide the
+ * same way. The stylesheet consumes `--p` in transforms and opacity only — no
+ * layout property moves during the gesture.
  */
 export function HomeStage({
   locale,
@@ -51,36 +59,63 @@ export function HomeStage({
   const ruleRef = useRef<HTMLSpanElement>(null)
   const cueRef = useRef<HTMLButtonElement>(null)
   const progress = useRef(0)
+  const target = useRef(0)
+  const tau = useRef(TAU_SETTLE)
+  const frame = useRef(0)
+  const lastFrame = useRef(0)
   const direction = useRef(0)
   const settleTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
   const reduced = useRef(false)
   const [revealed, setRevealed] = useState(false)
   const [introActive, setIntroActive] = useState(false)
 
-  const apply = useCallback((value: number, motion: 'drag' | 'settle') => {
-    const el = stageRef.current
-    if (!el) return
-    progress.current = clamp(value)
-    el.dataset.motion = motion
-    el.style.setProperty('--p', progress.current.toFixed(4))
+  const paint = useCallback((value: number) => {
+    progress.current = value
+    stageRef.current?.style.setProperty('--p', value.toFixed(4))
   }, [])
+
+  /** Ease `--p` toward `value`; `follow` is the smoothing time-constant in ms. */
+  const run = useCallback(
+    (value: number, follow: number) => {
+      target.current = clamp(value)
+      tau.current = follow
+      if (reduced.current) {
+        paint(target.current)
+        return
+      }
+      if (frame.current) return
+      lastFrame.current = performance.now()
+      const step = (now: number) => {
+        const dt = Math.min(64, now - lastFrame.current)
+        lastFrame.current = now
+        const diff = target.current - progress.current
+        if (Math.abs(diff) < 0.0008) {
+          paint(target.current)
+          frame.current = 0
+          return
+        }
+        paint(progress.current + diff * (1 - Math.exp(-dt / tau.current)))
+        frame.current = requestAnimationFrame(step)
+      }
+      frame.current = requestAnimationFrame(step)
+    },
+    [paint],
+  )
+
+  useEffect(() => () => cancelAnimationFrame(frame.current), [])
 
   const finishIntro = useCallback(() => {
     const root = document.documentElement
     if (root.dataset.intro === 'play') root.dataset.intro = 'done'
   }, [])
 
-  const settle = useCallback((target: 0 | 1) => {
-    const el = stageRef.current
-    if (!el) return
-    el.dataset.motion = 'settle'
-    // The transition only starts if `--p` changes after `data-motion` is painted.
-    requestAnimationFrame(() => {
-      progress.current = target
-      el.style.setProperty('--p', String(target))
-      setRevealed(target === 1)
-    })
-  }, [])
+  const settle = useCallback(
+    (value: 0 | 1) => {
+      run(value, TAU_SETTLE)
+      setRevealed(value === 1)
+    },
+    [run],
+  )
 
   const moveIndicator = useCallback((item: HTMLElement | null) => {
     const nav = listRef.current
@@ -117,12 +152,7 @@ export function HomeStage({
     const nav = navRef.current
     const stage = stageRef.current
     if (!nav || !stage) return
-    // max-height clamps offsetHeight, so read the uncapped size or the
-    // mobile list stays clipped at the desktop height.
-    const previous = nav.style.maxHeight
-    nav.style.maxHeight = 'none'
     const full = nav.offsetHeight
-    nav.style.maxHeight = previous
     if (full > 0) stage.style.setProperty('--nav-h', `${full}px`)
     resetIndicator()
   }, [resetIndicator])
@@ -152,7 +182,7 @@ export function HomeStage({
 
   useEffect(() => {
     const pickTarget = (): 0 | 1 => {
-      const p = progress.current
+      const p = target.current
       return direction.current > 0 ? (p > 0.12 ? 1 : 0) : p < 0.88 ? 0 : 1
     }
     const scheduleSettle = () => {
@@ -167,7 +197,7 @@ export function HomeStage({
       if (!dy) return
       finishIntro()
       direction.current = Math.sign(dy)
-      apply(progress.current + dy / WHEEL_RANGE, 'drag')
+      run(target.current + dy / WHEEL_RANGE, TAU_DRAG)
       scheduleSettle()
     }
 
@@ -177,7 +207,7 @@ export function HomeStage({
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length !== 1) return
       startY = e.touches[0]!.clientY
-      startP = progress.current
+      startP = target.current
       moved = false
     }
     const onTouchMove = (e: TouchEvent) => {
@@ -187,7 +217,7 @@ export function HomeStage({
       moved = true
       finishIntro()
       direction.current = Math.sign(dy)
-      apply(startP + dy / (innerHeight * 0.28), 'drag')
+      run(startP + dy / (innerHeight * 0.28), TAU_DRAG / 2)
     }
     const onTouchEnd = () => {
       if (!moved) return
@@ -208,7 +238,7 @@ export function HomeStage({
       removeEventListener('touchend', onTouchEnd)
       removeEventListener('touchcancel', onTouchEnd)
     }
-  }, [apply, finishIntro, settle])
+  }, [run, finishIntro, settle])
 
   const collapse = useCallback(() => {
     if (reduced.current) return
@@ -270,7 +300,6 @@ export function HomeStage({
       ref={stageRef}
       className="home"
       data-revealed={revealed ? 'true' : 'false'}
-      data-motion="settle"
     >
       <div className="home__grid" aria-hidden="true">
         <span className="home__line home__line--v" />

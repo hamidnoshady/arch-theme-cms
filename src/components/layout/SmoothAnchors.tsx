@@ -3,14 +3,14 @@
 import { useEffect } from 'react'
 
 /**
- * Smooth scrolling, scoped to same-document anchors: the footer's "back to top",
- * the skip link, and any in-page link an editor writes in rich text.
+ * Same-document anchors: the footer's "back to top", the skip link, and any
+ * in-page link an editor writes in rich text.
  *
- * A global `scroll-behavior: smooth` is deliberately not used. The App Router
- * resets `documentElement.scrollTop` on every route change, and CSS smooth
- * scrolling animates that reset too, dragging the previous scroll position across
- * the freshly rendered page. Delegation keeps navigation instant and still lets
- * `scroll-padding-top` clear the sticky header.
+ * Page scrolling is smooth site-wide through CSS (`scroll-behavior`, base.css) and
+ * `<html data-scroll-behavior="smooth">`, which has Next disable it for route-change
+ * scroll resets. This handler adds what CSS cannot: keep the hash shareable without
+ * a history entry, move focus to a focusable target (the skip link), and honour
+ * reduced motion explicitly.
  */
 export function SmoothAnchors() {
   useEffect(() => {

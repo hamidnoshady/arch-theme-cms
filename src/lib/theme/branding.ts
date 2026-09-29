@@ -8,6 +8,7 @@ export const DEMO_BRANDING: SiteBranding = {
   tagline: null,
   logo: null,
   logoCompact: null,
+  homeLogo: null,
   favicon: null,
   defaultOgImage: null,
 }
@@ -54,6 +55,7 @@ export function resolveBranding(site: SiteDescriptor | null, locale: Locale): Re
     tagline: branding?.tagline?.trim() || null,
     logo: mediaRef(branding?.logo),
     logoCompact: mediaRef(branding?.logoCompact ?? branding?.logo),
+    homeLogo: mediaRef(branding?.homeLogo ?? branding?.logo),
     favicon: mediaRef(branding?.favicon),
     defaultOgImage: mediaRef(branding?.defaultOgImage ?? branding?.ogImage),
     siteName,

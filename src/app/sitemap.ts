@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const section of SECTIONS) {
     const loc: Url['loc'] = { fa: undefined, en: undefined }
     for (const locale of locales) {
-      const listing = section === 'projects' || section === 'education'
+      const listing = (ENTRY_KINDS as string[]).includes(section)
       if (listing || (await sectionPageExists(section, locale))) loc[locale] = href(locale, section)
     }
     urls.push({ loc })

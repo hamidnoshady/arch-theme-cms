@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 
-import { Logo } from '@/components/brand/Logo'
 import { copy, href } from '@/lib/i18n'
 import type { Locale } from '@/lib/types'
 
@@ -24,7 +23,7 @@ export function StatusView({
   return (
     <main className="status-page">
       <Link href={href(locale)} className="status-page__brand" aria-label={t.home}>
-        <Logo variant="compact" />
+        <span className="status-page__home">{t.home}</span>
       </Link>
       <div className="status-page__body">
         <span className="rule rule--marked" aria-hidden="true" />

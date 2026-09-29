@@ -36,8 +36,8 @@ export function toCardEntry(
     title: post.title ?? '',
     image,
     category,
-    date: kind === 'education' ? formatDate(post.publishedAt, locale) : undefined,
-    excerpt: kind === 'education' ? post.meta?.description ?? undefined : undefined,
+    date: kind !== 'projects' ? formatDate(post.publishedAt, locale) : undefined,
+    excerpt: kind !== 'projects' ? post.meta?.description ?? undefined : undefined,
   }
 }
 
