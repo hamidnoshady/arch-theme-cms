@@ -12,7 +12,7 @@
   "framework": "nextjs",
   "proxiesApi": true,
   "capabilities": {
-    "blog": false,
+    "blog": true,
     "projects": true,
     "education": true,
     "contactForm": true,
@@ -93,6 +93,13 @@
       "type": "category",
       "labelEn": "Projects category",
       "labelFa": "دسته پروژه‌ها",
+      "required": false
+    },
+    {
+      "key": "blogCategory",
+      "type": "category",
+      "labelEn": "Blog category",
+      "labelFa": "دستهٔ وبلاگ",
       "required": false
     },
     {

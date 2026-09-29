@@ -36,6 +36,7 @@ export function pathsForResources(resources: string[]): string[] {
     if (
       key === 'projects' ||
       key === 'education' ||
+      key === 'blog' ||
       key === 'pages' ||
       key === 'posts' ||
       key === 'categories' ||

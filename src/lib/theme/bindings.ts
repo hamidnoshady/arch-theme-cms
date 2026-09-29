@@ -9,6 +9,7 @@ export type ContentBindings = {
   contactPage: Page | null
   projectsCategory: Category | null
   educationCategory: Category | null
+  blogCategory: Category | null
 }
 
 /**
@@ -17,13 +18,14 @@ export type ContentBindings = {
  * route would not render (see `sections.ts` for the binding rules).
  */
 export async function resolveBindings(locale: Locale): Promise<ContentBindings> {
-  const [homePage, aboutPage, servicesPage, contactPage, projects, education] = await Promise.all([
+  const [homePage, aboutPage, servicesPage, contactPage, projects, education, blog] = await Promise.all([
     getHomePage(locale),
     getSectionPage('about', locale),
     getSectionPage('services', locale),
     getSectionPage('contact', locale),
     getSectionCategories('projects', locale),
     getSectionCategories('education', locale),
+    getSectionCategories('blog', locale),
   ])
   return {
     homePage,
@@ -32,5 +34,6 @@ export async function resolveBindings(locale: Locale): Promise<ContentBindings> 
     contactPage,
     projectsCategory: projects.root,
     educationCategory: education.root,
+    blogCategory: blog.root,
   }
 }

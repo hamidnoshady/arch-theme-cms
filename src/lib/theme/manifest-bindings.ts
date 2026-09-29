@@ -25,5 +25,6 @@ export function effectiveBindings(site: SiteDescriptor | null): SiteBindings | n
     contactPage: fromSite?.contactPage ?? hints.contactPage ?? null,
     projectsCategory: fromSite?.projectsCategory ?? hints.projectsCategory ?? null,
     educationCategory: fromSite?.educationCategory ?? hints.educationCategory ?? null,
+    blogCategory: fromSite?.blogCategory ?? hints.blogCategory ?? null,
   }
 }

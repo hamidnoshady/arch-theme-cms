@@ -81,3 +81,22 @@ describe('office location', () => {
   })
 
 })
+
+describe('blog section', () => {
+  it('is a category-backed entry kind with its own content slot', async () => {
+    const { ENTRY_KINDS, SECTION_SLOT, sectionRef } = await import('./theme/sections')
+    expect(ENTRY_KINDS).toContain('blog')
+    expect(SECTION_SLOT.blog).toBe('blogCategory')
+    const site = { themeRuntime: { bindings: { blogCategory: { id: '0b1f2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d', slug: 'journal' } } } }
+    expect(sectionRef(site as never, 'blog')).toEqual({ id: '0b1f2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d', slug: 'journal' })
+    expect(sectionRef(null, 'blog').slug).toBe('blog')
+  })
+
+  it('has a route and copy in both locales', async () => {
+    const { copy, href } = await import('./i18n')
+    expect(href('fa', 'blog')).toBe('/blog')
+    expect(href('en', 'blog')).toBe('/en/blog')
+    expect(copy.fa.blog).toBeTruthy()
+    expect(copy.en.blog).toBe('Blog')
+  })
+})

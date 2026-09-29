@@ -91,6 +91,7 @@ export function SiteHeaderClient({ locale, items, branding, homeLabel, language 
           <LanguageSwitch locale={locale} link={language} />
           <MobileMenu
             locale={locale}
+            branding={branding}
             items={items.map(({ key, href: h, label, number, current, external, newTab }) => ({
               key,
               href: h,

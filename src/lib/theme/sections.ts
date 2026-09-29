@@ -26,6 +26,7 @@ export const SECTION_SLOT = {
   contact: 'contactPage',
   projects: 'projectsCategory',
   education: 'educationCategory',
+  blog: 'blogCategory',
 } as const satisfies Record<Section, keyof SiteBindings>
 
 /** `home` is a page role too, but it is the site root, not a section route. */
@@ -70,7 +71,7 @@ export function sectionRef(site: SiteDescriptor | null, section: Section | 'home
 }
 
 /** Every category-backed section, so callers do not repeat the list. */
-export const ENTRY_KINDS: EntryKind[] = ['projects', 'education']
+export const ENTRY_KINDS: EntryKind[] = ['projects', 'education', 'blog']
 
 /**
  * Page id → the role that page plays on this site. A page bound to «about» has one canonical

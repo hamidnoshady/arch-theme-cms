@@ -46,6 +46,7 @@ async function fallbackNav(locale: Locale): Promise<PrimaryNavItem[]> {
   if (bindings.projectsCategory?.title) entries.push({ slug: 'projects', label: bindings.projectsCategory.title! })
   if (bindings.servicesPage?.title) entries.push({ slug: 'services', label: bindings.servicesPage.title! })
   if (bindings.educationCategory?.title) entries.push({ slug: 'education', label: bindings.educationCategory.title! })
+  if (bindings.blogCategory?.title) entries.push({ slug: 'blog', label: bindings.blogCategory.title! })
   if (bindings.contactPage?.title) entries.push({ slug: 'contact', label: bindings.contactPage.title! })
 
   return entries.map((entry, index) => ({

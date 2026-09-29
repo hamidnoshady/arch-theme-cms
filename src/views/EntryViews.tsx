@@ -14,6 +14,17 @@ import { copy, formatDate, href, sectionNumber } from '@/lib/i18n'
 import { resolveMedia } from '@/lib/media'
 import type { EntryKind, LocaleLink, Page, Post } from '@/lib/types'
 
+/** Copy that differs per section: empty state and the "more like this" headings. */
+const entryCopy = (t: (typeof copy)['fa'], kind: EntryKind) =>
+  kind === 'projects'
+    ? { empty: t.emptyProjects, related: t.relatedProjects, next: t.nextProjects }
+    : kind === 'blog'
+      ? { empty: t.emptyBlog, related: t.relatedBlog, next: t.nextBlog }
+      : { empty: t.emptyEducation, related: t.relatedEducation, next: t.nextEducation }
+
+/** Sections whose entries are dated articles rather than project fact sheets. */
+const isArticle = (kind: EntryKind) => kind !== 'projects'
+
 const categoryIds = (post: Post) =>
   (post.categories ?? []).map((c) => (typeof c === 'string' ? c : c?.id)).filter((id): id is string => Boolean(id))
 
@@ -40,7 +51,7 @@ export async function IndexView({
   const [entries, section] = await Promise.all([getEntries(kind, ctx.locale), getSectionCategories(kind, ctx.locale)])
 
   const options =
-    kind === 'projects'
+    kind !== 'education'
       ? section.children
           .map((c) => ({
             key: c.slug || c.id,
@@ -73,7 +84,7 @@ export async function IndexView({
           <EntryGrid entries={cards} locale={ctx.locale} variant={kind === 'projects' ? 'project' : 'editorial'} prioritise={2} />
         ) : (
           <EmptyState>
-            {category && entries.length ? t.emptyFilter : kind === 'projects' ? t.emptyProjects : t.emptyEducation}
+            {category && entries.length ? t.emptyFilter : entryCopy(t, kind).empty}
           </EmptyState>
         )}
       </div>
@@ -102,7 +113,7 @@ export async function EntryView({
   const meta: MetaItem[] = []
   if (cat?.title) meta.push({ label: t.category, value: cat.title })
   for (const f of facts) meta.push({ label: f.label, value: f.value })
-  if (kind === 'education') {
+  if (isArticle(kind)) {
     const date = formatDate(post.publishedAt, ctx.locale)
     if (date) meta.push({ label: t.published, value: <time dateTime={post.publishedAt ?? undefined}>{date}</time> })
     const authors = (post.populatedAuthors ?? []).map((a) => a.name).filter(Boolean)
@@ -121,16 +132,14 @@ export async function EntryView({
           .filter((p, i, arr): p is Post => Boolean(p) && p!.id !== post.id && arr.findIndex((o) => o?.id === p!.id) === i)
       : []
   const more = (related.length ? related : adjacent).slice(0, kind === 'projects' ? 2 : 3)
-  const moreTitle = related.length
-    ? kind === 'projects'
-      ? t.relatedProjects
-      : t.relatedEducation
-    : kind === 'projects'
-      ? t.nextProjects
-      : t.nextEducation
+  const moreTitle = related.length ? entryCopy(t, kind).related : entryCopy(t, kind).next
+  // Newest first, so "previous" is the newer neighbour and "next" the older one.
+  const newer = index > 0 ? siblings[index - 1] : undefined
+  const older = index >= 0 ? siblings[index + 1] : undefined
 
   return (
     <PageShell locale={ctx.locale} active={sectionActive(ctx.locale, kind, false)} language={language}>
+      <div className="reading-progress" role="presentation" aria-hidden="true" />
       <article className={`container page entry entry--${kind}`}>
         <PageTitle
           number={sectionNumber(kind, ctx.locale)}
@@ -156,6 +165,29 @@ export async function EntryView({
           variant={kind === 'projects' ? 'project' : 'editorial'}
           entries={more.map((p) => toCardEntry(p, kind, ctx.locale, ctx.origin, subCategory(p, section)?.title ?? undefined))}
         />
+
+        {newer || older ? (
+          <nav className="entry__pager" aria-label={t[kind]}>
+            {newer ? (
+              <Link className="entry__pager-link entry__pager-link--prev" href={href(ctx.locale, `${kind}/${encodeURIComponent(newer.slug ?? '')}`)} rel="prev">
+                <span className="entry__pager-label">
+                  <span className="arrow arrow--back" aria-hidden="true" /> {t.previousEntry}
+                </span>
+                <span className="entry__pager-title">{newer.title}</span>
+              </Link>
+            ) : (
+              <span />
+            )}
+            {older ? (
+              <Link className="entry__pager-link entry__pager-link--next" href={href(ctx.locale, `${kind}/${encodeURIComponent(older.slug ?? '')}`)} rel="next">
+                <span className="entry__pager-label">
+                  {t.nextEntry} <span className="arrow" aria-hidden="true" />
+                </span>
+                <span className="entry__pager-title">{older.title}</span>
+              </Link>
+            ) : null}
+          </nav>
+        ) : null}
 
         <nav className="entry__back" aria-label={t[kind]}>
           <span className="rule rule--marked" aria-hidden="true" />
