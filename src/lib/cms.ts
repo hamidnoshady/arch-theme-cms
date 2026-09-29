@@ -17,7 +17,6 @@ import type {
   SiteDescriptor,
 } from './types'
 
-export const CMS_TAG = 'cms'
 const TTL_OK = 60_000
 const TTL_MISS = 5_000
 

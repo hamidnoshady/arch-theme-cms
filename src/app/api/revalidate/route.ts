@@ -1,12 +1,14 @@
 import { revalidatePath, revalidateTag } from 'next/cache'
 
-import { CMS_TAG, invalidateCmsCache } from '@/lib/cms'
+import { invalidateCmsCache } from '@/lib/cms'
 import { pathsForResources, toThemePath, verifyRevalidateSignature } from '@/lib/revalidate'
 
 /**
  * CMS change notice (THEME_API §17). The HMAC is verified over the raw body
- * before anything is purged. Every CMS read is tagged, so one tag purge covers
- * localized slugs, section pages and listings that a path list would miss.
+ * before anything is purged. CMS reads go through the in-process cache in
+ * `src/lib/cms.ts` (node:http, not `fetch`, so Next's data cache never holds them);
+ * dropping that cache is what makes every localized slug, section page and listing
+ * fresh at once, and the path purges below refresh rendered pages.
  */
 export async function POST(req: Request) {
   const raw = await req.text()
@@ -28,7 +30,6 @@ export async function POST(req: Request) {
   }
 
   invalidateCmsCache()
-  revalidateTag(CMS_TAG, { expire: 0 })
   for (const tag of tags) revalidateTag(tag, { expire: 0 })
 
   const themePaths = [
@@ -45,5 +46,5 @@ export async function POST(req: Request) {
   revalidatePath('/', 'layout')
   revalidatePath('/en', 'layout')
 
-  return Response.json({ revalidated: true, tag: CMS_TAG, tags, paths: themePaths })
+  return Response.json({ revalidated: true, tags, paths: themePaths })
 }
