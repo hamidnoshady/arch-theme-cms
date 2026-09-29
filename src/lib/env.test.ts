@@ -42,15 +42,21 @@ describe('platform env contract', () => {
     expect(siteApiKey()).toBe('platform')
   })
 
-  it('builds Host + Authorization for CMS calls', () => {
+  it('names the tenant with the key and keeps the CMS Host when a key is set', () => {
+    // Rewriting Host to the customer domain makes Coolify's proxy route the call back
+    // into this theme (or nowhere): the site renders empty after a timeout.
     process.env.ESHOBE_API_KEY = 'k'
     process.env.ESHOBE_SITE_DOMAIN = 'https://acme.ir/'
     expect(siteDomain()).toBe('acme.ir')
     expect(cmsRequestHeaders()).toEqual({
       Accept: 'application/json',
       Authorization: 'Bearer k',
-      Host: 'acme.ir',
     })
+  })
+
+  it('falls back to Host as the tenant without a key', () => {
+    process.env.ESHOBE_SITE_DOMAIN = 'acme.ir'
+    expect(cmsRequestHeaders()).toEqual({ Accept: 'application/json', Host: 'acme.ir' })
   })
 
   it('uses public origin for preview links and site domain for canonicals', () => {

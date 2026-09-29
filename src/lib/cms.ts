@@ -2,6 +2,7 @@ import { cache } from 'react'
 
 import { HOME_SLUG } from '@eshobe/site-runtime'
 import { ENTRY_KINDS, sectionRef } from './theme/sections'
+import { siteId } from './env'
 import { cmsJson } from './upstream'
 import type {
   Category,
@@ -22,6 +23,7 @@ const TTL_MISS = 5_000
 
 type Slot = { at: number; ttl: number; result: CmsResult<unknown> }
 const slots = new Map<string, Slot>()
+const inflight = new Map<string, Promise<CmsResult<unknown>>>()
 
 /** Drops the in-process response cache. Called after a verified revalidation webhook. */
 export function invalidateCmsCache() {
@@ -41,23 +43,59 @@ function toSearch(query: Query): string {
 
 export type CmsResult<T> = { ok: true; data: T } | { ok: false; status: number }
 
-/**
- * Server-only REST call. Tenant is resolved by the CMS from `Host` and/or the
- * site API key in `cmsRequestHeaders` — never from a query parameter.
- */
-export async function cmsGet<T>(path: string, query: Query = {}): Promise<CmsResult<T>> {
-  const key = `${path}${toSearch(query)}`
-  const hit = slots.get(key)
-  if (hit && Date.now() - hit.at < hit.ttl) return hit.result as CmsResult<T>
+/** An answer that says nothing about the content: the CMS was down, slow or erroring. */
+const transient = (status: number) => status === 0 || status === 429 || status >= 500
 
-  const { status, data } = await cmsJson<T>(path, toSearch(query))
+async function fetchSlot<T>(key: string, path: string, search: string, previous?: Slot): Promise<CmsResult<T>> {
+  const { status, data } = await cmsJson<T>(path, search)
   const result: CmsResult<T> = data !== null ? { ok: true, data } : { ok: false, status }
+  // A CMS hiccup must not blank a page that rendered a minute ago: keep serving the last
+  // good answer and retry soon, instead of caching the failure.
+  if (!result.ok && transient(status) && previous?.result.ok) {
+    slots.set(key, { at: Date.now(), ttl: TTL_MISS, result: previous.result })
+    return previous.result as CmsResult<T>
+  }
   slots.set(key, { at: Date.now(), ttl: result.ok ? TTL_OK : TTL_MISS, result })
   return result
 }
 
+/**
+ * Server-only REST call. Tenant is resolved by the CMS from the site API key (or `Host`
+ * without one) in `cmsRequestHeaders` — never from a query parameter. Concurrent renders
+ * asking the same question share one request.
+ */
+export async function cmsGet<T>(path: string, query: Query = {}): Promise<CmsResult<T>> {
+  const search = toSearch(query)
+  const key = `${path}${search}`
+  const hit = slots.get(key)
+  if (hit && Date.now() - hit.at < hit.ttl) return hit.result as CmsResult<T>
+
+  const pending = inflight.get(key)
+  if (pending) return pending as Promise<CmsResult<T>>
+  const request = fetchSlot<T>(key, path, search, hit).finally(() => inflight.delete(key))
+  inflight.set(key, request)
+  return request
+}
+
+/**
+ * Narrows a list to this deployment's site. A `where` can only narrow a CMS read, never
+ * widen it, so this is free when the CMS already scopes the request — and it is what
+ * keeps a header, footer or category list from another tenant out of this site on a CMS
+ * that scopes some collections by `Host` only.
+ */
+function withSite(query: Query): Query {
+  const id = siteId()
+  return id ? { ...query, 'where[site][equals]': id } : query
+}
+
+/** A site API key also reads drafts; a public render shows published documents only. */
+const isPublished = (doc: object | null | undefined) => {
+  const status = (doc as { _status?: string | null } | null | undefined)?._status
+  return Boolean(doc) && (status === undefined || status === null || status === 'published')
+}
+
 async function list<T>(collection: string, query: Query): Promise<T[]> {
-  const res = await cmsGet<Paginated<T>>(collection, query)
+  const res = await cmsGet<Paginated<T>>(collection, withSite(query))
   return res.ok ? res.data.docs ?? [] : []
 }
 
@@ -98,7 +136,7 @@ export const getPageById = cache(async (id: string, locale: Locale): Promise<Pag
     depth: 2,
     fallbackLocale: false,
   })
-  return res.ok && hasLocalizedContent(res.data) ? res.data : null
+  return res.ok && isPublished(res.data) && hasLocalizedContent(res.data) ? res.data : null
 })
 
 /**
@@ -146,11 +184,18 @@ export const getHomePage = cache(async (locale: Locale): Promise<Page | null> =>
 /** Slug of a document in another locale, or null when it is not translated. */
 export const getTranslatedSlug = cache(
   async (collection: 'pages' | 'posts', id: string, locale: Locale): Promise<string | null> => {
-    const res = await cmsGet<{ slug?: string | null; title?: string | null }>(
+    const res = await cmsGet<{ slug?: string | null; title?: string | null; _status?: string | null }>(
       `${collection}/${encodeURIComponent(id)}`,
-      { locale, depth: 0, fallbackLocale: false, 'select[slug]': true, 'select[title]': true },
+      {
+        locale,
+        depth: 0,
+        fallbackLocale: false,
+        'select[slug]': true,
+        'select[title]': true,
+        'select[_status]': true,
+      },
     )
-    return res.ok && hasLocalizedContent(res.data) ? res.data.slug! : null
+    return res.ok && isPublished(res.data) && hasLocalizedContent(res.data) ? res.data.slug! : null
   },
 )
 

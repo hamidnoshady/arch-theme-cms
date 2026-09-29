@@ -1,7 +1,16 @@
 import http from 'node:http'
 import https from 'node:https'
 
-import { cmsOrigin, cmsRequestHeaders, siteDomain } from './env'
+import { cmsOrigin, cmsRequestHeaders } from './env'
+
+/**
+ * Reused connections to the CMS. Without keep-alive every lookup pays a fresh TCP + TLS
+ * handshake, and a page render makes several lookups in sequence.
+ */
+const agents = {
+  http: new http.Agent({ keepAlive: true, maxSockets: 32 }),
+  https: new https.Agent({ keepAlive: true, maxSockets: 32 }),
+}
 
 export type UpstreamResult = { status: number; headers: http.IncomingHttpHeaders; body: Buffer }
 
@@ -9,17 +18,21 @@ export type UpstreamResult = { status: number; headers: http.IncomingHttpHeaders
  * `fetch` silently discards a custom `Host`, and the CMS resolves the tenant from
  * `Host` before the API key. node:http sends the header we give it.
  */
+export { agents as upstreamAgents }
+
 export function upstreamRequest(
   target: URL,
   init: { method?: string; headers?: Record<string, string>; body?: Buffer | null; timeout?: number } = {},
 ): Promise<UpstreamResult> {
-  const client = target.protocol === 'http:' ? http : https
+  const plain = target.protocol === 'http:'
+  const client = plain ? http : https
   return new Promise((resolve, reject) => {
     const req = client.request(
       target,
       {
         method: init.method ?? 'GET',
         headers: init.headers,
+        agent: plain ? agents.http : agents.https,
         servername: target.hostname,
         timeout: init.timeout ?? 8_000,
       },
@@ -49,8 +62,6 @@ export async function cmsJson<T>(path: string, search = ''): Promise<{ status: n
     return { status: 0, data: null }
   }
   const headers = cmsRequestHeaders()
-  const domain = siteDomain()
-  if (domain) headers.Host = domain
   try {
     const res = await upstreamRequest(target, { headers })
     if (res.status < 200 || res.status >= 300) return { status: res.status, data: null }
