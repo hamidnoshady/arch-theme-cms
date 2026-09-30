@@ -40,7 +40,11 @@ export function SmoothAnchors() {
       history.replaceState(null, '', url.hash)
       // Native fragment navigation focuses a focusable target (`#content` is
       // tabindex="-1"), which is how the skip link moves the caret.
-      if (target.hasAttribute('tabindex')) target.focus({ preventScroll: true })
+      // If the target doesn't have a tabindex, we add one so focus can move.
+      if (!target.hasAttribute('tabindex')) {
+        target.setAttribute('tabindex', '-1')
+      }
+      target.focus({ preventScroll: true })
     }
 
     document.addEventListener('click', onClick)
