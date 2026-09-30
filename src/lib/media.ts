@@ -22,12 +22,23 @@ const VIDEO_EXT = /\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i
  * Origin media URLs are resolved against. `media.url` is always relative
  * (`/api/media/file/…`). Order: explicit override → the site's media origin once
  * its domain is verified → this deployment's own `/api` proxy (preview hosts).
+ *
+ * An origin on the site's own domain is dropped: this deployment *is* that domain and
+ * proxies `/api/media/file/*`, so a relative URL is equivalent — and immune to the CMS
+ * reporting the wrong protocol or port (it once sent `https://acme.com:3000`, which broke
+ * every image and logo on the site).
  */
 export function mediaOrigin(site: SiteDescriptor | null): string {
   const override = process.env.NEXT_PUBLIC_MEDIA_ORIGIN?.trim()
   if (override) return override.replace(/\/$/, '')
-  if (site?.media?.origin && site.domainVerified !== false) return site.media.origin.replace(/\/$/, '')
-  return ''
+  const origin = site?.media?.origin
+  if (!origin || site.domainVerified === false) return ''
+  try {
+    if (new URL(origin).hostname === site.domain) return ''
+  } catch {
+    return ''
+  }
+  return origin.replace(/\/$/, '')
 }
 
 export function absoluteMediaUrl(url: string | null | undefined, origin: string): string {
