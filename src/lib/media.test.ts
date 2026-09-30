@@ -1,12 +1,20 @@
 import { describe, expect, it } from 'vitest'
 
-import { absoluteMediaUrl, isVideoMime, resolveMedia } from './media'
+import { absoluteMediaUrl, isVideoMime, mediaOrigin, resolveMedia } from './media'
+import type { SiteDescriptor } from './types'
 
 describe('media urls', () => {
   it('resolves relative CMS paths against the origin and leaves absolute urls', () => {
     expect(absoluteMediaUrl('/api/media/file/a.jpg', 'https://acme.ir')).toBe('https://acme.ir/api/media/file/a.jpg')
     expect(absoluteMediaUrl('https://cdn.example/a.jpg', 'https://acme.ir')).toBe('https://cdn.example/a.jpg')
     expect(absoluteMediaUrl(undefined, 'https://acme.ir')).toBe('')
+  })
+
+  it('serves own-domain media relatively, whatever port or protocol the CMS reports', () => {
+    const site = (origin: string) => ({ domain: 'arch.eshobe.com', media: { origin } }) as SiteDescriptor
+    expect(mediaOrigin(site('https://arch.eshobe.com:3000'))).toBe('')
+    expect(mediaOrigin(site('https://cdn.eshobe.com/'))).toBe('https://cdn.eshobe.com')
+    expect(mediaOrigin(null)).toBe('')
   })
 
   it('builds a srcset from the smaller generated sizes', () => {
