@@ -1,3 +1,4 @@
+import { draftMode } from 'next/headers'
 import { cache } from 'react'
 
 import { HOME_SLUG } from '@eshobe/site-runtime'
@@ -64,6 +65,13 @@ async function fetchSlot<T>(key: string, path: string, search: string, previous?
  * asking the same question share one request.
  */
 export async function cmsGet<T>(path: string, query: Query = {}): Promise<CmsResult<T>> {
+  if (await previewing()) {
+    // Editor preview (see /next/preview): latest draft, published or not, never cached.
+    const { 'where[_status][equals]': _published, ...rest } = query
+    const search = toSearch({ ...rest, draft: true })
+    const { status, data } = await cmsJson<T>(path, search)
+    return data !== null ? { ok: true, data } : { ok: false, status }
+  }
   const search = toSearch(query)
   const key = `${path}${search}`
   const hit = slots.get(key)
@@ -85,6 +93,15 @@ export async function cmsGet<T>(path: string, query: Query = {}): Promise<CmsRes
 function withSite(query: Query): Query {
   const id = siteId()
   return id ? { ...query, 'where[site][equals]': id } : query
+}
+
+/** Whether this request is an editor preview (draft mode, set by /next/preview). */
+async function previewing(): Promise<boolean> {
+  try {
+    return (await draftMode()).isEnabled
+  } catch {
+    return false // outside a request (sitemap, tests)
+  }
 }
 
 /** A site API key also reads drafts; a public render shows published documents only. */
@@ -135,7 +152,7 @@ export const getPageById = cache(async (id: string, locale: Locale): Promise<Pag
     depth: 2,
     fallbackLocale: false,
   })
-  return res.ok && isPublished(res.data) && hasLocalizedContent(res.data) ? res.data : null
+  return res.ok && ((await previewing()) || isPublished(res.data)) && hasLocalizedContent(res.data) ? res.data : null
 })
 
 /**
@@ -194,7 +211,7 @@ export const getTranslatedSlug = cache(
         'select[_status]': true,
       },
     )
-    return res.ok && isPublished(res.data) && hasLocalizedContent(res.data) ? res.data.slug! : null
+    return res.ok && ((await previewing()) || isPublished(res.data)) && hasLocalizedContent(res.data) ? res.data.slug! : null
   },
 )
 
