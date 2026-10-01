@@ -38,9 +38,34 @@
    * display 42–72 · h1 36–56 · h2 26–36 · h3 20–24 · body-lg 18 · body 17 ·
    * ui 15 · label 14 · meta 13. The old micro scale is retired; secondary
    * metadata uses --text-meta and the smallest token is the label floor.
+   *
+   * The two statement rungs climb on the same slope (3.6vw vs 2.75vw, a 1.29
+   * ratio) rather than flattening against their caps early: a steeper display
+   * curve used to reach 69px on a 980px canvas, where a tablet is one column and
+   * a title that size is a wall. Both now grow at the same rate, so a page title
+   * stays clear of its section headings at every width instead of only at the ends.
    */
-  --text-display: clamp(2.625rem, 1.5rem + 4.6vw, 4.5rem);
-  --text-h1: clamp(2.25rem, 1.5rem + 3.1vw, 3.5rem);
+  --text-display: clamp(2.625rem, 1.2rem + 3.6vw, 4.5rem);
+  /*
+   * Page titles: the display size is a statement, and a statement needs width. A
+   * phone gets the h1 step instead (see the mobile step below), so a page title
+   * does not spend a third of the viewport before the first line of content.
+   */
+  --text-title: var(--text-display);
+  --text-title-weight: var(--text-display-weight);
+  /*
+   * Section headings sit one step under the page title so the two never compete:
+   * ~72/56 on a wide canvas, ~32/24 on a phone. Only the size steps down; the
+   * heading weight role is shared with h1.
+   */
+  --text-section: var(--text-h1);
+  /*
+   * A heading the CMS writes inside a page's intro is a standfirst: it belongs to the
+   * page title's voice, not to the section headings below. It sits a full rung under the
+   * title on a wide canvas, and two rungs down on a phone (see the compact step).
+   */
+  --text-standfirst: var(--text-h2);
+  --text-h1: clamp(2rem, 0.95rem + 2.75vw, 3.5rem);
   --text-h2: clamp(1.625rem, 1.375rem + 1.1vw, 2.25rem);
   --text-h3: clamp(1.25rem, 1.1875rem + 0.26vw, 1.5rem);
   --text-body-lg: 1.125rem;
@@ -48,6 +73,16 @@
   --text-ui: 0.9375rem;
   --text-label: 0.875rem;
   --text-meta: 0.8125rem;
+
+  /*
+   * Tracking. Latin-composed chrome (brand lockup, tabular figures, uppercase
+   * Kickers) carries letter-spacing as a design device. Persian does not: it is a
+   * connected script, so tracking only loosens the joins and reads as a mistake.
+   * Roles that can hold either language consume these tokens instead of raw ems,
+   * and `html[lang='fa']` zeroes them once, in one place.
+   */
+  --tracking-label: 0.04em;
+  --tracking-ui: 0.02em;
 
   --leading-display: 1.08;
   --leading-heading: 1.25;
@@ -63,17 +98,77 @@
   --section: clamp(56px, 8vw, 112px);
   --gutter: clamp(0px, 4vw, 56px);
   --frame-pad: clamp(10px, 1vw, 16px);
+  /*
+   * The card's mat: the hairline frame floats this far inside the card's layout box.
+   * A percentage (of the card's own width), so it scales with the column the grid
+   * hands the card instead of being one px value for every breakpoint.
+   */
+  --card-mat: 5%;
   --frame-inset: clamp(5px, 0.55vw, 8px);
 
   --header-h: 64px;
+  /*
+   * The uploaded mark in the page chrome (header bar and drawer top). Deliberately
+   * larger than the identity scale's compact size in home.css: this one is the
+   * tenant's primary logo standing alone in a bar, not a mark inline with copy.
+   */
+  --chrome-logo-h: 40px;
+  /*
+   * Mobile drawer width. One value for two consumers — the panel's own width and
+   * the offset the page is pushed by — so the two can never drift apart and leave
+   * a seam. Percent (not vw) keeps it stable when opening drops the scrollbar.
+   */
+  --menu-w: min(400px, 86%);
+  /*
+   * Where a rule that draws in should start from. `transform-origin` accepts no
+   * logical value: `inline-start` is silently invalid there and falls back to the
+   * centre, so a hairline meant to sweep out from the reading edge grows outward from
+   * its middle instead. Direction is the only way to say it, so it is said once here.
+   */
+  --origin-inline-start: left;
   --ease: cubic-bezier(0.22, 0.7, 0.2, 1);
   --dur: 0.7s;
   /* Choreography durations; the intro clock itself lives in --intro-duration. */
   --reveal-dur: 0.7s;
   --reveal-stagger: 70ms;
   --entrance-dur: 0.4s;
+  /*
+   * How long the route rule takes to cross to its 92% ceiling. Long enough that it never
+   * claims to be nearly finished, short enough that a real page change — a few hundred
+   * milliseconds on a prefetched route — draws a line most of the way across. At 9s the
+   * entire page change happened inside the rule's first tenth, so a visitor saw a stub at
+   * the reading edge instead of a rule being drawn.
+   */
+  --route-dur: 3s;
 
   color-scheme: light;
+}
+
+/*
+ * Mobile step (≤640px): the same roles, one notch down, sitting at the low end of
+ * each band above — a phone is one column with one thumb, and a size that reads as
+ * generous on a 1440px canvas reads as a wall of type on a 390px one. Every value
+ * stays inside its AGENTS.md band: h1 32, h2 24, h3 18, body 16, body-lg 17, ui 14.
+ * Every value is a further notch down: a phone title is 28px, not 32px, because a phone
+ * holds one column and one thumb, and a title that fills a third of the width pushes the
+ * content it introduces off the screen. The ladder keeps its ratios — 28 / 21 / 17 for
+ * title, section and subhead — so no two roles collide.
+ */
+@media (max-width: 640px) {
+  :root {
+    --text-h1: 1.75rem;
+    --text-h2: 1.3125rem;
+    --text-h3: 1.0625rem;
+    --text-body-lg: 1rem;
+    --text-body: 1rem;
+    --text-ui: 0.875rem;
+    --leading-heading: 1.2;
+    --text-title: var(--text-h1);
+    --text-title-weight: var(--text-h1-weight);
+    --text-section: var(--text-h2);
+    /* Two rungs down: 32 / 17 reads as a title and its standfirst, 32 / 21 as two titles. */
+    --text-standfirst: var(--text-h3);
+  }
 }
 
 @property --p {
@@ -85,13 +180,22 @@
 html[lang='fa'] {
   --font-ui: var(--font-shazde), 'Vazirmatn Variable', Vazirmatn, system-ui, sans-serif;
   --leading-body: 1.8;
-  --leading-body-lg: 1.9;
+  /* One leading for Persian prose, at every size: a taller lead paragraph read as a
+     separate, airier block than the copy under it. */
+  --leading-body-lg: 1.8;
+  /* Persian takes no tracking: line-height carries the airiness instead. */
+  --tracking-label: normal;
+  --tracking-ui: normal;
 }
 
 html[lang='en'] {
   --font-ui: var(--font-inter), system-ui, sans-serif;
   --leading-body: 1.7;
   --leading-body-lg: 1.75;
+}
+
+html[dir='rtl'] {
+  --origin-inline-start: right;
 }
 
 html[data-fonts='fallback'] {

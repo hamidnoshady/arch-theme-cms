@@ -1,4 +1,4 @@
-import type { Locale, Media, SiteBranding, SiteDescriptor } from '@/lib/types'
+import type { Locale, Media, Ref, SiteBranding, SiteDescriptor } from '@/lib/types'
 
 /** Theme demo identity when the CMS provides no site name or branding. */
 export const DEMO_BRANDING: SiteBranding = {
@@ -18,6 +18,21 @@ export type ResolvedBranding = SiteBranding & {
   siteName: string
   /** Accessible label for logo links and chrome. */
   brandLabel: string
+}
+
+/**
+ * The uploaded mark a variant renders (THEME_API §branding): `logo` is the tenant's
+ * primary mark (نشان اصلی) and `logoCompact` is the CMS's `compactLogo`, else the
+ * primary. The chrome leads with the primary, so a site that uploaded only نشان اصلی
+ * shows that mark everywhere; a dedicated home mark owns the full variant.
+ */
+export function logoMarkFor(
+  branding: ResolvedBranding | null | undefined,
+  variant: 'full' | 'compact',
+): Ref<Media> | null {
+  const primary = branding?.logo ?? null
+  if (variant === 'full') return branding?.homeLogo ?? primary
+  return primary ?? branding?.logoCompact ?? null
 }
 
 function mediaRef(media: Media | string | null | undefined): Media | null {

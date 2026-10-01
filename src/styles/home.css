@@ -252,7 +252,7 @@ html:not([data-intro]) .home__nav {
 .home__label {
   font-size: var(--text-ui);
   font-weight: var(--text-label-weight);
-  letter-spacing: 0.01em;
+  letter-spacing: var(--tracking-ui);
   color: var(--color-ink);
 }
 
@@ -270,7 +270,7 @@ html:not([data-intro]) .home__nav {
   height: 1px;
   background: currentColor;
   transform: scaleX(0);
-  transform-origin: inline-start;
+  transform-origin: var(--origin-inline-start);
   transition: transform 0.35s var(--ease);
 }
 
@@ -406,7 +406,7 @@ html[data-intro='play'] .home__line--v {
   top: 30%;
   height: 1px;
   transform: scaleX(0);
-  transform-origin: inline-start;
+  transform-origin: var(--origin-inline-start);
 }
 
 html[data-intro='play'] .home__line--h {

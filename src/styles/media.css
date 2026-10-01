@@ -207,38 +207,32 @@
   padding: 6px 0;
 }
 
+/*
+ * Boxes: three per row on a desktop canvas, two once the chrome goes compact. Two per
+ * row is the floor at every smaller width — one column of post boxes spends a phone's
+ * whole scroll on a handful of items. Both variants share the policy; only their
+ * aspect ratios differ (see EntryCard).
+ */
 .entry-grid {
   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(22px, 3vw, 48px);
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.entry-grid--project {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.entry-grid--editorial {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-@media (min-width: 1380px) {
-  .entry-grid--project {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
+/*
+ * The card is a mat, not a box: the hairline frame sits `--card-mat` inside the
+ * layout box rather than on its edge, so a grid of cards reads as plates floating on
+ * the paper instead of a lattice of touching borders. Only the border moved — the
+ * frame keeps its own `--frame-pad` inset, so the image, caption and arrow inside it
+ * hold exactly the spacing they had.
+ */
 .card {
-  border: 1px solid var(--color-line);
+  padding: var(--card-mat);
   background: var(--color-paper);
-  transition: border-color 0.2s var(--ease);
   height: 100%;
-}
-
-.card:hover,
-.card:focus-within {
-  border-color: var(--color-ink);
 }
 
 .card__link {
@@ -247,7 +241,14 @@
   grid-template-rows: auto 1fr;
   height: 100%;
   padding: var(--frame-pad);
+  border: 1px solid var(--color-line);
   color: inherit;
+}
+
+/* Hover lands on the frame, which is now the card's visible object. */
+.card:hover .card__link,
+.card:focus-within .card__link {
+  border-color: var(--color-ink);
 }
 
 .card .frame {
@@ -278,7 +279,7 @@
   gap: 6px 14px;
   color: var(--color-muted);
   font-size: var(--text-meta);
-  letter-spacing: 0.04em;
+  letter-spacing: var(--tracking-label);
 }
 
 .card__title {
@@ -287,10 +288,6 @@
   font-size: var(--text-body-lg);
   line-height: 1.45;
   color: var(--color-ink);
-}
-
-.card--editorial .card__title {
-  font-size: var(--text-body-lg);
 }
 
 .card__excerpt {
@@ -352,14 +349,12 @@
 }
 
 @media (max-width: 1080px) {
-  .entry-grid--editorial {
+  .entry-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 680px) {
-  .entry-grid--project,
-  .entry-grid--editorial,
   .gallery {
     grid-template-columns: 1fr;
   }
@@ -367,6 +362,16 @@
   .filters {
     margin-top: 0;
     overflow-x: auto;
+    /*
+     * The row is swipeable, but the platform scrollbar it drew across the page was
+     * heavier than any rule in the layout — a second, chunkier line under the chips.
+     * Hiding it leaves the row reading as a row, cut off at the viewport edge.
+     */
+    scrollbar-width: none;
+  }
+
+  .filters::-webkit-scrollbar {
+    display: none;
   }
 
   .filters__list {
@@ -380,5 +385,51 @@
   .frame[data-reveal] {
     opacity: 1;
     transition: none;
+  }
+}
+
+/*
+ * Compact boxes. At two per row on a phone a box is roughly 170px wide, and a 170px box
+ * cannot afford desktop insets: the mat plus a 10px inner inset would spend a third of
+ * the width on white before the image starts. So the gutter, the mat's inner inset, the
+ * caption padding and the title all step down together, and the deck goes: three clamped
+ * lines of 13px copy is noise at this size, not information. The title lands on the UI
+ * step, which is the floor this theme sets for type a reader has to act on.
+ */
+@media (max-width: 640px) {
+  .entry-grid {
+    gap: clamp(12px, 3vw, 22px);
+  }
+
+  .card__link {
+    padding: var(--frame-inset);
+  }
+
+  .card__body {
+    padding: 10px 2px 4px;
+  }
+
+  .card__title {
+    font-size: var(--text-ui);
+    line-height: 1.35;
+  }
+
+  /* Spelled out for the variant too: a box title that keeps a desktop size while its
+     box shrinks to half the width is how a caption ends up bigger than its image. */
+  .card--editorial .card__title {
+    font-size: var(--text-ui);
+  }
+
+  .card__excerpt {
+    display: none;
+  }
+
+  .card__meta {
+    gap: 4px 10px;
+  }
+
+  .card__arrow {
+    inset-inline-end: 8px;
+    bottom: 8px;
   }
 }

@@ -1,5 +1,13 @@
 /* Semantic typography roles — prefer size + color for hierarchy, not extra weights. */
 
+.text-title {
+  font-family: var(--font-ui);
+  font-size: var(--text-title);
+  font-weight: var(--text-title-weight);
+  line-height: var(--leading-display);
+  color: var(--color-ink);
+}
+
 .text-display {
   font-family: var(--font-ui);
   font-size: var(--text-display);
