@@ -68,7 +68,7 @@ html[data-menu='open'] {
 .site-header__brand .logo--compact .logo__image,
 .menu-panel__top .logo--compact .logo__image {
   height: var(--chrome-logo-h);
-  max-width: 220px;
+  max-width: 160px;
 }
 
 /* ---------- primary navigation ---------- */

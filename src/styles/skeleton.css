@@ -1,0 +1,67 @@
+/*
+ * Loading placeholders. Monochrome, no gradients: a soft ink block that pulses in
+ * opacity only. Reduced motion gets the static block.
+ */
+.skeleton {
+  display: block;
+  background: var(--color-soft-2);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton,
+  .frame__media {
+    animation: skeleton-pulse 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.skeleton--logo {
+  width: 65px;
+  height: var(--chrome-logo-h);
+}
+
+.skeleton--line {
+  height: 14px;
+  width: 100%;
+}
+
+.skeleton--short {
+  width: 60%;
+}
+
+.skeleton--eyebrow {
+  width: 120px;
+}
+
+.skeleton--title {
+  height: clamp(32px, 6vw, 72px);
+  width: min(560px, 80%);
+}
+
+.skeleton--media {
+  aspect-ratio: 16 / 9;
+  max-height: 40vh;
+  margin-top: 8px;
+}
+
+.skeleton-header__nav {
+  width: min(420px, 50%);
+  justify-self: center;
+}
+
+.skeleton-page {
+  display: grid;
+  gap: 24px;
+  padding: clamp(32px, 6vw, 96px) var(--page-margin);
+}
+
+.skeleton-text {
+  display: grid;
+  gap: 12px;
+  max-width: 640px;
+}
