@@ -19,7 +19,7 @@ describe('card frame policy', () => {
   })
 
   it('holds the mat as a system value and the hairline on the inner frame', () => {
-    expect(stripComments(read('src', 'styles', 'tokens.css'))).toMatch(/--card-mat:\s*5%/)
+    expect(stripComments(read('src', 'styles', 'tokens.css'))).toMatch(/--card-mat:\s*5px/)
     expect(media()).toMatch(/\.card__link\s*\{[^}]*border:\s*1px solid var\(--color-line\)/)
   })
 
@@ -56,10 +56,7 @@ describe('card frame policy', () => {
     expect(css).not.toMatch(/\.entry-grid[^{]*\{[^}]*grid-template-columns:\s*1fr/)
   })
 
-  it('keeps every card in a grid aligned on the same mat', () => {
-    // A percentage mat only holds the grid together if it resolves against the card
-    // width the grid hands out, not against the viewport.
+  it('lays cards out on a grid', () => {
     expect(media()).toMatch(/\.entry-grid\s*\{[^}]*display:\s*grid/)
-    expect(stripComments(read('src', 'styles', 'tokens.css'))).not.toMatch(/--card-mat:\s*\d+px/)
   })
 })

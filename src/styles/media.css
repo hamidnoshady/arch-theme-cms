@@ -433,3 +433,27 @@
     bottom: 8px;
   }
 }
+
+/* Route loading skeleton (PageLoading): the empty frames breathe; still under reduced motion. */
+.page-loading {
+  padding: var(--section) var(--page-margin);
+}
+
+.page-loading .frame--empty > .frame__media {
+  animation: page-loading-pulse 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes page-loading-pulse {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-loading .frame--empty > .frame__media {
+    animation: none;
+  }
+}
