@@ -20,7 +20,7 @@ function Hero({ page, ctx }: { page: Page; ctx: RenderContext }) {
   if (!media) return null
   return (
     <div className="page-hero">
-      <MediaFrame media={media} locale={ctx.locale} priority caption={media.caption} />
+      <MediaFrame media={media} locale={ctx.locale} priority sizes="(min-width: 1040px) 960px, 92vw" caption={media.caption} />
     </div>
   )
 }

@@ -50,7 +50,7 @@ function ContentBlock({ block, ctx }: { block: Block; ctx: Ctx }) {
 function MediaBlock({ block, ctx }: { block: Block; ctx: Ctx }) {
   const media = resolveMedia(block.media as Ref<Media>, ctx.origin)
   if (!media) return null
-  return <MediaFrame media={media} locale={ctx.locale} caption={media.caption} />
+  return <MediaFrame media={media} locale={ctx.locale} sizes="(min-width: 820px) 760px, 92vw" caption={media.caption} />
 }
 
 function GalleryBlock({ block, ctx, number }: { block: Block; ctx: Ctx; number?: string }) {

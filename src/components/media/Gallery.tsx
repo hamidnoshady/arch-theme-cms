@@ -7,16 +7,8 @@ import type { ResolvedMedia } from '@/lib/media'
 import { toLocaleDigits } from '@eshobe/site-runtime'
 import type { Locale } from '@/lib/types'
 
-import { MediaFrame, type FrameRatio } from './MediaFrame'
+import { MediaFrame } from './MediaFrame'
 import { Picture } from './Picture'
-
-/** Natural proportions when every image shares one, otherwise a calm 4:3 crop on the focal point. */
-export function galleryRatio(images: ResolvedMedia[]): FrameRatio {
-  if (images.length < 2) return 'natural'
-  const ratios = images.map((m) => m.width / m.height)
-  const first = ratios[0]!
-  return ratios.every((r) => Math.abs(r - first) / first < 0.04) ? 'natural' : '4/3'
-}
 
 export function Gallery({
   images,
@@ -30,7 +22,6 @@ export function Gallery({
   const t = copy[locale]
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [index, setIndex] = useState<number | null>(null)
-  const ratio = galleryRatio(images)
   const count = images.length
   const cols = Math.min(Math.max(columns, 1), 4)
 
@@ -60,6 +51,8 @@ export function Gallery({
 
   const touchX = useRef<number | null>(null)
   const current = index === null ? null : images[index]
+  const previous = index === null ? null : images[(index - 1 + count) % count]
+  const next = index === null ? null : images[(index + 1) % count]
   const counter = (n: number) =>
     interpolate(t.imageOf, { n: toLocaleDigits(String(n + 1), locale), total: toLocaleDigits(String(count), locale) })
 
@@ -80,8 +73,8 @@ export function Gallery({
                 as="span"
                 media={image}
                 locale={locale}
-                ratio={ratio}
-                sizes={`(min-width: 900px) ${Math.round(100 / cols)}vw, 100vw`}
+                ratio="4/3"
+                sizes={`(min-width: 900px) ${Math.round(1000 / cols)}px, 100vw`}
               />
             </button>
           </li>
@@ -122,11 +115,13 @@ export function Gallery({
             </figure>
             {count > 1 ? (
               <div className="lightbox__nav">
-                <button type="button" className="text-link" onClick={() => go(-1)}>
-                  <span aria-hidden="true" className="arrow arrow--back" /> {t.previous}
+                <button type="button" className="lightbox__step" onClick={() => go(-1)} aria-label={`${t.previous}: ${previous?.alt || counter((index! - 1 + count) % count)}`}>
+                  <Picture media={previous!} sizes="96px" alt="" cover className="lightbox__preview" />
+                  <span className="lightbox__step-label"><span aria-hidden="true" className="arrow arrow--back" /> {t.previous}</span>
                 </button>
-                <button type="button" className="text-link" onClick={() => go(1)}>
-                  {t.next} <span aria-hidden="true" className="arrow" />
+                <button type="button" className="lightbox__step" onClick={() => go(1)} aria-label={`${t.next}: ${next?.alt || counter((index! + 1) % count)}`}>
+                  <Picture media={next!} sizes="96px" alt="" cover className="lightbox__preview" />
+                  <span className="lightbox__step-label">{t.next} <span aria-hidden="true" className="arrow" /></span>
                 </button>
               </div>
             ) : null}
