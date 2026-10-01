@@ -88,6 +88,11 @@ export async function proxyToCms(req: Request, apiPath: string): Promise<Respons
 
   const incoming = new URL(req.url)
   const target = new URL(`${base}/api/${apiPath.replace(/^\//, '')}${incoming.search}`)
+  const basePath = new URL(`${base}/api/`).pathname
+  if (!target.pathname.startsWith(basePath)) {
+    return Response.json({ error: 'Invalid API path' }, { status: 400 })
+  }
+
   const headers = proxyHeaders(req.headers, req.headers.get('host'), {
     keyed: isKeyedPath(req.method, apiPath) && !incoming.searchParams.has('draft'),
   })

@@ -1,0 +1,4 @@
+## 2025-02-28 - SSRF and Path Traversal in Next.js Catch-All Proxy
+**Vulnerability:** The `proxyToCms` function built proxy target URLs using string interpolation with the `apiPath` coming directly from Next.js catch-all routes (`src/app/api/[...path]/route.ts`). A URL like `/api/../../admin` allowed path traversal via `new URL(..., base)`.
+**Learning:** Next.js catch-all routes correctly decode path parameters, but they don't block `..` sequences, which can then be directly interpolated into a `new URL()` target. Using `new URL(..., base)` with string concatenated untrusted paths allows full SSRF / Path Traversal escapes.
+**Prevention:** Always normalize and filter untrusted paths before combining them into a final proxy target, explicitly checking for and rejecting or removing `..` and `.` segments, or manually constructing the `URL` properties rather than relying on the URL constructor's automatic path resolution logic.
