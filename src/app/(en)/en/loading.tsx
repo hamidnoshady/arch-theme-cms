@@ -1,3 +1,5 @@
-import { PageLoading } from '@/components/layout/PageLoading'
+import { HomeSkeleton } from '@/components/layout/HomeSkeleton'
 
-export default PageLoading
+export default function Loading() {
+  return <HomeSkeleton locale="en" />
+}

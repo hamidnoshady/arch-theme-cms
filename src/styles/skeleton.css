@@ -1,6 +1,12 @@
 /*
  * Loading placeholders. Monochrome, no gradients: a soft ink block that pulses in
  * opacity only. Reduced motion gets the static block.
+ *
+ * The pulse belongs to the *placeholder*, never to a photograph. A frame's blank paper
+ * (`.frame__media::before`, media.css) sits behind the picture, so the animation is
+ * visible exactly while a file is in flight and is covered the moment the image paints.
+ * Animating `.frame__media` instead is animating every image on the site: a loaded
+ * photograph pulsed forever, which is what a visitor saw as a flickering page.
  */
 .skeleton {
   display: block;
@@ -9,7 +15,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .skeleton,
-  .frame__media {
+  .frame__media::before {
     animation: skeleton-pulse 1.4s ease-in-out infinite;
   }
 }
@@ -20,6 +26,28 @@
   }
 }
 
+/* ---------- page skeleton (PageSkeleton) ---------- */
+
+/*
+ * The silhouette rides on the page's own rhythm — `.container .page` in
+ * editorial.css — so the placeholder and the page it precedes share one measure and
+ * one vertical spacing. Hand-rolled padding meant the two agreed only at some widths:
+ * past 1320px the skeleton's lines ran wider than the text they stood in for, and the
+ * page appeared to jump sideways when it landed.
+ */
+/* The page title block's own rhythm (`gap: 22px` in editorial.css), nothing else. */
+.page-skeleton__title {
+  display: grid;
+  gap: 22px;
+}
+
+.skeleton-text {
+  display: grid;
+  gap: 12px;
+  max-width: var(--read);
+}
+
+/* The chrome's mark, at the height the header bar gives it (chrome.css). */
 .skeleton--logo {
   width: 65px;
   height: var(--chrome-logo-h);
@@ -43,25 +71,46 @@
   width: min(560px, 80%);
 }
 
+/* The hero's shape: a bounded, centred plate — the same object the page will show. */
 .skeleton--media {
   aspect-ratio: 16 / 9;
   max-height: 40vh;
+  width: min(100%, 960px);
+  margin-inline: auto;
   margin-top: 8px;
 }
 
+/*
+ * The header's nav row. A definite width, never a percentage: under 980px the grid
+ * collapses to `1fr auto`, so `50%` resolved against a content-sized track and the
+ * line rendered zero pixels wide — a header skeleton with nothing in it.
+ */
 .skeleton-header__nav {
-  width: min(420px, 50%);
+  width: min(420px, 60vw);
   justify-self: center;
 }
 
-.skeleton-page {
-  display: grid;
-  gap: 24px;
-  padding: clamp(32px, 6vw, 96px) var(--page-margin);
+@media (max-width: 980px) {
+  /* Below the nav breakpoint (chrome.css) the bar is the mark alone. */
+  .skeleton-header__nav {
+    display: none;
+  }
 }
 
-.skeleton-text {
-  display: grid;
-  gap: 12px;
-  max-width: 640px;
+/* ---------- home skeleton (HomeSkeleton) ---------- */
+
+/*
+ * The home stage is a fixed, non-scrolling screen, so its loading state is the same
+ * screen with the mark and the navigation row standing in: a card grid here announced
+ * a page the visitor was never going to get, then the whole screen changed shape.
+ */
+.skeleton--wordmark {
+  width: clamp(230px, 30vw, 440px);
+  height: clamp(72px, 8vw, 132px);
+}
+
+.skeleton--nav {
+  width: min(70vw, 420px);
+  height: 20px;
+  margin-top: 34px;
 }
