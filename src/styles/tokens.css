@@ -106,13 +106,13 @@
   --card-mat: 5%;
   --frame-inset: clamp(5px, 0.55vw, 8px);
 
-  --header-h: 64px;
+  --header-h: 96px;
   /*
    * The uploaded mark in the page chrome (header bar and drawer top). Deliberately
    * larger than the identity scale's compact size in home.css: this one is the
    * tenant's primary logo standing alone in a bar, not a mark inline with copy.
    */
-  --chrome-logo-h: 40px;
+  --chrome-logo-h: 80px;
   /*
    * Mobile drawer width. One value for two consumers — the panel's own width and
    * the offset the page is pushed by — so the two can never drift apart and leave
