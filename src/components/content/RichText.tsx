@@ -115,7 +115,7 @@ function renderNode(node: Grouped, ctx: Ctx, key: string): React.ReactNode {
       const media = n.value as ResolvedMedia
       return (
         <div key={key} className="rt-media">
-          <MediaFrame media={media} locale={ctx.locale} caption={media.caption} />
+          <MediaFrame media={media} locale={ctx.locale} sizes="(min-width: 820px) 760px, 92vw" caption={media.caption} />
         </div>
       )
     }

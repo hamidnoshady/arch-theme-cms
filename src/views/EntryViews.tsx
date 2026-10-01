@@ -153,7 +153,7 @@ export async function EntryView({
 
         {hero ? (
           <div className="entry__hero">
-            <MediaFrame media={hero} locale={ctx.locale} priority sizes="(min-width: 1500px) 1400px, 94vw" caption={hero.caption} />
+            <MediaFrame media={hero} locale={ctx.locale} priority sizes="(min-width: 1040px) 960px, 92vw" caption={hero.caption} />
           </div>
         ) : null}
 
