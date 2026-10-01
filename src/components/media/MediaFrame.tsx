@@ -33,8 +33,17 @@ export function MediaFrame({
   className?: string
 }) {
   const fixed = ratio !== 'natural'
-  const style = fixed ? ({ ['--ratio' as string]: ratio } as React.CSSProperties) : undefined
-  const classes = `frame frame--${variant} ${fixed ? 'frame--fixed' : ''} ${className}`.trim()
+  /*
+   * A fixed frame is told the ratio to crop to; a natural one is told the ratio the
+   * picture already has, so the frame can be as wide as the image rather than as wide
+   * as the column. Both are unitless CSS numbers consumed in media.css.
+   */
+  const style = (
+    fixed
+      ? { ['--ratio' as string]: ratio }
+      : { ['--media-ar' as string]: String(media.width / media.height || 1.5) }
+  ) as React.CSSProperties
+  const classes = `frame frame--${variant} ${fixed ? 'frame--fixed' : 'frame--natural'} ${className}`.trim()
   const body =
     media.kind === 'video' && as === 'figure' ? (
       <VideoPlayer media={media} locale={locale} />

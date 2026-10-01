@@ -12,9 +12,32 @@
 .frame__media {
   /* Block, not inherited inline: MediaFrame as="span" would otherwise ignore aspect-ratio/overflow and split its border into a stray line. */
   display: block;
+  /* The placeholder below is placed against this box. */
+  position: relative;
   border: 1px solid var(--color-frame);
   background: var(--color-soft);
   line-height: 0;
+}
+
+/*
+ * The frame's blank paper. It is painted *behind* the picture, so it shows for
+ * exactly as long as the file is in flight and is covered the moment the photograph
+ * paints — the image ends the placeholder, not a timer. A frame with no media at all
+ * (an empty entry, a route skeleton) keeps it on screen, which is what a skeleton is.
+ * The pulse itself lives in skeleton.css, on this placeholder only.
+ */
+.frame__media::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-soft-2);
+}
+
+/* Above the placeholder: a loaded photograph covers it, a loading one lets it show. */
+.frame__media > .picture,
+.frame__media > .video {
+  position: relative;
+  z-index: 1;
 }
 
 .frame__caption {
@@ -33,6 +56,26 @@
 .frame--fixed > .frame__media {
   aspect-ratio: var(--ratio);
   overflow: hidden;
+}
+
+/*
+ * A frame that follows the photograph's own ratio is as wide as the picture, not as
+ * wide as the column. Its width is the column, or the height cap transferred through
+ * the image's ratio — whichever is smaller — plus the frame's own chrome. Without this
+ * a portrait hero sat inside a 960px plate with ~250px of empty paper on either side,
+ * and the hairline read as a mistake rather than a frame. `--media-ar` is the CMS
+ * media's own width/height, set by MediaFrame.
+ */
+.frame--natural {
+  width: min(100%, calc(68dvh * var(--media-ar, 1.5) + 2 * var(--frame-pad) + 4px));
+  margin-inline: auto;
+}
+
+/* Belt and braces for a frame whose padding is not the standard inset: the media box
+   is capped by the same ratio, so the picture can never be the wider of the two. */
+.frame--natural > .frame__media {
+  width: min(100%, calc(68dvh * var(--media-ar, 1.5)));
+  margin-inline: auto;
 }
 
 .frame--fixed .picture,
@@ -484,26 +527,3 @@
   }
 }
 
-/* Route loading skeleton (PageLoading): the empty frames breathe; still under reduced motion. */
-.page-loading {
-  padding: var(--section) var(--page-margin);
-}
-
-.page-loading .frame--empty > .frame__media {
-  animation: page-loading-pulse 1.4s ease-in-out infinite alternate;
-}
-
-@keyframes page-loading-pulse {
-  from {
-    opacity: 0.5;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .page-loading .frame--empty > .frame__media {
-    animation: none;
-  }
-}

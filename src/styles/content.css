@@ -284,19 +284,14 @@
   align-items: center;
 }
 
+/*
+ * The column a natural-ratio media frame may fill. The frame then sizes itself to the
+ * photograph inside it (media.css, `.frame--natural`): these containers say how wide
+ * the plate may be, the frame says how wide the picture is.
+ */
 .page-hero,
 .entry__hero {
   width: min(100%, 960px);
-  margin-inline: auto;
-}
-
-.page-hero .picture,
-.entry__hero .picture,
-.block--mediaBlock .picture,
-.rt-media:not(.rt-media--gallery) .picture {
-  width: auto;
-  max-width: 100%;
-  max-height: 68dvh;
   margin-inline: auto;
 }
 

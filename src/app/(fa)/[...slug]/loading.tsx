@@ -1,3 +1,5 @@
 import { PageSkeleton } from '@/components/layout/PageSkeleton'
 
-export default PageSkeleton
+export default function Loading() {
+  return <PageSkeleton locale="fa" />
+}
