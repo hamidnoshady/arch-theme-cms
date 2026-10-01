@@ -68,11 +68,10 @@ export function EntryCard({
             locale={locale}
             ratio={ratio}
             priority={priority}
-            sizes={
-              variant === 'project'
-                ? '(min-width: 1360px) 30vw, (min-width: 640px) 46vw, 92vw'
-                : '(min-width: 1100px) 30vw, (min-width: 640px) 46vw, 92vw'
-            }
+            /* Both variants share one grid (3 per row on a desktop canvas, 2 below),
+               so they share one width hint: ~30vw in a third of the content column,
+               ~46vw in half of it. */
+            sizes="(min-width: 1081px) 30vw, 46vw"
           />
         ) : (
           <span className="frame frame--inset frame--fixed frame--empty" style={{ ['--ratio' as string]: ratio }}>

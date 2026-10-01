@@ -61,8 +61,8 @@
 .rt-h2 {
   margin: 0.6em 0 0;
   font-weight: var(--text-body-weight);
-  font-size: clamp(1.625rem, 1.375rem + 1.1vw, 2.25rem);
-  line-height: 1.3;
+  font-size: var(--text-h2);
+  line-height: var(--leading-heading);
   color: var(--color-ink);
 }
 
@@ -463,7 +463,13 @@
 }
 
 @media (max-width: 860px) {
-  .block-content__col,
+  /* A content column collapses to one column. It must not inherit the numbered
+   * list's 40px number gutter: without a gutter child of its own, the article
+   * would auto-place into that 40px track and wrap one word per line. */
+  .block-content__col {
+    grid-column: 1 / -1;
+  }
+
   .numbered-list__item,
   .numbered-list__item.has-media {
     grid-column: 1 / -1;

@@ -2,6 +2,33 @@
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  /*
+   * The mobile drawer pushes the page instead of covering it; this is the one
+   * clock that motion runs on. Untransformed at rest, so the shell is never a
+   * containing block for the page's fixed layers (reading progress).
+   */
+  transition: transform var(--entrance-dur) var(--ease);
+}
+
+/*
+ * The panel is a top-layer dialog, so it cannot displace the document by itself.
+ * `html[data-menu]` (set by MobileMenu while the drawer is open) slides the whole
+ * shell by the drawer's width — transform only, so nothing reflows mid-gesture.
+ * The direction follows the document: in RTL the drawer takes the inline-end
+ * (left) edge, so the page travels right; in LTR it travels left.
+ */
+html[data-menu='open'] .shell {
+  transform: translateX(var(--menu-w));
+}
+
+html[data-menu='open'][dir='ltr'] .shell {
+  transform: translateX(calc(-1 * var(--menu-w)));
+}
+
+/* Nothing scrolls behind a modal drawer, and a translated shell invents no
+   horizontal scroll area of its own. */
+html[data-menu='open'] {
+  overflow: hidden;
 }
 
 .shell__main {
@@ -31,6 +58,17 @@
 
 .site-header__brand {
   display: flex;
+}
+
+/*
+ * The tenant's uploaded mark is the chrome's identity, so it is sized by the bar
+ * it sits in rather than by the compact logo scale in home.css (the footer keeps
+ * that smaller, inline-with-copy size). Header and drawer share one height.
+ */
+.site-header__brand .logo--compact .logo__image,
+.menu-panel__top .logo--compact .logo__image {
+  height: var(--chrome-logo-h);
+  max-width: 220px;
 }
 
 /* ---------- primary navigation ---------- */
@@ -105,15 +143,22 @@
 
 /* ---------- mobile menu button ---------- */
 
+/*
+ * Icon-only: the label lives in `aria-label`. The box is a 40px target whose
+ * negative inline margin keeps the three rules themselves on the header's content
+ * edge — the icon's own box is 1px tall (its rules are pseudo-elements), so sizing
+ * the target from the padding would collapse it.
+ */
 .menu-button {
   display: none;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
   border: 0;
   background: none;
-  padding: 8px 0;
-  font-size: var(--text-ui);
-  letter-spacing: 0.08em;
+  padding: 0;
+  margin-inline-end: -12px;
 }
 
 .menu-button__icon,
@@ -134,10 +179,16 @@
 /* ---------- mobile menu panel (native dialog) ---------- */
 
 .menu-panel {
+  /*
+   * Off-screen offset on the panel's own side: one full drawer width outside the
+   * viewport, so the very same gesture that moves the page also brings the drawer
+   * in. Nothing fades over the page — the drawer is revealed by the push.
+   */
+  --menu-off: -100%;
   border: 0;
   margin: 0;
   margin-inline-start: auto;
-  width: min(400px, 100vw);
+  width: var(--menu-w);
   height: 100dvh;
   max-height: 100dvh;
   padding: 0;
@@ -145,42 +196,52 @@
   color: var(--color-ink);
 }
 
+/* In LTR the drawer lands on the right, so it comes in from the right. */
+html[dir='ltr'] .menu-panel {
+  --menu-off: 100%;
+}
+
+/* A light scrim: the page beside the drawer stays legible, just recessed. */
 .menu-panel::backdrop {
-  background: rgba(0, 0, 0, 0.32);
+  background: rgba(0, 0, 0, 0.16);
 }
 
 /*
- * Short one-way entrance. `data-enter` is set (empty) when the dialog opens and
- * flipped to `in` after the first painted frame, so the transition plays once;
- * without the attribute — or under reduced motion — the panel is simply shown.
+ * Entrance and exit are one motion: the drawer rides on the same clock and the
+ * same easing as the page, so its leading edge stays welded to the page's trailing
+ * edge for the whole gesture. `data-enter` (empty) is the pre-flight position,
+ * claimed before the panel is first painted; `in` is at rest; `out` returns.
+ *
+ * Order matters: every state below carries `data-enter`, so the resting state has
+ * to come after the off-screen one to win at equal specificity.
  */
-.menu-panel[data-enter] {
-  opacity: 0;
-  transform: translateY(14px);
+.menu-panel[data-enter],
+.menu-panel[data-enter='out'] {
+  transform: translateX(var(--menu-off));
 }
 
 .menu-panel[data-enter='in'] {
-  opacity: 1;
   transform: none;
-  transition:
-    opacity var(--entrance-dur) var(--ease),
-    transform var(--entrance-dur) var(--ease);
 }
 
-.menu-panel[data-enter='in'] .menu-panel__link {
-  animation: menu-item calc(var(--entrance-dur) + 0.1s) var(--ease) both;
-  animation-delay: calc(var(--menu-i, 0) * 45ms + 60ms);
+.menu-panel[data-enter='in'],
+.menu-panel[data-enter='out'] {
+  transition: transform var(--entrance-dur) var(--ease);
 }
 
-@keyframes menu-item {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+/* The scrim recedes with the page rather than snapping on over it. */
+.menu-panel[data-enter]::backdrop,
+.menu-panel[data-enter='out']::backdrop {
+  background: rgba(0, 0, 0, 0);
+}
+
+.menu-panel[data-enter='in']::backdrop {
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.menu-panel[data-enter='in']::backdrop,
+.menu-panel[data-enter='out']::backdrop {
+  transition: background-color var(--entrance-dur) var(--ease);
 }
 
 .menu-panel__inner {
@@ -198,11 +259,43 @@
   border-bottom: 1px solid var(--color-line);
 }
 
+/*
+ * Close is an icon too, and its glyph has to keep sitting on the panel's content
+ * edge, in line with the rules under the links. The padding grows the target to
+ * 40px while the negative margin gives the layout nothing to shift around.
+ */
 .menu-panel__close {
+  display: grid;
+  place-items: center;
   background: none;
   border: 0;
-  font-size: var(--text-ui);
-  padding: 8px 0;
+  padding: 12px;
+  margin: -12px;
+}
+
+.menu-panel__close-icon {
+  position: relative;
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.menu-panel__close-icon::before,
+.menu-panel__close-icon::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--color-ink);
+}
+
+.menu-panel__close-icon::before {
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.menu-panel__close-icon::after {
+  transform: translateY(-50%) rotate(-45deg);
 }
 
 .menu-panel__list {
@@ -265,7 +358,7 @@
   padding-block: 26px;
   color: var(--color-muted);
   font-size: var(--text-meta);
-  letter-spacing: 0.02em;
+  letter-spacing: var(--tracking-ui);
 }
 
 .site-footer__nav ul {
@@ -311,15 +404,24 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* The drawer is simply in place — the page still steps aside for it, it just
+     does not travel there. */
   .menu-panel,
-  .menu-panel[data-enter='in'] {
-    opacity: 1;
+  .menu-panel[data-enter],
+  .menu-panel[data-enter='in'],
+  .menu-panel[data-enter='out'] {
     transform: none;
     transition: none;
   }
 
-  .menu-panel[data-enter='in'] .menu-panel__link {
-    animation: none;
+  .menu-panel[data-enter]::backdrop,
+  .menu-panel[data-enter='in']::backdrop,
+  .menu-panel[data-enter='out']::backdrop {
+    transition: none;
+  }
+
+  .shell {
+    transition: none;
   }
 
   .site-nav__link,

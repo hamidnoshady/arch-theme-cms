@@ -30,17 +30,14 @@
   margin: 0;
   color: var(--color-muted);
   font-size: var(--text-label);
-  letter-spacing: 0.04em;
+  letter-spacing: var(--tracking-label);
 }
 
+/* Size and weight come from `.text-title` (typography.css); this rule is layout. */
 .page-title__heading {
   grid-column: 1 / -1;
   margin: 0;
-  font-weight: var(--text-display-weight);
-  font-size: var(--text-display);
-  line-height: var(--leading-display);
   letter-spacing: -0.015em;
-  color: var(--color-ink);
   text-wrap: balance;
 }
 
@@ -59,6 +56,21 @@ html[lang='fa'] .page-title__heading {
 
 .page-title__lead p {
   margin: 0;
+}
+
+/*
+ * A heading an editor writes inside the intro is a standfirst, not a section heading:
+ * left at `--text-h2` it sat one step under the page title and read as a second title,
+ * which is what made the top of the page look crowded. `--text-standfirst` keeps it in
+ * the title's voice at every width and drops it a further rung in the compact step.
+ */
+.page-title__lead :is(h1, h2, h3, h4, .rt-h2, .rt-h3, .rt-h4) {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-standfirst);
+  font-weight: var(--text-h1-weight);
+  line-height: var(--leading-heading);
+  color: var(--color-ink);
 }
 
 .page-title__extra {
@@ -84,10 +96,12 @@ html[lang='fa'] .page-title__heading {
   padding-top: 0.7em;
 }
 
+/* `--text-section` steps down with the viewport so a section heading never matches
+ * the page title on a phone (see tokens.css). */
 .section-heading__title {
   margin: 0;
   font-weight: var(--text-h1-weight);
-  font-size: var(--text-h1);
+  font-size: var(--text-section);
   line-height: var(--leading-heading);
   color: var(--color-ink);
 }
@@ -116,7 +130,7 @@ html[lang='fa'] .page-title__heading {
 
 .meta-list dt {
   font-size: var(--text-label);
-  letter-spacing: 0.04em;
+  letter-spacing: var(--tracking-label);
   color: var(--color-muted);
 }
 
@@ -173,6 +187,21 @@ html[lang='fa'] .page-title__heading {
 .entry__back {
   display: grid;
   gap: 18px;
+}
+
+/*
+ * Compact step (≤640px). The type takes a rung down in tokens.css; the air around the
+ * title has to come down with it, or the block is still one tall slab between the header
+ * and the first line of content.
+ */
+@media (max-width: 640px) {
+  .page-title {
+    gap: 16px;
+  }
+
+  .page-title__extra {
+    margin-top: 12px;
+  }
 }
 
 @media (max-width: 720px) {

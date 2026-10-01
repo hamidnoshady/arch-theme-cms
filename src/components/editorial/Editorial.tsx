@@ -34,7 +34,7 @@ export function PageTitle({
             ) : null}
           </p>
         ) : null}
-        <h1 className="page-title__heading">{title}</h1>
+        <h1 className="page-title__heading text-title">{title}</h1>
         {lead ? <div className="page-title__lead">{lead}</div> : null}
         {children ? <div className="page-title__extra">{children}</div> : null}
       </div>

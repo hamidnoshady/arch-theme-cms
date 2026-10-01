@@ -1,7 +1,7 @@
 import Image from 'next/image'
 
 import { absoluteMediaUrl } from '@/lib/media'
-import type { ResolvedBranding } from '@/lib/theme/branding'
+import { logoMarkFor, type ResolvedBranding } from '@/lib/theme/branding'
 
 /**
  * Site identity mark. The tenant's uploaded logo (SVG or raster, from the CMS
@@ -19,7 +19,7 @@ type LogoProps = {
 }
 
 function cmsLogo(branding: ResolvedBranding | null | undefined, variant: 'full' | 'compact', origin: string) {
-  const media = variant === 'compact' ? branding?.logoCompact ?? branding?.logo : branding?.homeLogo ?? branding?.logo
+  const media = logoMarkFor(branding, variant)
   const url = media && typeof media === 'object' ? media.url : null
   if (!url || !media || typeof media !== 'object') return null
   return { src: absoluteMediaUrl(url, origin), width: media.width ?? null, height: media.height ?? null }

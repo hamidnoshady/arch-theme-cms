@@ -44,9 +44,9 @@ The product exposes **four normal weights** (300–600). **700–900 are excepti
 | Role | Token / class | Min size | Weight role |
 |------|----------------|----------|-------------|
 | Display XL | `--text-display` / `.text-display` | fluid | `--text-display-weight` |
-| H1 | `--text-h1` / `.text-h1` | 32–40px mobile | `--text-h1-weight` |
-| H2 | `--text-h2` | 24–30px mobile | `--text-heading-weight` |
-| H3 | `--text-h3` | 18–22px mobile | `--text-heading-weight` |
+| H1 | `--text-h1` / `.text-h1` | 28–40px mobile | `--text-h1-weight` |
+| H2 | `--text-h2` | 20–30px mobile | `--text-heading-weight` |
+| H3 | `--text-h3` | 16–22px mobile | `--text-heading-weight` |
 | Body large | `--text-body-lg` | 17–18px | `--text-body-weight` |
 | Body | `--text-body` | 16px | `--text-body-weight` |
 | UI / nav / button | `--text-ui` / `.text-ui` | **14px** (13–15 desktop) | `--text-label-weight` |
@@ -56,8 +56,29 @@ The product exposes **four normal weights** (300–600). **700–900 are excepti
 
 - **Interactive UI minimum:** 13–14px (`--text-ui`, `--text-label`). **12px** only for secondary metadata (`--text-meta`).
 - **Avoid 10px** except genuinely nonessential legal/copyright (`--text-micro` at 11px is the floor in tokens).
-- **Persian body** uses slightly more line-height than English (`--leading-body` 1.8 vs 1.7 on `html[lang='fa']` / `en`).
-- **Do not apply global letter-spacing to Persian.** Tracking is for Latin brand lockup only (`.logo__wordmark` calibration under `data-fonts='shazde'`).
+- **Persian body** uses slightly more line-height than English (`--leading-body` 1.8 vs 1.7 on `html[lang='fa']` / `en`). `--leading-body-lg` follows the same rule and is *not* a third value: a taller lead paragraph reads as a separate, airier block than the copy under it.
+- **Do not apply global letter-spacing to Persian.** Tracking is for Latin brand lockup only (`.logo__wordmark` calibration under `data-fonts='shazde'`). Roles that can hold either language consume `--tracking-label` (0.04em) or `--tracking-ui` (0.02em); `html[lang='fa']` zeroes both.
+
+### Compact step (≤640px)
+
+The same roles, one notch down, at the low end of each band above — a phone is one
+column with one thumb, so a size that reads as generous on a 1440px canvas reads as a
+wall of type on a 390px one. The step lives in `tokens.css` (one `@media` block) so the
+whole system moves together; components never write their own mobile sizes.
+
+| Role | Wide canvas | ≤640px |
+|------|-------------|--------|
+| Page title | `--text-title` → display (~72px) | → `--text-h1` (28px) |
+| Section heading | `--text-section` → h1 (~56px) | → `--text-h2` (21px) |
+| Page intro heading | `--text-standfirst` → h2 | → `--text-h3` (17px) |
+
+The step sits at the **low** end of the bands above, one notch under the band floor where a
+phone needs it: a 32px title on a 390px canvas is a third of the width before the first line
+of content. `tokens.css` is the only place that decides this.
+
+- **Statement rungs keep a ~1.3 ratio at every width.** `--text-display` (3.6vw) and `--text-h1` (2.75vw) climb on the same slope, so a page title never collides with the section headings beneath it mid-range — the tablet band is where a steeper display curve used to shout.
+- The display scale itself is absent on a phone: a phone has no statement moment.
+- Guardrails: `src/lib/typography-policy.test.ts` checks the step's values against these bands, the title/section ratio across widths, and that tracking goes through tokens.
 
 ## Implementation rules for agents
 
@@ -95,3 +116,5 @@ Do not treat “font file appeared in Network” as sufficient.
 - **The theme ships no logo.** The home intro mark is the tenant's uploaded SVG/raster: `branding.homeLogo` if the CMS sends it, else `branding.logo` (`src/components/brand/Logo.tsx`). With none uploaded the site name is set as a wordmark. Do not add demo artwork back into `src/` or `public/`.
 - **Sections are category-backed or page-backed.** Projects, Education and Blog are Posts filed under a bound root category (`ENTRY_KINDS` in `src/lib/theme/sections.ts`); adding another means a content slot in `eshobe.theme.json`, an entry in `SECTION_SLOT`, `SECTIONS`, and copy in `src/lib/i18n.ts`.
 - **Motion:** the home stage animates `--p` through one rAF loop and the stylesheet reads it in transform/opacity only. Global polish lives in `src/styles/motion.css`; smooth scrolling is `scroll-behavior` on `<html>` plus `data-scroll-behavior="smooth"` so Next skips it on route changes.
+- **A rule that draws in starts at the reading edge.** Use `transform-origin: var(--origin-inline-start)`. `inline-start` is not a valid `transform-origin` value, so writing it directly fails silently and grows the rule outward from its centre; the token is zeroed in for RTL in `tokens.css`.
+- **Page changes get one acknowledgement:** the 2px route rule (`RouteProgress.tsx`, rendered outside `.shell` so the drawer's push cannot drag it). It starts on link activation, never claims to finish (it fills to 92% over `--route-dur`), and is drawn on width alone — opacity is not transitioned — because a prefetched route can commit before the `pending` phase has rendered. Its resting geometry is a visible stub, not `scaleX(0)`: a transition out of zero spends its first frames a few pixels wide, so the acknowledgement reads as a speck at the corner exactly when the page changes fastest. It sits below `env(safe-area-inset-top)`, like the header it shares a top edge with (`viewport-fit=cover` is on). Never re-introduce a debounce: the rule exists to say the press landed.

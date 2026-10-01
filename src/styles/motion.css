@@ -56,7 +56,12 @@
 /* ---------- cards ---------- */
 
 .card {
-  transition: border-color 0.25s var(--ease), transform 0.45s var(--ease);
+  transition: transform 0.45s var(--ease);
+}
+
+/* The frame is the card's visible object, so it is what comes to full ink. */
+.card__link {
+  transition: border-color 0.25s var(--ease);
 }
 
 .card:hover,
@@ -157,7 +162,7 @@ html[dir='rtl'] .text-link:focus-visible .arrow--back {
   height: 1px;
   background: currentColor;
   transform: scaleX(0);
-  transform-origin: inline-start;
+  transform-origin: var(--origin-inline-start);
   transition: transform 0.35s var(--ease);
 }
 
@@ -197,6 +202,15 @@ html[dir='rtl'] .text-link:focus-visible .arrow--back {
   width: 13px;
 }
 
+.menu-panel__close {
+  transition: opacity 0.25s var(--ease);
+}
+
+.menu-panel__close:hover,
+.menu-panel__close:focus-visible {
+  opacity: 0.6;
+}
+
 .menu-panel__link {
   transition: padding-inline-start 0.35s var(--ease), color 0.25s var(--ease);
 }
@@ -226,12 +240,13 @@ html[dir='rtl'] .text-link:focus-visible .arrow--back {
 .reading-progress {
   position: fixed;
   inset-inline: 0;
-  top: 0;
+  /* Below the safe-area inset, like the header it shares the top edge with. */
+  top: env(safe-area-inset-top);
   z-index: 30;
   height: 2px;
   background: var(--color-ink);
   transform: scaleX(0);
-  transform-origin: inline-start;
+  transform-origin: var(--origin-inline-start);
   pointer-events: none;
 }
 
@@ -245,6 +260,97 @@ html[dir='rtl'] .text-link:focus-visible .arrow--back {
 @keyframes reading-progress {
   to {
     transform: scaleX(1);
+  }
+}
+
+/* ---------- route progress ---------- */
+
+/*
+ * The page-change rule. Same gesture as `.reading-progress` one level up in the
+ * shell — a 2px ink line anchored to the inline-start edge — so a visitor reads both
+ * as the same idea: a hairline that reports how far along something is.
+ *
+ * `data-phase` comes from RouteProgress.tsx. Width is the only thing that makes the rule
+ * visible — it is opaque the moment a phase other than `idle` is applied — because an
+ * activation can commit its route before React has rendered the `pending` phase at all:
+ * a prefetched link goes straight to `done`. Fading in on `pending` therefore meant the
+ * acknowledgement was missing in exactly the common case. `pending` now appears instantly
+ * and grows on a curve that flattens before the end; `done` fills it and fades.
+ */
+.route-progress {
+  position: fixed;
+  inset-inline: 0;
+  /*
+   * Below the safe-area inset, like the header: `viewport-fit=cover` (see the layout's
+   * `viewport` export) means `top: 0` is the status bar on a phone — the one device whose
+   * page changes are slow enough to need the rule.
+   */
+  top: env(safe-area-inset-top);
+  z-index: 40;
+  height: 2px;
+  background: var(--color-ink);
+  /*
+   * The resting geometry is a visible stub rather than nothing: a transition out of
+   * `scaleX(0)` spends its first frames a few pixels wide, so an activation read as a speck
+   * at the corner. From a stub the rule is legible on its first painted frame, and it still
+   * grows from the reading edge. Opacity is what keeps it out of sight at rest.
+   */
+  transform: scaleX(0.06);
+  transform-origin: var(--origin-inline-start);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.24s var(--ease);
+}
+
+/* Opacity is not in the shorthand, so the rule is up the instant a page change starts. */
+.route-progress[data-phase='pending'] {
+  opacity: 1;
+  transform: scaleX(0.92);
+  /* Front-loaded, then a crawl it can never finish: mostly done inside a second, and
+     past that it only admits to still working. */
+  transition: transform var(--route-dur) cubic-bezier(0.06, 0.6, 0.1, 1);
+}
+
+/*
+ * Filled and gone. The fade is an animation rather than a transition so the rule is
+ * visible from the first frame even when it arrives here straight from `idle` — a
+ * transition from the resting opacity would draw nothing at all.
+ */
+.route-progress[data-phase='done'] {
+  transform: scaleX(1);
+  transition: transform 0.24s var(--ease);
+  animation: route-progress-out 0.32s var(--ease) 0.12s both;
+}
+
+@keyframes route-progress-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/*
+ * Reduced motion: no growth to watch. The rule is simply present for as long as the
+ * page is changing, which is the whole message — unlike `.reading-progress`, which is
+ * decoration and is hidden outright.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .route-progress {
+    transition: none;
+  }
+
+  .route-progress[data-phase='pending'] {
+    transform: scaleX(1);
+    transition: none;
+  }
+
+  /* Only the fade survives: nothing grows, nothing moves. */
+  .route-progress[data-phase='done'] {
+    transform: scaleX(1);
+    transition: none;
+    animation: route-progress-out 0.3s linear both;
   }
 }
 
@@ -304,7 +410,7 @@ html[dir='rtl'] .text-link:focus-visible .arrow--back {
 .entry__pager-label {
   color: var(--color-muted);
   font-size: var(--text-label);
-  letter-spacing: 0.04em;
+  letter-spacing: var(--tracking-label);
 }
 
 .entry__pager-title {
@@ -338,7 +444,7 @@ html[dir='rtl'] .text-link:focus-visible .arrow--back {
     display: none;
   }
 
-  .card,
+  .card__link,
   .card .picture,
   .card__arrow,
   .card__title,
@@ -347,6 +453,7 @@ html[dir='rtl'] .text-link:focus-visible .arrow--back {
   .filters__link,
   .site-nav__link::after,
   .gallery__item .picture,
+  .menu-panel__close,
   .menu-panel__link,
   .entry__pager-link {
     transition: none;

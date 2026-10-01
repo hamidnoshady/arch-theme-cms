@@ -2,8 +2,10 @@ import '@fontsource-variable/vazirmatn/wght.css'
 import '@/styles/index.css'
 
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 
 import { Logo } from '@/components/brand/Logo'
+import { RouteProgress } from '@/components/layout/RouteProgress'
 import { getSite } from '@/lib/cms'
 import { shazdeUiReady } from '@/lib/fonts'
 import { interFont } from '@/lib/inter-font'
@@ -46,6 +48,16 @@ export async function RootDocument({ locale, children }: { locale: Locale; child
     >
       <body>
         {css ? <style dangerouslySetInnerHTML={{ __html: css }} /> : null}
+        {/* Outside the page shell: the drawer pushes `.shell`, which would carry a
+            fixed-position rule along with it. The boundary lets a statically
+            prerendered page (404, _not-found) bail out to the client rather than
+            fail: the rule reads the query string, and it is fixed-position, so its
+            absence from the prerendered HTML cannot shift anything. */}
+        {serving ? (
+          <Suspense fallback={null}>
+            <RouteProgress />
+          </Suspense>
+        ) : null}
         {serving ? children : <Holding locale={locale} branding={branding} />}
       </body>
     </html>

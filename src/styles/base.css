@@ -145,7 +145,7 @@ a {
 
 .text-link--large {
   font-size: var(--text-body-lg);
-  letter-spacing: 0.01em;
+  letter-spacing: var(--tracking-ui);
 }
 
 .arrow {
@@ -186,7 +186,7 @@ html[dir='rtl'] .arrow--back::before {
   font-size: var(--text-ui);
   font-weight: var(--text-label-weight);
   line-height: var(--leading-ui);
-  letter-spacing: 0.02em;
+  letter-spacing: var(--tracking-ui);
   transition: background 0.2s var(--ease), color 0.2s var(--ease);
 }
 
@@ -222,7 +222,7 @@ html[dir='rtl'] .arrow--back::before {
   height: 2px;
   background: var(--color-ink);
   transform: scaleX(0);
-  transform-origin: inline-start;
+  transform-origin: var(--origin-inline-start);
 }
 
 [data-reveal='in'] .rule--marked::before,
@@ -263,12 +263,13 @@ html[dir='rtl'] .arrow--back::before {
   margin-bottom: 12px;
 }
 
+/* A status page states exactly one thing, so its title is the page-title role. */
 .holding__title,
 .status-page__title {
   margin: 0;
-  font-weight: var(--text-display-weight);
-  font-size: clamp(28px, 4vw, 48px);
-  line-height: 1.25;
+  font-weight: var(--text-title-weight);
+  font-size: var(--text-title);
+  line-height: var(--leading-heading);
   color: var(--color-ink);
 }
 
@@ -294,5 +295,5 @@ html[dir='rtl'] .arrow--back::before {
 
 .status-page__home {
   font-size: var(--text-ui);
-  letter-spacing: 0.04em;
+  letter-spacing: var(--tracking-label);
 }
