@@ -1,0 +1,3 @@
+## 2024-03-20 - Global querySelectorAll in MutationObserver callback is a performance trap
+**Learning:** Using `document.querySelectorAll` inside a `MutationObserver` callback that listens to `document.body` with `childList: true, subtree: true` is an O(N) operation on the entire DOM tree. In a framework like React that triggers many small mutations, this blocks the main thread and severely degrades performance.
+**Action:** Always scope DOM queries within a `MutationObserver` callback strictly to the added subtrees. Iterate over `mutation.addedNodes`, check `instanceof Element`, and run `node.querySelectorAll` instead.
