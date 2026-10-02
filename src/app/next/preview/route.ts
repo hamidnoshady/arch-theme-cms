@@ -17,7 +17,7 @@ export async function GET(req: Request): Promise<Response> {
   const path = params.get('path') ?? ''
   const token = params.get('token')
 
-  if (!path.startsWith('/') || path.startsWith('//')) return new Response('Invalid preview path', { status: 400 })
+  if (!path.startsWith('/') || path.startsWith('//') || path.startsWith('/\\')) return new Response('Invalid preview path', { status: 400 })
   if (!token || !(await editorMaySee(token))) return new Response('You are not allowed to preview this page', { status: 403 })
 
   const draft = await draftMode()

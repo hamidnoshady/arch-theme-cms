@@ -20,5 +20,6 @@ describe('form validation', () => {
     expect(safeFormRedirect('https://example.com/x')).toMatch(/^https:/)
     expect(safeFormRedirect('javascript:alert(1)')).toBeNull()
     expect(safeFormRedirect('//evil.com')).toBeNull()
+    expect(safeFormRedirect('/\\evil.com')).toBeNull()
   })
 })
