@@ -19,7 +19,7 @@ export function validateFormField(
 export function safeFormRedirect(url: string | null | undefined): string | null {
   if (!url) return null
   const trimmed = url.trim()
-  if (trimmed.startsWith('/') && !trimmed.startsWith('//')) return trimmed
+  if (trimmed.startsWith('/') && !trimmed.startsWith('//') && !trimmed.startsWith('/\\')) return trimmed
   if (/^https?:\/\//i.test(trimmed)) return trimmed
   return null
 }
