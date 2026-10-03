@@ -68,6 +68,7 @@ export function Gallery({
               className="gallery__item"
               onClick={() => setIndex(i)}
               aria-label={`${t.openImage} — ${image.alt || counter(i)}`}
+              title={`${t.openImage} — ${image.alt || counter(i)}`}
             >
               <MediaFrame
                 as="span"
@@ -115,11 +116,11 @@ export function Gallery({
             </figure>
             {count > 1 ? (
               <div className="lightbox__nav">
-                <button type="button" className="lightbox__step" onClick={() => go(-1)} aria-label={`${t.previous}: ${previous?.alt || counter((index! - 1 + count) % count)}`}>
+                <button type="button" className="lightbox__step" onClick={() => go(-1)} aria-label={`${t.previous}: ${previous?.alt || counter((index! - 1 + count) % count)}`} title={`${t.previous}: ${previous?.alt || counter((index! - 1 + count) % count)}`}>
                   <Picture media={previous!} sizes="96px" alt="" cover className="lightbox__preview" />
                   <span className="lightbox__step-label"><span aria-hidden="true" className="arrow arrow--back" /> {t.previous}</span>
                 </button>
-                <button type="button" className="lightbox__step" onClick={() => go(1)} aria-label={`${t.next}: ${next?.alt || counter((index! + 1) % count)}`}>
+                <button type="button" className="lightbox__step" onClick={() => go(1)} aria-label={`${t.next}: ${next?.alt || counter((index! + 1) % count)}`} title={`${t.next}: ${next?.alt || counter((index! + 1) % count)}`}>
                   <Picture media={next!} sizes="96px" alt="" cover className="lightbox__preview" />
                   <span className="lightbox__step-label">{t.next} <span aria-hidden="true" className="arrow" /></span>
                 </button>
