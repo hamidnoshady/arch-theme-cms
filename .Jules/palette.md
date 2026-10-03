@@ -1,3 +1,3 @@
-## 2026-09-30 - [Smooth Anchor Keyboard Navigation]
-**Learning:** Native browser smooth scroll behavior intercepts link clicks and often breaks standard accessibility focus management for in-page anchors when the target doesn't explicitly have a `tabindex` set. This prevents keyboard/screen reader users from continuing navigation from the anchor target.
-**Action:** When overriding or handling smooth scrolling manually for same-page anchors, ensure the target element is made focusable programmatically (e.g., adding `tabindex="-1"`) and actively set focus to it.
+## 2026-10-03 - Native Tooltips for Icon-Only Buttons
+**Learning:** Adding `title` attributes matching `aria-label` to icon-only buttons provides native tooltips for mouse users without adding JavaScript overhead. Modern screen readers handle identical `aria-label` and `title` gracefully, prioritizing the accessible name. Avoid adding tooltips to buttons that already display the tooltip text visually to prevent annoying redundancy.
+**Action:** Always verify if an icon-only button lacks a `title` attribute when `aria-label` is present, and add it for improved usability. Double-check that text-based buttons don't have redundant tooltips.
