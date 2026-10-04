@@ -181,7 +181,10 @@ export function MobileMenu({
                       <span className="menu-panel__number" aria-hidden="true">
                         {item.number}
                       </span>
-                      <span>{item.label}</span>
+                      <span>
+                        {item.label}
+                        <span className="arrow arrow--external" aria-hidden="true" />
+                      </span>
                     </a>
                   ) : (
                     <Link
