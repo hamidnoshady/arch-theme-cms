@@ -88,6 +88,15 @@ export async function proxyToCms(req: Request, apiPath: string): Promise<Respons
 
   const incoming = new URL(req.url)
   const target = new URL(`${base}/api/${apiPath.replace(/^\//, '')}${incoming.search}`)
+
+  // 🛡️ Sentinel: Security fix for SSRF / Path Traversal
+  // Verify the resulting URL stays within the /api/ namespace to prevent attackers
+  // from bypassing constraints via encoded dot segments (e.g., %2e%2e/admin).
+  const expectedPathBase = new URL(base).pathname.replace(/\/$/, '') + '/api/'
+  if (!target.pathname.startsWith(expectedPathBase)) {
+    return Response.json({ error: 'Invalid proxy path' }, { status: 403 })
+  }
+
   const headers = proxyHeaders(req.headers, req.headers.get('host'), {
     keyed: isKeyedPath(req.method, apiPath) && !incoming.searchParams.has('draft'),
   })
