@@ -37,6 +37,7 @@ export async function SiteFooter({ locale }: { locale: Locale }) {
                     {...(l.link!.newTab || l.link!.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                   >
                     {l.label}
+                    {(l.link!.newTab || l.link!.external) ? <span className="arrow arrow--external" aria-hidden="true" /> : null}
                   </a>
                 </li>
               ))}

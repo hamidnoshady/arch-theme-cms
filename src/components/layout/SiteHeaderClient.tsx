@@ -55,7 +55,10 @@ export function SiteHeaderClient({ locale, items, branding, homeLabel, language 
                   <span className="site-nav__number" aria-hidden="true">
                     {item.number}
                   </span>
-                  <span>{item.label}</span>
+                  <span>
+                    {item.label}
+                    {item.external ? <span className="arrow arrow--external" aria-hidden="true" /> : null}
+                  </span>
                 </>
               )
               return (
