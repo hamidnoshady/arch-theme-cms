@@ -43,3 +43,20 @@ describe('keyed proxy paths', () => {
     expect(isKeyedPath('GET', 'form-submissions')).toBe(false)
   })
 })
+
+describe('proxyToCms', () => {
+  it('blocks path traversal attacks (SSRF)', async () => {
+    const { proxyToCms } = await import('./cms-proxy')
+    process.env.ESHOBE_CMS_URL = 'https://cms.example.com'
+    const req = new Request('http://localhost:3000/api/some/path')
+
+    const res = await proxyToCms(req, '../admin')
+    expect(res.status).toBe(403)
+
+    const res2 = await proxyToCms(req, '%2e%2e/admin')
+    expect(res2.status).toBe(403)
+
+    const res3 = await proxyToCms(req, 'foo/../../admin')
+    expect(res3.status).toBe(403)
+  })
+})
