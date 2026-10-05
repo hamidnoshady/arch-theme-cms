@@ -182,7 +182,11 @@ const posts = [
   post({
     slug: L('خانه-ساحلی', 'sea-house'), title: L('خانهٔ ساحلی', 'Sea House'),
     categories: [ID.projects, ID.residential], heroImage: MEDIA.sea,
-    projectMetadata: { location: 'Nowshahr', date: '2023-05-01T00:00:00.000Z', area: '320 m²', status: null, client: null, additionalFacts: [{ id: 'f1', label: 'Structure', value: 'Exposed concrete' }] },
+    // Localized text facts, shared date (eshobe-cms migration 20261005_180000).
+    projectMetadata: {
+      location: L('نوشهر', 'Nowshahr'), date: '2023-05-01T00:00:00.000Z', area: L('۳۲۰ متر مربع', '320 m²'), status: null, client: null,
+      additionalFacts: [{ id: 'f1', label: L('سازه', 'Structure'), value: L('بتن نمایان', 'Exposed concrete') }],
+    },
     content: L(
       longBody(fa, { intro: 'ویلایی رو به دریا با حیاط‌های میانی.', h1: 'زمین و اقلیم', p1: 'نسیم دریا و نور.', h2: 'مصالح', p2: 'بتن نمایان و چوب.', h3: 'اجرا', p3: 'ساخت در دو فصل.' }),
       longBody(en, { intro: 'A seaside villa with inner courts.', h1: 'Site and climate', p1: 'Sea breeze and daylight.', h2: 'Materials', p2: 'Exposed concrete and timber.', h3: 'Construction', p3: 'Built over two seasons.' }),
@@ -205,7 +209,7 @@ const posts = [
     // No image at all: the card must not pretend an image is loading.
     slug: L('کلبه-دامنه', 'hillside-cabin'), title: L('کلبهٔ دامنه', 'Hillside Cabin'),
     categories: [ID.projects, ID.residential],
-    projectMetadata: { location: 'Alamut', date: null, area: '96 m²' },
+    projectMetadata: { location: L('الموت', 'Alamut'), date: null, area: L('۹۶ متر مربع', '96 m²') },
     content: L(root([para('کلبه‌ای کوچک روی شیب.', fa)], fa), root([para('A small cabin on a slope.', en)], en)),
   }),
   post({
