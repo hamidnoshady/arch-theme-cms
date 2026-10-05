@@ -28,15 +28,32 @@ export function Reveal() {
       { rootMargin: '0px 0px -8% 0px' },
     )
 
-    const scan = () => {
-      for (const el of document.querySelectorAll('[data-reveal]')) {
-        if (el.getAttribute('data-reveal') === 'in') continue
-        io.observe(el)
-      }
+    const observeNew = (el: Element) => {
+      if (el.getAttribute('data-reveal') === 'in') return
+      io.observe(el)
     }
-    scan()
-    const mo = new MutationObserver(scan)
-    mo.observe(document.body, { childList: true, subtree: true })
+
+    // Initial scan
+    for (const el of document.querySelectorAll('[data-reveal]')) observeNew(el)
+
+    // ⚡ Bolt: Only scan added nodes to avoid O(N) full DOM traversals on every mutation
+    const mo = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type === 'childList') {
+          for (const node of m.addedNodes) {
+            if (node instanceof Element) {
+              if (node.hasAttribute('data-reveal')) observeNew(node)
+              for (const el of node.querySelectorAll('[data-reveal]')) observeNew(el)
+            }
+          }
+        } else if (m.type === 'attributes' && m.attributeName === 'data-reveal') {
+          if (m.target instanceof Element && m.target.hasAttribute('data-reveal')) {
+            observeNew(m.target)
+          }
+        }
+      }
+    })
+    mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-reveal'] })
 
     return () => {
       io.disconnect()
