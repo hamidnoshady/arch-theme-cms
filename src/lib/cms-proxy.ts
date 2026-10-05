@@ -74,20 +74,44 @@ export function proxyHeaders(
   return out
 }
 
-/** Public, draft-free reads that may carry the site key so the CMS knows the tenant. */
-export function isKeyedPath(method: string, apiPath: string): boolean {
-  if (method !== 'GET' && method !== 'HEAD') return false
-  const path = apiPath.replace(/^\/+/, '')
-  return path === 'site' || /^media\/file\/[^/]+$/.test(path)
+/** One file name: no separators, no dot segments, no control characters. */
+const fileSegment = (segment: string) =>
+  segment.length > 0 && segment.length <= 255 && segment !== '.' && segment !== '..' && !/[/\\\u0000-\u001f\u007f]/.test(segment)
+
+/**
+ * The visitor-facing `/api/*` surface, as an allowlist. A browser on this site needs the
+ * public site descriptor and media files — nothing else (form submissions have their own,
+ * validating route). Every other path, and every other method, is a 404 here: the CMS
+ * keeps `/api/*` closed on customer domains by design, and this proxy must not reopen it
+ * (no login, no staff endpoints, no `..` walk out of `/api`). Returns the canonical,
+ * re-encoded CMS path, or null.
+ */
+export function publicApiPath(method: string, segments: string[]): string | null {
+  if (method !== 'GET' && method !== 'HEAD') return null
+  if (segments.length === 1 && segments[0] === 'site') return 'site'
+  if (segments.length === 3 && segments[0] === 'media' && segments[1] === 'file' && fileSegment(segments[2]!)) {
+    return `media/file/${encodeURIComponent(segments[2]!)}`
+  }
+  return null
 }
 
-/** Forward `/api/*` to the CMS preserving method, body and tenant Host (`proxiesApi`). */
+/** Public, draft-free reads that may carry the site key so the CMS knows the tenant. */
+export function isKeyedPath(method: string, apiPath: string): boolean {
+  return publicApiPath(method, apiPath.replace(/^\/+/, '').split('/')) !== null
+}
+
+/** Forward an allowlisted, canonical `/api/*` read to the CMS (`proxiesApi`). */
 export async function proxyToCms(req: Request, apiPath: string): Promise<Response> {
   const base = cmsOrigin()
   if (!base) return Response.json({ error: 'CMS is not configured' }, { status: 503 })
 
   const incoming = new URL(req.url)
-  const target = new URL(`${base}/api/${apiPath.replace(/^\//, '')}${incoming.search}`)
+  // Media keeps its cache-busting query; the descriptor takes none (and never `draft`).
+  const search = apiPath.startsWith('media/') ? incoming.search : ''
+  const target = new URL(`${base}/api/${apiPath.replace(/^\//, '')}${search}`)
+  if (target.origin !== new URL(base).origin || !target.pathname.startsWith('/api/')) {
+    return Response.json({ error: 'Not Found' }, { status: 404 })
+  }
   const headers = proxyHeaders(req.headers, req.headers.get('host'), {
     keyed: isKeyedPath(req.method, apiPath) && !incoming.searchParams.has('draft'),
   })

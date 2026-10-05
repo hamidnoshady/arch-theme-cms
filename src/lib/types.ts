@@ -83,6 +83,8 @@ export type Post = {
   publishedAt?: string | null
   updatedAt?: string | null
   populatedAuthors?: { id?: string | null; name?: string | null }[] | null
+  /** Structured project facts (`projectMetadata` group); see `src/lib/project-metadata.ts`. */
+  projectMetadata?: import('./project-metadata').ProjectMetadata | null
 }
 
 export type LinkField = {

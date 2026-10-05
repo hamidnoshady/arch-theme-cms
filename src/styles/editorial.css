@@ -179,6 +179,106 @@ html[lang='fa'] .page-title__heading {
   background: var(--color-ink);
 }
 
+/* Every state names its way forward: a short row of text links under the message. */
+.state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 28px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.state-actions .text-link {
+  color: var(--color-ink);
+}
+
+/* Project facts sit as one compact band under the hero, not a second title block. */
+.meta-list--facts {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.meta-list--facts dd {
+  font-size: var(--text-body);
+}
+
+/* Section anchors for a long project: a quiet numbered index, not a second navigation bar. */
+.toc {
+  display: grid;
+  gap: 10px;
+  max-width: var(--read);
+  padding-block: 4px;
+}
+
+.toc__title {
+  margin: 0;
+  font-size: var(--text-label);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-muted);
+}
+
+.toc__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 26px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: toc;
+}
+
+.toc__list li {
+  counter-increment: toc;
+}
+
+.toc__link {
+  display: inline-flex;
+  gap: 8px;
+  padding-block: 6px;
+  border-bottom: 1px solid var(--color-line);
+  color: var(--color-ink);
+  font-size: var(--text-ui);
+}
+
+.toc__link::before {
+  content: counter(toc, decimal-leading-zero);
+  color: var(--color-muted);
+  font-size: var(--text-label);
+}
+
+html[lang='fa'] .toc__link::before {
+  content: counter(toc, persian);
+}
+
+.toc__link:hover,
+.toc__link:focus-visible {
+  border-bottom-color: var(--color-ink);
+}
+
+.inquiry {
+  display: grid;
+  gap: 22px;
+}
+
+.inquiry__grid {
+  display: grid;
+  gap: 14px;
+  justify-items: start;
+  max-width: var(--read);
+}
+
+.inquiry__title {
+  margin: 0;
+  font-weight: var(--text-h1-weight);
+  font-size: var(--text-h2);
+  line-height: var(--leading-heading);
+}
+
+.inquiry__body {
+  margin: 0;
+  color: var(--color-muted);
+}
+
 .related {
   display: grid;
   gap: 8px;

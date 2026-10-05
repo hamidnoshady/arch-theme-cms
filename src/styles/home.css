@@ -53,9 +53,16 @@ html[lang='fa'] .logo__subtitle {
   font-size: var(--text-body-lg);
 }
 
+/*
+ * The header wordmark (no logo uploaded) has to read as a name at a glance. At UI size
+ * with 0.28em tracking it broke into spaced letters ("G r a p h i t e") about 15px tall;
+ * it now sits on the large body step with a light Latin lockup tracking. Persian resets
+ * tracking to zero below.
+ */
 .logo--compact .logo__wordmark {
-  font-size: var(--text-ui);
-  letter-spacing: 0.28em;
+  font-size: var(--text-body-lg);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
 }
 
 html[lang='fa'] .logo--compact .logo__wordmark {
@@ -316,6 +323,18 @@ html[data-intro='play'] .home__skip {
 .home__lang {
   font-size: var(--text-ui);
   letter-spacing: 0.08em;
+}
+
+/*
+ * The direct way in. The logo still builds and the menu still waits for its gesture,
+ * but a visitor who came for the work can go straight to it from the first frame.
+ * It sits at the end of the top bar, before the language switch.
+ */
+.home__shortcut {
+  margin-inline-start: auto;
+  margin-inline-end: 28px;
+  font-size: var(--text-ui);
+  color: var(--color-ink);
 }
 
 .home__cue {

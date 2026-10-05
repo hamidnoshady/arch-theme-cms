@@ -2,10 +2,10 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { HomeStage } from '@/components/home/HomeStage'
-import { getHomePage, getSite } from '@/lib/cms'
+import { CmsUnavailableError, getHomePage, getSite } from '@/lib/cms'
 import { getRenderContext } from '@/lib/context'
 import { copy, href, otherLocale } from '@/lib/i18n'
-import { getPrimaryNavigation } from '@/lib/navigation'
+import { getPrimaryNavigation, projectsShortcut } from '@/lib/navigation'
 import { ogImageUrl } from '@/lib/media'
 import { buildMetadata } from '@/lib/seo'
 import type { Locale } from '@/lib/types'
@@ -20,7 +20,11 @@ const introScript = (enabled: boolean, durationMs: number) =>
 
 export async function homeMetadata(locale: Locale): Promise<Metadata> {
   const ctx = await getRenderContext(locale)
-  const page = await getHomePage(locale)
+  // The home stage needs no page document; an outage only costs the SEO fields.
+  const page = await getHomePage(locale).catch((error: unknown) => {
+    if (error instanceof CmsUnavailableError) return null
+    throw error
+  })
   const other = otherLocale(locale)
   return buildMetadata({
     locale,
@@ -45,6 +49,7 @@ export async function HomeView({ locale }: { locale: Locale }) {
     label: item.label,
     number: ctx.settings.showSectionNumbers ? item.number : '',
   }))
+  const projects = projectsShortcut(nav, locale)
   const language = ctx.otherServed
     ? { href: href(other), label: t.switchLabel, short: t.switchToShort, lang: other }
     : null
@@ -59,6 +64,7 @@ export async function HomeView({ locale }: { locale: Locale }) {
       <HomeStage
         locale={locale}
         items={items}
+        shortcut={projects ? { href: projects.href, label: projects.label } : null}
         language={language}
         branding={ctx.branding}
         mediaOrigin={ctx.origin}

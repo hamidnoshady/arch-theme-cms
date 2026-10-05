@@ -88,10 +88,6 @@
   object-fit: cover;
 }
 
-.frame--empty > .frame__media {
-  background: var(--color-soft-2);
-}
-
 /* Entering frames crossfade from the paper; nothing is hidden from readers
    without JS or with reduced motion (final states guaranteed in tokens.css). */
 .frame[data-reveal]:not([data-reveal='in']) {
@@ -226,17 +222,67 @@
 }
 
 .lightbox__count {
+  margin: 0;
   font-family: var(--font-brand);
-  font-size: var(--text-meta);
-  letter-spacing: 0.08em;
-  color: var(--color-muted);
+  font-size: var(--text-label);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-ink);
+}
+
+/* The page behind an open viewer does not scroll (Gallery.tsx sets the flag). */
+html[data-viewer='open'] {
+  overflow: hidden;
+}
+
+/* Close is a labelled control with a drawn ×, not a bare word floating in the corner. */
+.lightbox .lightbox__close {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--color-ink);
+  color: var(--color-ink);
+  font-size: var(--text-ui);
+  cursor: pointer;
+}
+
+.lightbox__close-icon {
+  position: relative;
+  width: 14px;
+  height: 14px;
+}
+
+.lightbox__close-icon::before,
+.lightbox__close-icon::after {
+  content: '';
+  position: absolute;
+  inset-inline-start: 50%;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: currentColor;
+  transform: rotate(45deg);
+}
+
+.lightbox__close-icon::after {
+  transform: rotate(-45deg);
+}
+
+.lightbox .lightbox__close:hover,
+.lightbox .lightbox__close:focus-visible {
+  background: var(--color-ink);
+  color: var(--color-paper);
 }
 
 .lightbox__figure {
   margin: 0;
   min-height: 0;
   display: grid;
-  align-content: center;
+  /* The picture takes what its row leaves after the caption — never more, so it can
+     not ride up under the counter and the close control. */
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: center;
   justify-items: center;
   gap: 12px;
 }
@@ -245,7 +291,7 @@
   width: auto;
   height: auto;
   max-width: 100%;
-  max-height: calc(100dvh - 160px);
+  max-height: 100%;
   object-fit: contain;
   animation: lightbox-image-enter 0.28s var(--ease) both;
 }
@@ -268,11 +314,17 @@
 
 .lightbox__step {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   justify-items: start;
   min-width: 96px;
+  min-height: 44px;
   color: var(--color-ink);
   cursor: pointer;
+}
+
+.lightbox__step:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 4px;
 }
 
 .lightbox__step:last-child {
@@ -288,6 +340,7 @@
 
 .lightbox__step-label {
   font-size: var(--text-ui);
+  font-weight: var(--text-label-weight);
 }
 
 .lightbox__step:hover .lightbox__preview,
@@ -296,18 +349,49 @@
 }
 
 /*
- * Boxes: three per row on a desktop canvas, two once the chrome goes compact. Two per
- * row is the floor at every smaller width — one column of post boxes spends a phone's
- * whole scroll on a handful of items. Both variants share the policy; only their
- * aspect ratios differ (see EntryCard).
+ * Boxes follow the number of items as well as the width. Three per row on a desktop
+ * canvas, two once the chrome goes compact, one on a narrow phone — where a half-width
+ * box shrinks a photograph to a thumbnail and its title to a caption. One or two items
+ * never sit in a three-column lattice with empty cells beside them: a single project
+ * gets a plate, a pair splits the row. `data-count` is set by EntryGrid.
  */
 .entry-grid {
+  --grid-cols: 3;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
   gap: clamp(22px, 3vw, 48px);
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+.entry-grid[data-count='1'] {
+  --grid-cols: 1;
+  max-width: 760px;
+}
+
+.entry-grid[data-count='2'] {
+  --grid-cols: 2;
+}
+
+/* A card whose entry has no image is a text card: no empty plate standing in for one. */
+.card--text .card__link {
+  grid-template-rows: 1fr;
+}
+
+.card--text .card__body {
+  padding-top: 6px;
+  gap: 10px;
+}
+
+.card--text .card__title {
+  font-size: var(--text-h3);
+}
+
+/* A picture that failed to load is absent, not pending (Picture.tsx). */
+.frame[data-media='failed'],
+.gallery li:has(.frame[data-media='failed']) {
+  display: none;
 }
 
 /*
@@ -438,7 +522,17 @@
 
 @media (max-width: 1080px) {
   .entry-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    --grid-cols: 2;
+  }
+
+  .entry-grid[data-count='1'] {
+    --grid-cols: 1;
+  }
+}
+
+@media (max-width: 520px) {
+  .entry-grid {
+    --grid-cols: 1;
   }
 }
 
@@ -524,6 +618,19 @@
   .card__arrow {
     inset-inline-end: 8px;
     bottom: 8px;
+  }
+}
+
+/* One box per row: the box is a full-width plate again, so its type steps back up. */
+@media (max-width: 520px) {
+  .card__title,
+  .card--editorial .card__title {
+    font-size: var(--text-body-lg);
+  }
+
+  .card__excerpt {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
   }
 }
 

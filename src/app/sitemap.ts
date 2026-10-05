@@ -2,10 +2,11 @@ import type { MetadataRoute } from 'next'
 
 export const dynamic = 'force-dynamic'
 
-import { getEntries, getSite, listPublishedPages, sectionPageExists, servedLocales } from '@/lib/cms'
+import { getEntries, getSite, listPublishedPages, servedLocales } from '@/lib/cms'
 import { canonicalOrigin } from '@/lib/env'
 import { SECTIONS, href } from '@/lib/i18n'
 import { pageHref } from '@/lib/links'
+import { sectionAvailable } from '@/lib/navigation'
 import { ENTRY_KINDS, pageRoleIndex } from '@/lib/theme/sections'
 import { HOME_SLUG } from '@eshobe/site-runtime'
 import type { EntryKind, Locale } from '@/lib/types'
@@ -28,8 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const section of SECTIONS) {
     const loc: Url['loc'] = { fa: undefined, en: undefined }
     for (const locale of locales) {
-      const listing = (ENTRY_KINDS as string[]).includes(section)
-      if (listing || (await sectionPageExists(section, locale))) loc[locale] = href(locale, section)
+      if (await sectionAvailable(section, locale)) loc[locale] = href(locale, section)
     }
     urls.push({ loc })
   }

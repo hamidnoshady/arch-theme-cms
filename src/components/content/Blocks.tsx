@@ -8,17 +8,19 @@ import { copy, indexNumber } from '@/lib/i18n'
 import { resolveLink, safeHref } from '@/lib/links'
 import { isMapUrl } from '@/lib/map'
 import { resolveMedia } from '@/lib/media'
+import type { PageRole } from '@/lib/theme/sections'
 import type { Block, Form, LinkField, Locale, Media, Post, Ref, RichTextData } from '@/lib/types'
 
 import { ContactDetails } from './ContactDetails'
 import { RichText } from './RichText'
 
-type Ctx = { locale: Locale; origin: string }
+/** `roles` sends a link to a bound page to its section URL; `formPrefill` seeds a form's message box. */
+type Ctx = { locale: Locale; origin: string; roles?: ReadonlyMap<string, PageRole>; formPrefill?: string }
 
 const SPAN: Record<string, number> = { oneThird: 4, half: 6, twoThirds: 8, full: 12 }
 
 function CmsLink({ link, ctx, className = 'text-link' }: { link: LinkField | null | undefined; ctx: Ctx; className?: string }) {
-  const resolved = resolveLink(link, ctx.locale)
+  const resolved = resolveLink(link, ctx.locale, ctx.roles)
   if (!resolved || !link?.label || !safeHref(resolved.href)) return null
   return (
     <a
@@ -111,7 +113,15 @@ function ContactBlock({ block, ctx, number }: { block: Block; ctx: Ctx; number?:
 
 async function FormBlock({ block, ctx }: { block: Block; ctx: Ctx }) {
   const ref = block.form as Ref<Form>
-  const form = typeof ref === 'string' ? await getForm(ref, ctx.locale) : ref
+  // Always read through this site's key, even when the block arrived populated: a form
+  // that is not this site's (or that the CMS cannot serve right now) is not rendered.
+  const id = typeof ref === 'string' ? ref : ref?.id
+  let form: Form | null = null
+  try {
+    form = id ? await getForm(id, ctx.locale) : null
+  } catch {
+    form = null
+  }
   if (!form?.id || !form.fields?.length) {
     return <p className="muted">{copy[ctx.locale].formUnavailable}</p>
   }
@@ -128,7 +138,7 @@ async function FormBlock({ block, ctx }: { block: Block; ctx: Ctx }) {
       {block.enableIntro ? (
         <RichText data={block.introContent as RichTextData} locale={ctx.locale} origin={ctx.origin} variant="compact" />
       ) : null}
-      <CmsForm form={form} locale={ctx.locale} messages={messages} confirmation={confirmation} />
+      <CmsForm form={form} locale={ctx.locale} messages={messages} confirmation={confirmation} prefill={ctx.formPrefill} />
     </div>
   )
 }
@@ -325,6 +335,8 @@ export function RenderBlocks({
   origin,
   allowed,
   numbered = false,
+  roles,
+  formPrefill,
 }: {
   blocks: Block[] | null | undefined
   locale: Locale
@@ -332,8 +344,10 @@ export function RenderBlocks({
   /** The site's block allowlist from `GET /api/site`; null when unknown. */
   allowed?: string[] | null
   numbered?: boolean
+  roles?: ReadonlyMap<string, PageRole>
+  formPrefill?: string
 }) {
-  const ctx = { locale, origin }
+  const ctx: Ctx = { locale, origin, roles, formPrefill }
   let counter = 0
   const list = (blocks ?? []).filter((b) => {
     if (allowed && !allowed.includes(b.blockType)) {

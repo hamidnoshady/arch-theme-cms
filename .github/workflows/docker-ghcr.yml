@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - arena/01a0e3c3-arch-theme-cms
     tags:
       - 'v*'
   pull_request:

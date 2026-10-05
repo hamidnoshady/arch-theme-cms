@@ -1,18 +1,22 @@
-import Link from 'next/link'
-
 import { RenderBlocks, isContactBlock } from '@/components/content/Blocks'
+import { ContactActions } from '@/components/content/ContactDetails'
 import { RichText } from '@/components/content/RichText'
-import { EmptyState, Notice, PageTitle, SectionHeading } from '@/components/editorial/Editorial'
+import { EmptyState, Notice, PageTitle, SectionHeading, type StateAction } from '@/components/editorial/Editorial'
 import { PageShell, sectionActive } from '@/components/layout/PageShell'
-import { pageHref } from '@/lib/links'
 import { MinimalMap } from '@/components/map/MinimalMap'
 import { MediaFrame } from '@/components/media/MediaFrame'
 import type { RenderContext } from '@/lib/context'
 import { copy, href, otherLocale, sectionNumber } from '@/lib/i18n'
+import { pageHref } from '@/lib/links'
 import { resolveMedia } from '@/lib/media'
-import { getOffice } from '@/lib/office'
+import { sectionAvailable } from '@/lib/navigation'
+import { getOffice, type ContactBlockData } from '@/lib/office'
+import { withoutLeadingTitle } from '@/lib/richtext'
+import type { SectionState } from '@/lib/route'
+import { pageRoleIndex } from '@/lib/theme/sections'
 import type { LocaleLink, Page, Section } from '@/lib/types'
 
+/** A hero picture only when the page has one; nothing stands in for an absent image. */
 function Hero({ page, ctx }: { page: Page; ctx: RenderContext }) {
   const type = page.hero?.type
   if (type !== 'highImpact' && type !== 'mediumImpact') return null
@@ -25,9 +29,11 @@ function Hero({ page, ctx }: { page: Page; ctx: RenderContext }) {
   )
 }
 
+/** The hero text, minus a leading heading that only repeats the page title (already the h1). */
 function Lead({ page, ctx }: { page: Page | null; ctx: RenderContext }) {
-  if (!page?.hero?.richText) return null
-  return <RichText data={page.hero.richText} locale={ctx.locale} origin={ctx.origin} variant="lead" />
+  const data = withoutLeadingTitle(page?.hero?.richText, page?.title)
+  if (!data) return null
+  return <RichText data={data} locale={ctx.locale} origin={ctx.origin} variant="lead" />
 }
 
 async function OfficeMap({ ctx, page, heading }: { ctx: RenderContext; page: Page | null; heading?: boolean }) {
@@ -42,80 +48,90 @@ async function OfficeMap({ ctx, page, heading }: { ctx: RenderContext; page: Pag
   )
 }
 
-/** Shown when this locale has no translation but the other locale does. */
-function MissingTranslation({ ctx, other }: { ctx: RenderContext; other: LocaleLink | null }) {
+/** Where a visitor goes from a section with nothing to show in this language. */
+async function sectionActions(section: Section, ctx: RenderContext, language: LocaleLink | null, state: SectionState) {
   const t = copy[ctx.locale]
-  if (!other?.available) return <EmptyState>{t.empty}</EmptyState>
+  const actions: StateAction[] = []
+  if (state === 'missing-translation' && language?.available) {
+    const other = otherLocale(ctx.locale)
+    actions.push({ href: language.href, label: t.translationMissingLink, hrefLang: other })
+  }
+  if (section !== 'contact' && (await sectionAvailable('contact', ctx.locale))) {
+    actions.push({ href: href(ctx.locale, 'contact'), label: t.contact })
+  }
+  if (await sectionAvailable('projects', ctx.locale)) actions.push({ href: href(ctx.locale, 'projects'), label: t.allProjects })
+  actions.push({ href: href(ctx.locale), label: t.home })
+  return actions
+}
+
+const same = (a: string, b: string) => a.trim().toLocaleLowerCase() === b.trim().toLocaleLowerCase()
+
+/**
+ * The contact page as a workflow: the direct actions the CMS gives (write, call), the
+ * details and the map beside them, and the site's own form when one is bound. Nothing
+ * here is invented — a field the CMS does not have is simply not shown.
+ */
+function ContactLayout({ page, ctx, prefill }: { page: Page; ctx: RenderContext; prefill?: string }) {
+  const layout = page.layout ?? []
+  const contacts = layout.filter((b) => b.blockType === 'contact')
+  const forms = layout.filter((b) => b.blockType === 'formBlock')
+  const roles = pageRoleIndex(ctx.site)
+  const first = contacts[0] as ContactBlockData | undefined
   return (
-    <Notice
-      action={
-        <Link className="text-link" href={other.href} hrefLang={otherLocale(ctx.locale)}>
-          {t.translationMissingLink} <span className="arrow" aria-hidden="true" />
-        </Link>
-      }
-    >
-      {t.translationMissing}
-    </Notice>
+    <div className={`contact-layout ${forms.length ? '' : 'contact-layout--solo'}`}>
+      <div className="contact-layout__info">
+        {first ? <ContactActions info={first} locale={ctx.locale} /> : null}
+        <RenderBlocks blocks={contacts} locale={ctx.locale} origin={ctx.origin} allowed={ctx.allowed} roles={roles} />
+        <OfficeMap ctx={ctx} page={page} />
+      </div>
+      {forms.length ? (
+        <div className="contact-layout__form" id="contact-form" tabIndex={-1}>
+          <RenderBlocks blocks={forms} locale={ctx.locale} origin={ctx.origin} allowed={ctx.allowed} roles={roles} formPrefill={prefill} />
+        </div>
+      ) : null}
+    </div>
   )
 }
 
 export async function SectionPageView({
   section,
   page,
+  state,
   ctx,
   language,
+  prefill,
 }: {
   section: Extract<Section, 'about' | 'services' | 'contact'>
   page: Page | null
+  state: SectionState
   ctx: RenderContext
   language: LocaleLink | null
+  /** Contact only: a project title carried from a project's inquiry link. */
+  prefill?: string
 }) {
   const t = copy[ctx.locale]
   const title = page?.title || t[section]
   const layout = page?.layout ?? []
-  const contactBlocks = section === 'contact' ? layout.filter(isContactBlock) : []
   const rest = section === 'contact' ? layout.filter((b) => !isContactBlock(b)) : layout
+  const eyebrow = same(t[section], title) ? undefined : t[section]
+  const roles = pageRoleIndex(ctx.site)
 
   return (
     <PageShell locale={ctx.locale} active={sectionActive(ctx.locale, section)} language={language}>
       <div className="container page">
-        <PageTitle number={sectionNumber(section, ctx.locale)} eyebrow={t[section]} title={title} lead={<Lead page={page} ctx={ctx} />} />
+        <PageTitle number={sectionNumber(section, ctx.locale)} eyebrow={eyebrow} title={title} lead={<Lead page={page} ctx={ctx} />} />
 
         {!page ? (
-          <MissingTranslation ctx={ctx} other={language} />
+          state === 'missing-translation' ? (
+            <Notice actions={await sectionActions(section, ctx, language, state)}>{t.translationMissing}</Notice>
+          ) : (
+            <EmptyState actions={await sectionActions(section, ctx, language, state)}>{t.empty}</EmptyState>
+          )
         ) : (
           <>
             <Hero page={page} ctx={ctx} />
-            {section === 'contact' ? (
-              <div className={`contact-layout ${contactBlocks.some((b) => b.blockType === 'formBlock') ? '' : 'contact-layout--solo'}`}>
-                <div className="contact-layout__info">
-                  <RenderBlocks
-                    blocks={contactBlocks.filter((b) => b.blockType === 'contact')}
-                    locale={ctx.locale}
-                    origin={ctx.origin}
-                    allowed={ctx.allowed}
-                  />
-                  <OfficeMap ctx={ctx} page={page} />
-                </div>
-                {contactBlocks.some((b) => b.blockType === 'formBlock') ? (
-                  <div className="contact-layout__form">
-                    <RenderBlocks
-                      blocks={contactBlocks.filter((b) => b.blockType === 'formBlock')}
-                      locale={ctx.locale}
-                      origin={ctx.origin}
-                      allowed={ctx.allowed}
-                    />
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
-            <RenderBlocks
-              blocks={rest}
-              locale={ctx.locale}
-              origin={ctx.origin}
-              allowed={ctx.allowed}
-              numbered={section !== 'contact'}
-            />
+            {section === 'contact' ? <ContactLayout page={page} ctx={ctx} prefill={prefill} /> : null}
+            <RenderBlocks blocks={rest} locale={ctx.locale} origin={ctx.origin} allowed={ctx.allowed} roles={roles} numbered={section !== 'contact'} />
             {section === 'about' ? <OfficeMap ctx={ctx} page={page} heading /> : null}
           </>
         )}
@@ -130,7 +146,7 @@ export function GenericPageView({ page, ctx, language }: { page: Page; ctx: Rend
       <div className="container page">
         <PageTitle eyebrow={copy[ctx.locale].home} eyebrowHref={href(ctx.locale)} title={page.title ?? ''} lead={<Lead page={page} ctx={ctx} />} />
         <Hero page={page} ctx={ctx} />
-        <RenderBlocks blocks={page.layout} locale={ctx.locale} origin={ctx.origin} allowed={ctx.allowed} />
+        <RenderBlocks blocks={page.layout} locale={ctx.locale} origin={ctx.origin} allowed={ctx.allowed} roles={pageRoleIndex(ctx.site)} />
       </div>
     </PageShell>
   )

@@ -45,3 +45,37 @@ export function ContactDetails({ info, locale }: { info: ContactInfo; locale: Lo
   if (info.hours) items.push({ label: t.hours, value: <span className="pre-line">{toLocaleDigits(info.hours, locale)}</span> })
   return <MetaList items={items} className="meta-list--stacked" />
 }
+
+/**
+ * The contact page's primary actions, straight from the CMS contact block: write an
+ * email, call. With neither field present nothing renders — no placeholder address or
+ * number ever stands in.
+ */
+export function ContactActions({ info, locale }: { info: ContactInfo; locale: Locale }) {
+  const t = copy[locale]
+  const email = info.email?.trim()
+  const phone = (info.phones ?? []).map((p) => p?.trim()).find(Boolean)
+  if (!email && !phone) return null
+  return (
+    <ul className="contact-actions" role="list" aria-label={t.contactActions}>
+      {email ? (
+        <li>
+          <a className="button" href={`mailto:${email}`}>
+            <span>{t.writeEmail}</span>
+            <span className="arrow" aria-hidden="true" />
+          </a>
+        </li>
+      ) : null}
+      {phone ? (
+        <li>
+          <a className="button button--quiet" href={telHref(phone)}>
+            <span>{t.call}</span>
+            <span dir="ltr" className="contact-actions__number">
+              {toLocaleDigits(phone, locale)}
+            </span>
+          </a>
+        </li>
+      ) : null}
+    </ul>
+  )
+}

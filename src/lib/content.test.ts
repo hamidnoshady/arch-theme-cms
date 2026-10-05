@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { extractFacts } from '@/components/content/RichText'
+import { extractLegacyFacts as extractFacts } from '@/lib/project-metadata'
 import { referenceHref, safeHref } from './links'
 import { findContactBlock, findLocation } from './office'
 import { richTextToPlain } from './richtext'

@@ -2,7 +2,7 @@
 
 import { useId, useRef, useState } from 'react'
 
-import { safeFormRedirect, validateFormField } from '@/lib/forms'
+import { safeFormRedirect, validateFormField, type FieldErrorCode } from '@/lib/forms'
 import { copy } from '@/lib/i18n'
 import type { Form, FormField, Locale } from '@/lib/types'
 
@@ -20,12 +20,15 @@ export function CmsForm({
   locale,
   messages = {},
   confirmation,
+  prefill,
 }: {
   form: Form
   locale: Locale
   /** Server-rendered `message` field bodies, keyed by field index. */
   messages?: Record<number, React.ReactNode>
   confirmation?: React.ReactNode
+  /** Opening text for the form's first message box (an inquiry from a project page). */
+  prefill?: string
 }) {
   const t = copy[locale]
   const uid = useId()
@@ -34,6 +37,7 @@ export function CmsForm({
   const [errors, setErrors] = useState<Errors>({})
   const [touched, setTouched] = useState(false)
   const fields = (form.fields ?? []).filter((f) => f.blockType === 'message' || f.name)
+  const prefillField = prefill ? fields.find((f) => f.blockType === 'textarea')?.name : undefined
 
   const read = (el: HTMLFormElement, field: FormField) => {
     const control = el.elements.namedItem(field.name!) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null
@@ -78,6 +82,17 @@ export function CmsForm({
         headers: { 'content-type': 'application/json', accept: 'application/json' },
         body: JSON.stringify({ form: form.id, submissionData }),
       })
+      if (res.status === 422) {
+        // The server's verdict wins over the browser's: show it on the fields it names.
+        const { fields: rejected = {} } = (await res.json().catch(() => ({}))) as { fields?: Record<string, FieldErrorCode> }
+        const next: Errors = {}
+        for (const [name, code] of Object.entries(rejected)) next[name] = t[code] ?? t.required
+        setErrors(next)
+        setStatus('idle')
+        const first = Object.keys(next)[0]
+        if (first) (el.elements.namedItem(first) as HTMLElement | null)?.focus()
+        return
+      }
       if (!res.ok) throw new Error(String(res.status))
       const redirect = form.confirmationType === 'redirect' ? safeFormRedirect(form.redirect?.url) : null
       if (redirect) {
@@ -106,7 +121,11 @@ export function CmsForm({
       className="form"
       noValidate
       onSubmit={onSubmit}
-      onBlur={() => touched && formRef.current && check(formRef.current)}
+      // After a failed attempt, errors update as the visitor types. Re-checking on blur
+      // instead removed messages between the submit button's mousedown and mouseup; the
+      // button moved out from under the pointer and the click was lost.
+      onInput={() => touched && formRef.current && check(formRef.current)}
+      onChange={() => touched && formRef.current && check(formRef.current)}
       aria-busy={status === 'sending'}
     >
       <div className="form__hp" aria-hidden="true">
@@ -163,7 +182,12 @@ export function CmsForm({
                 {!field.required ? <span className="field__optional">{t.optional}</span> : null}
               </label>
               {field.blockType === 'textarea' ? (
-                <textarea className="field__control" rows={5} {...common} defaultValue={String(field.defaultValue ?? '')} />
+                <textarea
+                  className="field__control"
+                  rows={5}
+                  {...common}
+                  defaultValue={field.name === prefillField ? `${prefill}\n` : String(field.defaultValue ?? '')}
+                />
               ) : field.blockType === 'select' ? (
                 <select className="field__control" {...common} defaultValue={String(field.defaultValue ?? '')}>
                   <option value="">—</option>
