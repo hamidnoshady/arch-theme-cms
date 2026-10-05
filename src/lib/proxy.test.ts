@@ -43,3 +43,25 @@ describe('keyed proxy paths', () => {
     expect(isKeyedPath('GET', 'form-submissions')).toBe(false)
   })
 })
+
+describe('public /api allowlist', async () => {
+  const { publicApiPath } = await import('./cms-proxy')
+
+  it('serves only the site descriptor and media files, read-only', () => {
+    expect(publicApiPath('GET', ['site'])).toBe('site')
+    expect(publicApiPath('HEAD', ['media', 'file', 'sea house.jpg'])).toBe('media/file/sea%20house.jpg')
+    expect(publicApiPath('POST', ['site'])).toBeNull()
+    expect(publicApiPath('GET', ['pages'])).toBeNull()
+    expect(publicApiPath('GET', ['users', 'me'])).toBeNull()
+    expect(publicApiPath('POST', ['users', 'login'])).toBeNull()
+    expect(publicApiPath('GET', ['form-submissions'])).toBeNull()
+  })
+
+  it('cannot be walked out of /api', () => {
+    expect(publicApiPath('GET', ['media', 'file', '..'])).toBeNull()
+    expect(publicApiPath('GET', ['media', 'file', '../../admin'])).toBeNull()
+    expect(publicApiPath('GET', ['media', 'file', '..\\admin'])).toBeNull()
+    expect(publicApiPath('GET', ['media', '..', 'pages'])).toBeNull()
+    expect(publicApiPath('GET', ['media', 'file', 'a', 'b'])).toBeNull()
+  })
+})

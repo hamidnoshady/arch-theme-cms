@@ -38,22 +38,34 @@ describe('card frame policy', () => {
 
   it('tells the browser the box width the grid actually hands out', () => {
     // A stale hint makes a phone download desktop-sized files (or a desktop, blurry ones).
-    expect(read('src', 'components', 'entries', 'EntryCard.tsx')).toMatch(
-      /sizes="\(min-width: 1081px\) 30vw, 46vw"/,
-    )
+    const card = read('src', 'components', 'entries', 'EntryCard.tsx')
+    expect(card).toMatch(/'\(min-width: 1081px\) 30vw, \(min-width: 521px\) 46vw, 92vw'/)
+    expect(card).toMatch(/count === 1\) return '\(min-width: 820px\) 760px, 92vw'/)
   })
 
   it('still suppresses the frame transition under reduced motion', () => {
     expect(motion()).toMatch(/\.card__link,[\s\S]{0,300}transition:\s*none/)
   })
 
-  it('keeps three boxes per row on a desktop canvas and two on tablet and phone', () => {
+  it('fits the grid to the width: three on desktop, two on tablet, one on a narrow phone', () => {
     const css = media()
-    expect(css).toMatch(/\.entry-grid\s*\{[^}]*grid-template-columns:\s*repeat\(3,/)
-    expect(css).toMatch(/@media \(max-width: 1080px\)\s*\{\s*\.entry-grid\s*\{\s*grid-template-columns:\s*repeat\(2,/)
-    // No single-column state: one column of boxes spends a phone's whole scroll on a
-    // handful of items.
-    expect(css).not.toMatch(/\.entry-grid[^{]*\{[^}]*grid-template-columns:\s*1fr/)
+    expect(css).toMatch(/\.entry-grid\s*\{[^}]*--grid-cols:\s*3;[^}]*grid-template-columns:\s*repeat\(var\(--grid-cols\),/)
+    expect(css).toMatch(/@media \(max-width: 1080px\)\s*\{\s*\.entry-grid\s*\{\s*--grid-cols:\s*2/)
+    expect(css).toMatch(/@media \(max-width: 520px\)\s*\{\s*\.entry-grid\s*\{\s*--grid-cols:\s*1/)
+  })
+
+  it('fits the grid to the item count: one plate, a pair, never empty cells beside them', () => {
+    const css = media()
+    expect(css).toMatch(/\.entry-grid\[data-count='1'\]\s*\{[^}]*--grid-cols:\s*1/)
+    expect(css).toMatch(/\.entry-grid\[data-count='2'\]\s*\{[^}]*--grid-cols:\s*2/)
+    expect(read('src', 'components', 'entries', 'EntryCard.tsx')).toMatch(/data-count=\{count\}/)
+  })
+
+  it('renders an image-less entry as a text card, never an empty plate', () => {
+    const card = read('src', 'components', 'entries', 'EntryCard.tsx')
+    expect(card).not.toMatch(/frame--empty/)
+    expect(card).toMatch(/card--text/)
+    expect(media()).toMatch(/\.card--text \.card__link\s*\{/)
   })
 
   it('lays cards out on a grid', () => {

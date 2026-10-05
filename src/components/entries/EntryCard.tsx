@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { MediaFrame } from '@/components/media/MediaFrame'
 import { formatDate, href, indexNumber } from '@/lib/i18n'
 import { resolveMedia, type ResolvedMedia } from '@/lib/media'
+import { projectCardLine } from '@/lib/project-metadata'
 import type { EntryKind, Locale, Post } from '@/lib/types'
 
 export type CardEntry = {
@@ -12,18 +13,27 @@ export type CardEntry = {
   image: ResolvedMedia | null
   category?: string
   date?: string
+  /** Project facts line (location · year) or an article's excerpt. */
   excerpt?: string
 }
 
-/** Cover image for a card: the hero, else the SEO image; a video contributes only its poster. */
+/**
+ * A card for an entry that exists in `locale`, or null. Without a title and a slug in
+ * this language there is nothing to show and nowhere to link: such a card used to render
+ * blank and point at `/en/projects/undefined` (or, with an empty slug, at the archive).
+ * The cover is the hero, else the SEO image; a video contributes only its poster.
+ */
 export function toCardEntry(
   post: Post,
   kind: EntryKind,
   locale: Locale,
   origin: string,
   category?: string,
-): CardEntry {
-  const media = resolveMedia(post.heroImage, origin, post.title ?? '') ?? resolveMedia(post.meta?.image, origin, post.title ?? '')
+): CardEntry | null {
+  const title = post.title?.trim()
+  const slug = post.slug?.trim()
+  if (!title || !slug) return null
+  const media = resolveMedia(post.heroImage, origin, title) ?? resolveMedia(post.meta?.image, origin, title)
   const image =
     media?.kind === 'video'
       ? media.poster
@@ -32,13 +42,23 @@ export function toCardEntry(
       : media
   return {
     id: post.id,
-    href: href(locale, `${kind}/${encodeURIComponent(post.slug ?? '')}`),
-    title: post.title ?? '',
+    href: href(locale, `${kind}/${encodeURIComponent(slug)}`),
+    title,
     image,
     category,
     date: kind !== 'projects' ? formatDate(post.publishedAt, locale) : undefined,
-    excerpt: kind !== 'projects' ? post.meta?.description ?? undefined : undefined,
+    excerpt: kind === 'projects' ? projectCardLine(post, locale) || undefined : post.meta?.description ?? undefined,
   }
+}
+
+export const toCardEntries = (posts: Post[], toCard: (post: Post) => CardEntry | null): CardEntry[] =>
+  posts.map(toCard).filter((entry): entry is CardEntry => Boolean(entry))
+
+/** The box width the grid hands a card, by how many cards share the row (media.css). */
+export function cardSizes(count: number): string {
+  if (count === 1) return '(min-width: 820px) 760px, 92vw'
+  if (count === 2) return '(min-width: 521px) 46vw, 92vw'
+  return '(min-width: 1081px) 30vw, (min-width: 521px) 46vw, 92vw'
 }
 
 export function EntryCard({
@@ -48,6 +68,7 @@ export function EntryCard({
   variant,
   headingLevel = 2,
   priority = false,
+  sizes = cardSizes(3),
 }: {
   entry: CardEntry
   locale: Locale
@@ -55,29 +76,16 @@ export function EntryCard({
   variant: 'project' | 'editorial'
   headingLevel?: 2 | 3
   priority?: boolean
+  sizes?: string
 }) {
   const Heading = `h${headingLevel}` as 'h2' | 'h3'
   const ratio = variant === 'project' ? '4/3' : '3/2'
   return (
-    <article className={`card card--${variant}`}>
+    <article className={`card card--${variant} ${entry.image ? '' : 'card--text'}`.trim()}>
       <Link className="card__link" href={entry.href}>
         {entry.image ? (
-          <MediaFrame
-            as="span"
-            media={entry.image}
-            locale={locale}
-            ratio={ratio}
-            priority={priority}
-            /* Both variants share one grid (3 per row on a desktop canvas, 2 below),
-               so they share one width hint: ~30vw in a third of the content column,
-               ~46vw in half of it. */
-            sizes="(min-width: 1081px) 30vw, 46vw"
-          />
-        ) : (
-          <span className="frame frame--inset frame--fixed frame--empty" style={{ ['--ratio' as string]: ratio }}>
-            <span className="frame__media" />
-          </span>
-        )}
+          <MediaFrame as="span" media={entry.image} locale={locale} ratio={ratio} priority={priority} sizes={sizes} />
+        ) : null}
         <span className="card__body">
           <span className="card__meta">
             <span className="num">{indexNumber(index, locale)}</span>
@@ -106,8 +114,10 @@ export function EntryGrid({
   headingLevel?: 2 | 3
   prioritise?: number
 }) {
+  if (!entries.length) return null
+  const count = Math.min(entries.length, 3)
   return (
-    <ul className={`entry-grid entry-grid--${variant}`} role="list" data-reveal="">
+    <ul className={`entry-grid entry-grid--${variant}`} role="list" data-count={count} data-reveal="">
       {entries.map((entry, i) => (
         <li key={entry.id}>
           <EntryCard
@@ -117,6 +127,7 @@ export function EntryGrid({
             variant={variant}
             headingLevel={headingLevel}
             priority={i < prioritise}
+            sizes={cardSizes(count)}
           />
         </li>
       ))}

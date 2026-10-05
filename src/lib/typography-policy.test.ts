@@ -205,4 +205,12 @@ describe('responsive typography step', () => {
     }
     expect(raw).toEqual([])
   })
+
+  it('sets the header wordmark large enough to read as a name', () => {
+    const home = stripComments(readFileSync(path.join(STYLE_DIR, 'home.css'), 'utf8'))
+    const rule = home.match(/\.logo--compact \.logo__wordmark\s*\{([^}]*)\}/)?.[1] ?? ''
+    expect(rule).toMatch(/font-size:\s*var\(--text-body-lg\)/)
+    const tracking = Number(rule.match(/letter-spacing:\s*([\d.]+)em/)?.[1] ?? 0)
+    expect(tracking).toBeLessThanOrEqual(0.1)
+  })
 })

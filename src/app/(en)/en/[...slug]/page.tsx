@@ -2,7 +2,7 @@ import { renderRoute, routeMetadata } from '@/lib/route'
 
 type Props = {
   params: Promise<{ slug: string[] }>
-  searchParams: Promise<{ category?: string | string[] }>
+  searchParams: Promise<{ category?: string | string[]; project?: string | string[] }>
 }
 
 export async function generateMetadata({ params }: Props) {

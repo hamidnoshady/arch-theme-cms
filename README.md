@@ -59,9 +59,38 @@ Production deploys use the public GHCR image `ghcr.io/hamidnoshady/arch-theme-cm
 | Other content | Source |
 | --- | --- |
 | Header / footer menus | `GET /api/header`, `GET /api/footer` (CMS pages are linked by id, so a bound page always lands on its section URL) |
-| Project facts | Structured CMS project metadata when available; else first `Label: Value` bullet list |
+| Project facts | `projectMetadata` on the post (`src/lib/project-metadata.ts`); legacy first `Label: Value` bullet list only when that group is empty, never shown twice |
 | Office map | Structured coordinates on contact blocks when available; else safe map URL parsing |
-| Contact form | `formBlock` proxied via `/api/form-submissions` |
+| Contact form | `formBlock`; `POST /api/form-submissions` validates against the form read with the site key, then forwards anonymously |
+
+### Content states
+
+Every route says which of these it is in, and each has an action to go on:
+
+| State | When | Visitor sees |
+| --- | --- | --- |
+| available | the document exists in this locale | the page |
+| missing translation | the other locale has it | a notice with a link to that version, contact, projects, home |
+| empty | nothing bound or published | an empty state with the same next steps |
+| upstream error | the CMS timed out, 5xx'd or rate-limited | the error page (HTTP 500) with a retry — never "nothing published" |
+| missing | unknown slug | a real HTTP 404 (malformed escapes get a 400 in `src/proxy.ts`) |
+
+Content routes deliberately have **no `loading.tsx`**: a streaming boundary above `[...slug]` commits a 200 before the route can call `notFound()`. The home skeleton lives in a `(home)` route group so it wraps only `/` and `/en`.
+
+Menus (header, footer, home stage) are one validated model (`src/lib/navigation.ts`): read without locale fallback, an item needs a label and a target in the visitor's language, author-typed paths like `/projects` are localized (`/en/projects`), and a section route is listed only when it has content in that language.
+
+### Visitor `/api/*`
+
+`src/app/api/[...path]` is an allowlist: `GET|HEAD /api/site` and `/api/media/file/<name>`. Everything else is a 404 — the CMS keeps `/api/*` closed on customer domains and the theme does not reopen it.
+
+### QA against a mock CMS
+
+```bash
+node scripts/mock-cms.mjs --port 4010          # modes: ok | down | slow | form-fail | sparse
+ESHOBE_CMS_URL=http://127.0.0.1:4010 ESHOBE_SITE_DOMAIN=arch.local ESHOBE_API_KEY=test npm run build && npx next start -p 3100
+```
+
+The mock reproduces Payload's localization (`fallbackLocale`), depth population, `where` filters and drafts, with deliberately uneven bilingual content (an untranslated page, a Persian-only project, an English title without an English slug, an image-less project, legacy facts, a draft).
 
 ## Runtime package
 

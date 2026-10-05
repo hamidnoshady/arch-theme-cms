@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - arena/01a0cee3-arch-theme-cms
   pull_request:
   workflow_dispatch:
 
@@ -79,6 +78,9 @@ jobs:
             process.exit(1);
           }
           "
+
+      - name: Lint
+        run: npm run lint
 
       - name: Type-check
         run: npm run typecheck

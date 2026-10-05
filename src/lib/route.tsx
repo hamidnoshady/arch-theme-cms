@@ -4,8 +4,10 @@ import { notFound, permanentRedirect, redirect } from 'next/navigation'
 import { EntryView, IndexView } from '@/views/EntryViews'
 import { GenericPageView, SectionPageView } from '@/views/PageView'
 
-import { getPageBySlug, getPostBySlug, getSectionPage, getTranslatedSlug, sectionOfPost } from './cms'
+import { CmsUnavailableError, getPageBySlug, getPostBySlug, getSectionPage, getTranslatedSlug, sectionOfPost } from './cms'
 import { getRenderContext, type RenderContext } from './context'
+import { inquiryPrefill } from './forms'
+import { decodeSegment } from './segments'
 import { SECTIONS, copy, href, otherLocale } from './i18n'
 import { pageHref } from './links'
 import { ogImageUrl } from './media'
@@ -20,16 +22,11 @@ type PageSection = (typeof PAGE_SECTIONS)[number]
 const isEntryKind = (s: string): s is EntryKind => (ENTRY_KINDS as string[]).includes(s)
 const isPageSection = (s: string): s is PageSection => (PAGE_SECTIONS as readonly string[]).includes(s)
 
-function decode(segment: string) {
-  try {
-    return decodeURIComponent(segment).normalize('NFC')
-  } catch {
-    return segment
-  }
-}
+/** What a section route has to show in this locale. */
+export type SectionState = 'available' | 'missing-translation' | 'empty'
 
 export type Resolved =
-  | { kind: 'section'; section: PageSection; page: Page | null; language: LocaleLink | null }
+  | { kind: 'section'; section: PageSection; page: Page | null; state: SectionState; language: LocaleLink | null }
   | { kind: 'index'; section: EntryKind; intro: Page | null; language: LocaleLink | null }
   | { kind: 'entry'; section: EntryKind; post: Post; language: LocaleLink | null }
   | { kind: 'page'; page: Page; language: LocaleLink | null }
@@ -48,7 +45,10 @@ async function entryLanguage(post: Post, kind: EntryKind, ctx: RenderContext): P
 export async function resolve(locale: Locale, rawSegments: string[]): Promise<Resolved> {
   const ctx = await getRenderContext(locale)
   if (!ctx.served.includes(locale)) return { kind: 'missing' }
-  const segments = rawSegments.map(decode).filter(Boolean)
+  const decoded = rawSegments.map(decodeSegment)
+  // A malformed segment is a 404 before any CMS query: `/en/projects/%E0%A4` never reaches the API.
+  if (decoded.some((segment) => segment === null)) return { kind: 'missing' }
+  const segments = decoded as string[]
   const [first, second, ...rest] = segments
   const other = otherLocale(locale)
   if (!first || rest.length) return { kind: 'missing' }
@@ -56,7 +56,8 @@ export async function resolve(locale: Locale, rawSegments: string[]): Promise<Re
   if (isPageSection(first) && !second) {
     const [page, otherPage] = await Promise.all([getSectionPage(first, locale), ctx.otherServed ? getSectionPage(first, other) : null])
     const language = ctx.otherServed ? { href: href(other, first), available: Boolean(otherPage) || !page } : null
-    return { kind: 'section', section: first, page, language }
+    const state: SectionState = page ? 'available' : otherPage ? 'missing-translation' : 'empty'
+    return { kind: 'section', section: first, page, state, language }
   }
 
   if (isEntryKind(first)) {
@@ -99,7 +100,22 @@ export async function resolve(locale: Locale, rawSegments: string[]): Promise<Re
   return { kind: 'page', page, language }
 }
 
+/**
+ * Metadata never takes a page down: it runs outside the route's error boundary, so an
+ * outage thrown here replaced the whole document with Next's bare error shell. It
+ * degrades to a non-indexable error title; the page body then renders the retryable
+ * error state through `error.tsx`.
+ */
 export async function routeMetadata(locale: Locale, segments: string[]): Promise<Metadata> {
+  try {
+    return await resolvedMetadata(locale, segments)
+  } catch (error) {
+    if (!(error instanceof CmsUnavailableError)) throw error
+    return { title: copy[locale].errorTitle, robots: { index: false, follow: false } }
+  }
+}
+
+async function resolvedMetadata(locale: Locale, segments: string[]): Promise<Metadata> {
   const r = await resolve(locale, segments)
   const ctx = await getRenderContext(locale)
   const t = copy[locale]
@@ -147,14 +163,27 @@ export async function routeMetadata(locale: Locale, segments: string[]): Promise
   }
 }
 
-export async function renderRoute(locale: Locale, segments: string[], query: { category?: string | string[] } = {}) {
+export async function renderRoute(
+  locale: Locale,
+  segments: string[],
+  query: { category?: string | string[]; project?: string | string[] } = {},
+) {
   const r = await resolve(locale, segments)
   const ctx = await getRenderContext(locale)
   switch (r.kind) {
     case 'redirect':
       return r.permanent ? permanentRedirect(r.to) : redirect(r.to)
     case 'section':
-      return <SectionPageView section={r.section} page={r.page} ctx={ctx} language={r.language} />
+      return (
+        <SectionPageView
+          section={r.section}
+          page={r.page}
+          state={r.state}
+          ctx={ctx}
+          language={r.language}
+          prefill={r.section === 'contact' ? inquiryPrefill(query.project, locale) : undefined}
+        />
+      )
     case 'index': {
       const category = Array.isArray(query.category) ? query.category[0] : query.category
       return <IndexView kind={r.section} ctx={ctx} language={r.language} intro={r.intro} category={category} />

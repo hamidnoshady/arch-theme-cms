@@ -3,19 +3,16 @@ import { Fragment } from 'react'
 import { Gallery } from '@/components/media/Gallery'
 import { MediaFrame } from '@/components/media/MediaFrame'
 import { referenceHref, safeHref } from '@/lib/links'
-import { asMedia, isVideoMime, resolveMedia, resolveVideoUrl, type ResolvedMedia } from '@/lib/media'
-import { nodeText } from '@/lib/richtext'
-import type { LexicalNode, Locale, Media, RichTextData } from '@/lib/types'
+import { isVideoMime, resolveMedia, resolveVideoUrl, type ResolvedMedia } from '@/lib/media'
+import { isAnchorHeading, mediaOfNode, nodeText } from '@/lib/richtext'
+import type { LexicalNode, Locale, RichTextData } from '@/lib/types'
 
-type Ctx = { locale: Locale; origin: string }
+/** `ids` carries the section-anchor id of each root-level h2 (see `headingAnchors`). */
+type Ctx = { locale: Locale; origin: string; ids?: Map<LexicalNode, string> }
 
 const FORMAT = { bold: 1, italic: 2, strike: 4, underline: 8, code: 16, sub: 32, sup: 64, highlight: 128 }
 
-function mediaOf(node: LexicalNode): Media | null {
-  if (node.type === 'upload' && node.relationTo === 'media') return asMedia(node.value as Media)
-  if (node.type === 'block' && node.fields?.blockType === 'mediaBlock') return asMedia(node.fields.media as Media)
-  return null
-}
+const mediaOf = mediaOfNode
 
 function videoLinkOf(node: LexicalNode): { url: string; label: string } | null {
   if (node.type !== 'paragraph') return null
@@ -148,7 +145,7 @@ function renderNode(node: Grouped, ctx: Ctx, key: string): React.ReactNode {
       const Tag = `h${level}` as 'h2' | 'h3' | 'h4'
       if (!nodeText(n).trim()) return null
       return (
-        <Tag key={key} className={`rt-h${level}`} style={alignStyle(n)}>
+        <Tag key={key} id={ctx.ids?.get(n)} className={`rt-h${level}`} style={alignStyle(n)}>
           {kids()}
         </Tag>
       )
@@ -157,6 +154,7 @@ function renderNode(node: Grouped, ctx: Ctx, key: string): React.ReactNode {
     case 'autolink':
       return renderLink(n, ctx, key)
     case 'list': {
+      if (!nodeText(n).trim()) return null
       const Tag = n.listType === 'number' ? 'ol' : 'ul'
       return (
         <Tag key={key} className={`rt-list rt-list--${n.listType ?? 'bullet'}`} start={n.listType === 'number' ? n.start : undefined}>
@@ -165,6 +163,7 @@ function renderNode(node: Grouped, ctx: Ctx, key: string): React.ReactNode {
       )
     }
     case 'listitem': {
+      if (!nodeText(n).trim()) return null
       const nested = (n.children ?? []).every((c) => c.type === 'list')
       return (
         <li
@@ -178,7 +177,7 @@ function renderNode(node: Grouped, ctx: Ctx, key: string): React.ReactNode {
       )
     }
     case 'quote':
-      return <blockquote key={key}>{kids()}</blockquote>
+      return nodeText(n).trim() ? <blockquote key={key}>{kids()}</blockquote> : null
     case 'horizontalrule':
       return <hr key={key} className="rule rt-rule" />
     case 'block': {
@@ -215,42 +214,23 @@ export function RichText({
   origin,
   variant = 'prose',
   className = '',
+  anchors = false,
 }: {
   data: RichTextData | null | undefined
   locale: Locale
   origin: string
   variant?: 'prose' | 'lead' | 'compact'
   className?: string
+  /** Give root-level h2s the positional ids `headingAnchors` links to. */
+  anchors?: boolean
 }) {
   if (!data?.root || isEmptyRichText(data)) return null
-  const ctx = { locale, origin }
+  const ids = new Map<LexicalNode, string>()
+  if (anchors) (data.root.children ?? []).filter(isAnchorHeading).forEach((node, i) => ids.set(node, `section-${i + 1}`))
+  const ctx: Ctx = { locale, origin, ids }
   return (
     <div className={`rich-text rich-text--${variant} ${className}`} dir={data.root.direction ?? undefined}>
       {group(data.root.children ?? [], ctx).map((node, i) => renderNode(node, ctx, `n${i}`))}
     </div>
   )
-}
-
-export type Fact = { label: string; value: string }
-
-/**
- * A project's structured facts (location, area, year, collaborators…) are written
- * by the editor as the first bullet list of the post, one `Label: Value` per item.
- * Posts have no dedicated fields, so this is the only verified source; anything
- * else stays in the body.
- */
-export function extractFacts(data: RichTextData | null | undefined): { facts: Fact[]; body: RichTextData | null } {
-  const children = data?.root?.children ?? []
-  const firstIndex = children.findIndex((n) => nodeText(n).trim() || mediaOf(n))
-  const first = children[firstIndex]
-  if (!data || !first || first.type !== 'list' || first.listType === 'number') return { facts: [], body: data ?? null }
-  const facts: Fact[] = []
-  for (const item of first.children ?? []) {
-    const m = nodeText(item).trim().match(/^([^:：]{1,40})[:：]\s*(.{1,160})$/s)
-    if (!m) return { facts: [], body: data }
-    facts.push({ label: m[1]!.trim(), value: m[2]!.trim() })
-  }
-  if (!facts.length) return { facts: [], body: data }
-  const rest = children.filter((_, i) => i !== firstIndex)
-  return { facts, body: { root: { ...data.root, children: rest } } }
 }

@@ -13,6 +13,8 @@ export type HomeNavItem = { href: string; label: string; number: string }
 type Props = {
   locale: Locale
   items: HomeNavItem[]
+  /** The Projects destination, offered from the first frame — before and during the intro. */
+  shortcut?: { href: string; label: string } | null
   language: { href: string; label: string; short: string; lang: Locale } | null
   branding: ResolvedBranding
   mediaOrigin?: string
@@ -45,6 +47,7 @@ const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayout
 export function HomeStage({
   locale,
   items,
+  shortcut = null,
   language,
   branding,
   mediaOrigin = '',
@@ -310,6 +313,11 @@ export function HomeStage({
         <button type="button" className="home__skip text-link" onClick={onSkip}>
           {t.skip}
         </button>
+        {shortcut ? (
+          <Link className="home__shortcut text-link" href={shortcut.href}>
+            {shortcut.label} <span className="arrow" aria-hidden="true" />
+          </Link>
+        ) : null}
         {language ? (
           <Link className="home__lang lang-switch" href={language.href} hrefLang={language.lang} lang={language.lang}>
             <span aria-hidden="true">{language.short}</span>

@@ -3,7 +3,7 @@ import { cache } from 'react'
 
 import { HOME_SLUG } from '@eshobe/site-runtime'
 import { ENTRY_KINDS, sectionRef } from './theme/sections'
-import { siteId } from './env'
+import { cmsOrigin, siteId } from './env'
 import { cmsJson } from './upstream'
 import type {
   Category,
@@ -45,6 +45,26 @@ export type CmsResult<T> = { ok: true; data: T } | { ok: false; status: number }
 
 /** An answer that says nothing about the content: the CMS was down, slow or erroring. */
 const transient = (status: number) => status === 0 || status === 429 || status >= 500
+
+/**
+ * The CMS could not answer, so the theme does not know whether the content exists.
+ * Rendering "nothing has been published" here would be a lie a visitor (and a crawler)
+ * believes; the route's error boundary renders a retryable error state instead. A site
+ * with no CMS configured at all (local development) is not an outage and never throws.
+ */
+export class CmsUnavailableError extends Error {
+  constructor(public readonly resource: string, public readonly status: number) {
+    super(`CMS unavailable for ${resource} (${status || 'no response'})`)
+    this.name = 'CmsUnavailableError'
+  }
+}
+
+/** Throws for an outage; returns false for an ordinary miss (404, 403, not configured). */
+function assertReachable(res: CmsResult<unknown>, resource: string): res is { ok: true; data: unknown } {
+  if (res.ok) return true
+  if (transient(res.status) && cmsOrigin()) throw new CmsUnavailableError(resource, res.status)
+  return false
+}
 
 async function fetchSlot<T>(key: string, path: string, search: string, previous?: Slot): Promise<CmsResult<T>> {
   const { status, data } = await cmsJson<T>(path, search)
@@ -112,7 +132,7 @@ const isPublished = (doc: object | null | undefined) => {
 
 async function list<T>(collection: string, query: Query): Promise<T[]> {
   const res = await cmsGet<Paginated<T>>(collection, withSite(query))
-  return res.ok ? res.data.docs ?? [] : []
+  return assertReachable(res, collection) ? ((res.data as Paginated<T>).docs ?? []) : []
 }
 
 /* ------------------------------------------------------------------ site */
@@ -152,7 +172,9 @@ export const getPageById = cache(async (id: string, locale: Locale): Promise<Pag
     depth: 2,
     fallbackLocale: false,
   })
-  return res.ok && ((await previewing()) || isPublished(res.data)) && hasLocalizedContent(res.data) ? res.data : null
+  if (!assertReachable(res, 'pages')) return null
+  const page = res.data as Page
+  return ((await previewing()) || isPublished(page)) && hasLocalizedContent(page) ? page : null
 })
 
 /**
@@ -185,11 +207,6 @@ export const getSectionPage = cache(async (section: Section, locale: Locale) => 
   return null
 })
 
-/** Whether a section page has content in `locale` — used for alternates. */
-export async function sectionPageExists(section: Section, locale: Locale) {
-  return Boolean(await getSectionPage(section, locale))
-}
-
 /** The home page: the bound document when there is one, else the page with the reserved `home` slug. */
 export const getHomePage = cache(async (locale: Locale): Promise<Page | null> => {
   const { id, slug } = sectionRef(await getSite(), 'home')
@@ -211,7 +228,9 @@ export const getTranslatedSlug = cache(
         'select[_status]': true,
       },
     )
-    return res.ok && ((await previewing()) || isPublished(res.data)) && hasLocalizedContent(res.data) ? res.data.slug! : null
+    if (!assertReachable(res, collection)) return null
+    const doc = res.data as { slug?: string | null; title?: string | null; _status?: string | null }
+    return ((await previewing()) || isPublished(doc)) && hasLocalizedContent(doc) ? doc.slug! : null
   },
 )
 
@@ -362,14 +381,29 @@ export async function sectionOfPost(post: Post, locale: Locale): Promise<EntryKi
 
 /* ----------------------------------------------------------- nav & forms */
 
+/**
+ * A header or footer, read *without* locale fallback: an item that has no English label —
+ * or that points at a page with no English slug — must disappear from the English menu,
+ * not show up in Persian or lead to a Persian URL. Chrome never takes a page down: an
+ * outage yields no menu (the page itself reports the outage if its own content fails).
+ */
 export const getNav = cache(
   async (collection: 'header' | 'footer', locale: Locale): Promise<NavCollection | null> => {
-    const docs = await list<NavCollection>(collection, { locale, depth: 1, limit: 1 })
-    return docs[0] ?? null
+    try {
+      const docs = await list<NavCollection>(collection, { locale, depth: 1, limit: 1, fallbackLocale: false })
+      return docs[0] ?? null
+    } catch (error) {
+      if (error instanceof CmsUnavailableError) return null
+      throw error
+    }
   },
 )
 
+/**
+ * A form by id, read with this deployment's site key — so it is only found when it belongs
+ * to this site. A form id from another tenant reads as missing.
+ */
 export const getForm = cache(async (id: string, locale: Locale): Promise<Form | null> => {
   const res = await cmsGet<Form>(`forms/${encodeURIComponent(id)}`, { locale, depth: 0 })
-  return res.ok ? res.data : null
+  return assertReachable(res, 'forms') ? (res.data as Form) : null
 })

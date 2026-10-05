@@ -49,13 +49,17 @@ describe('media frame policy', () => {
   })
 })
 
-describe('route loading skeleton policy', () => {
-  it('rides on the page container and rhythm so the placeholder matches the page', () => {
-    const skeleton = component('layout', 'PageSkeleton.tsx')
-    expect(skeleton).toMatch(/container page/)
-    expect(skeleton).toMatch(/skeleton--media/)
-    // A hand-rolled padding block ran wider than the page past 1320px.
-    expect(skeleton).not.toMatch(/skeleton-page/)
+describe('route loading policy', () => {
+  it('gives content routes no streaming boundary, so a missing slug answers 404, not 200', () => {
+    // A `loading.tsx` above `[...slug]` flushes a 200 before the route can call notFound(),
+    // and its silhouette drew a hero image on pages that have none.
+    // A boundary on a parent segment wraps the slug route too, so none may sit above it.
+    for (const route of [['(fa)', '[...slug]'], ['(en)', 'en', '[...slug]'], ['(fa)'], ['(en)', 'en'], ['(en)']]) {
+      expect(() => read('src', 'app', ...route, 'loading.tsx')).toThrow()
+    }
+    // The home skeleton is scoped to the home route by a route group.
+    expect(read('src', 'app', '(fa)', '(home)', 'loading.tsx')).toMatch(/HomeSkeleton/)
+    expect(read('src', 'app', '(en)', 'en', '(home)', 'loading.tsx')).toMatch(/HomeSkeleton/)
   })
 
   it('stands in for the home stage instead of an interior card grid', () => {
@@ -66,31 +70,13 @@ describe('route loading skeleton policy', () => {
   })
 
   it('announces loading in the visitor’s language', () => {
-    expect(component('layout', 'PageSkeleton.tsx')).toMatch(/copy\[locale\]\.loading/)
     expect(component('layout', 'HomeSkeleton.tsx')).toMatch(/copy\[locale\]\.loading/)
   })
 
-  it('defines every skeleton modifier the loading states use', () => {
+  it('defines every skeleton modifier the loading state uses', () => {
     const cssText = css('skeleton.css')
-    const sources = [component('layout', 'PageSkeleton.tsx'), component('layout', 'HomeSkeleton.tsx')].join('\n')
-    const used = [...new Set([...sources.matchAll(/skeleton--[a-z-]+/g)].map((m) => m[0]))]
-    expect(used.length).toBeGreaterThan(3)
+    const used = [...new Set([...component('layout', 'HomeSkeleton.tsx').matchAll(/skeleton--[a-z-]+/g)].map((m) => m[0]))]
+    expect(used.length).toBeGreaterThan(1)
     for (const name of used) expect(cssText, name).toMatch(new RegExp(`\\.${name}\\s*[,{]`))
-    expect(cssText).toMatch(/\.skeleton-text\s*\{/)
-  })
-
-  it('keeps the pulse behind a reduced-motion guard', () => {
-    expect(css('skeleton.css')).toMatch(/@media \(prefers-reduced-motion: no-preference\)\s*\{\s*\.skeleton,\s*\.frame__media::before/)
-  })
-
-  it('gives every route a loading state of the right shape', () => {
-    for (const file of ['src/app/(fa)/loading.tsx', 'src/app/(en)/en/loading.tsx']) {
-      expect(read(...file.split('/'))).toMatch(/HomeSkeleton/)
-    }
-    for (const file of ['src/app/(fa)/[...slug]/loading.tsx', 'src/app/(en)/en/[...slug]/loading.tsx']) {
-      const source = read(...file.split('/'))
-      expect(source).toMatch(/PageSkeleton/)
-      expect(source).toMatch(/locale="(fa|en)"/)
-    }
   })
 })

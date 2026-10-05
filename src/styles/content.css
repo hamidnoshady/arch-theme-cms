@@ -295,6 +295,33 @@
   margin-inline: auto;
 }
 
+/* The contact page leads with what a visitor can do: write, call. */
+.contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.button--quiet {
+  border-color: var(--color-line);
+}
+
+.contact-actions__number {
+  color: inherit;
+}
+
+.contact-layout__form:focus {
+  outline: none;
+}
+
+.entry__gallery {
+  display: grid;
+  gap: 8px;
+}
+
 .contact-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
