@@ -182,7 +182,7 @@ const posts = [
   post({
     slug: L('خانه-ساحلی', 'sea-house'), title: L('خانهٔ ساحلی', 'Sea House'),
     categories: [ID.projects, ID.residential], heroImage: MEDIA.sea,
-    // Localized text facts, shared date (eshobe-cms migration 20261005_180000).
+    // Localized text facts, shared date (eshobe-cms migration 20261005_190000).
     projectMetadata: {
       location: L('نوشهر', 'Nowshahr'), date: '2023-05-01T00:00:00.000Z', area: L('۳۲۰ متر مربع', '320 m²'), status: null, client: null,
       additionalFacts: [{ id: 'f1', label: L('سازه', 'Structure'), value: L('بتن نمایان', 'Exposed concrete') }],
