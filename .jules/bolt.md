@@ -1,0 +1,3 @@
+## 2024-10-05 - O(N) DOM queries inside MutationObserver
+**Learning:** Using `document.querySelectorAll` inside a `MutationObserver` that watches `document.body` for `subtree` and `childList` changes causes an O(N) full DOM traversal on every single DOM update. This blocks the main thread heavily in dynamic apps like this Next.js site where elements enter/exit the DOM frequently.
+**Action:** When a global observer is needed, only run `querySelectorAll` scoped to `mutation.addedNodes`, and watch for targeted `attributes` modifications (with `attributeFilter`) instead of relying on a document-wide scan.
