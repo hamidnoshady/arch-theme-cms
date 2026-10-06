@@ -29,7 +29,7 @@ export function LanguageSwitch({
       href={link.href}
       hrefLang={target}
       lang={target}
-      title={link.available ? undefined : t.switchUnavailable}
+      title={note}
       data-available={link.available}
     >
       <span aria-hidden="true">{variant === 'short' ? t.switchToShort : t.switchTo}</span>
