@@ -139,6 +139,7 @@ export function MobileMenu({
         type="button"
         className="menu-button"
         aria-label={t.openMenu}
+        title={t.openMenu}
         aria-haspopup="dialog"
         aria-expanded={phase !== 'closed'}
         onClick={() => {
@@ -161,7 +162,7 @@ export function MobileMenu({
         <div className="menu-panel__inner">
           <div className="menu-panel__top">
             <Logo variant="compact" branding={branding} />
-            <button type="button" className="menu-panel__close" aria-label={t.closeMenu} onClick={close}>
+            <button type="button" className="menu-panel__close" aria-label={t.closeMenu} title={t.closeMenu} onClick={close}>
               <span className="menu-panel__close-icon" aria-hidden="true" />
             </button>
           </div>
