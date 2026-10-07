@@ -283,18 +283,37 @@ export const getSectionCategories = cache(
     const all = locale === 'fa' ? fa : en
     const byId = new Map(all.map((c) => [c.id, c]))
     const known = new Map([...fa, ...en].map((c) => [c.id, c]))
+
+    // Performance optimization: Build O(N) adjacency list for children
+    const childrenByParent = new Map<string, string[]>()
+    for (const c of known.values()) {
+      const p = parentId(c)
+      if (p) {
+        let siblings = childrenByParent.get(p)
+        if (!siblings) {
+          siblings = []
+          childrenByParent.set(p, siblings)
+        }
+        siblings.push(c.id)
+      }
+    }
+
+    // DFS stack traversal to collect all descendants
     const ids = new Set([rootId])
-    let grew = true
-    while (grew) {
-      grew = false
-      for (const c of known.values()) {
-        const p = parentId(c)
-        if (p && ids.has(p) && !ids.has(c.id)) {
-          ids.add(c.id)
-          grew = true
+    const stack = [rootId]
+    while (stack.length > 0) {
+      const current = stack.pop()!
+      const currentChildren = childrenByParent.get(current)
+      if (currentChildren) {
+        for (const childId of currentChildren) {
+          if (!ids.has(childId)) {
+            ids.add(childId)
+            stack.push(childId)
+          }
         }
       }
     }
+
     const children = [...ids]
       .filter((id) => id !== rootId)
       .map((id) => byId.get(id))
