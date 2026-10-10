@@ -283,18 +283,35 @@ export const getSectionCategories = cache(
     const all = locale === 'fa' ? fa : en
     const byId = new Map(all.map((c) => [c.id, c]))
     const known = new Map([...fa, ...en].map((c) => [c.id, c]))
+
+    // Bolt: Replaced O(n^2) nested loop with O(n) adjacency map + stack traversal.
+    // Creates map of parent -> children in one pass, then traverses children in O(n).
+    const childrenByParent = new Map<string, string[]>()
+    for (const c of known.values()) {
+      const p = parentId(c)
+      if (p) {
+        if (!childrenByParent.has(p)) {
+          childrenByParent.set(p, [])
+        }
+        childrenByParent.get(p)!.push(c.id)
+      }
+    }
+
     const ids = new Set([rootId])
-    let grew = true
-    while (grew) {
-      grew = false
-      for (const c of known.values()) {
-        const p = parentId(c)
-        if (p && ids.has(p) && !ids.has(c.id)) {
-          ids.add(c.id)
-          grew = true
+    const stack = [rootId]
+    while (stack.length > 0) {
+      const current = stack.pop()!
+      const currentChildren = childrenByParent.get(current)
+      if (currentChildren) {
+        for (const child of currentChildren) {
+          if (!ids.has(child)) {
+            ids.add(child)
+            stack.push(child)
+          }
         }
       }
     }
+
     const children = [...ids]
       .filter((id) => id !== rootId)
       .map((id) => byId.get(id))
