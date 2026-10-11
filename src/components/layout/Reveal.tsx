@@ -28,14 +28,33 @@ export function Reveal() {
       { rootMargin: '0px 0px -8% 0px' },
     )
 
-    const scan = () => {
+    // ⚡ Bolt: Optimize DOM scanning by only checking newly inserted nodes
+    // instead of querying the entire document on every mutation.
+    const scan = (mutations?: MutationRecord[]) => {
+      if (mutations) {
+        for (const mutation of mutations) {
+          for (let i = 0; i < mutation.addedNodes.length; i++) {
+            const node = mutation.addedNodes[i]
+            if (node?.nodeType !== 1) continue
+            const el = node as Element
+            if (el.hasAttribute('data-reveal') && el.getAttribute('data-reveal') !== 'in') {
+              io.observe(el)
+            }
+            for (const child of el.querySelectorAll('[data-reveal]')) {
+              if (child.getAttribute('data-reveal') !== 'in') io.observe(child)
+            }
+          }
+        }
+        return
+      }
+      // Initial scan when there are no mutations (first load)
       for (const el of document.querySelectorAll('[data-reveal]')) {
         if (el.getAttribute('data-reveal') === 'in') continue
         io.observe(el)
       }
     }
     scan()
-    const mo = new MutationObserver(scan)
+    const mo = new MutationObserver((m) => scan(m))
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
