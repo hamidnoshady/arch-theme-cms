@@ -35,12 +35,21 @@ export function Reveal() {
       }
     }
     scan()
-    const mo = new MutationObserver(scan)
+    let scanFrame: number | undefined
+    const mo = new MutationObserver((mutations) => {
+      const hasNewElements = mutations.some((m) =>
+        Array.from(m.addedNodes).some((n) => n.nodeType === Node.ELEMENT_NODE)
+      )
+      if (!hasNewElements) return
+      if (scanFrame !== undefined) cancelAnimationFrame(scanFrame)
+      scanFrame = requestAnimationFrame(scan)
+    })
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
       io.disconnect()
       mo.disconnect()
+      if (scanFrame !== undefined) cancelAnimationFrame(scanFrame)
     }
   }, [])
 
