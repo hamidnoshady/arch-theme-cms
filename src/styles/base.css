@@ -201,6 +201,17 @@ html[dir='rtl'] .arrow--back::before {
   cursor: progress;
 }
 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  display: block;
+}
+
 .rule {
   display: block;
   height: 1px;
