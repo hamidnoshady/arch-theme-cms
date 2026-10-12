@@ -1,0 +1,15 @@
+
+> graphite-eshobe-theme@1.0.0 dev
+> next dev
+
+▲ Next.js 16.3.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+✓ Ready in 631ms
+✓ Running next.config.ts took 57ms
+- Experiments (use with caution):
+  ✓ globalNotFound
+
+ GET /contact 200 in 4.1s (next.js: 3.3s, proxy.ts: 277ms, application-code: 530ms)
+ GET /test-form 200 in 845ms (next.js: 680ms, proxy.ts: 51ms, application-code: 114ms)
+ GET /test-form 200 in 58ms (next.js: 5ms, proxy.ts: 7ms, application-code: 46ms)
