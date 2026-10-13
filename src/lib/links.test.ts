@@ -56,6 +56,16 @@ describe('custom menu URLs follow the visitor’s language', () => {
   })
 })
 
+describe('safeHref XSS protection', () => {
+  it('rejects schemes bypassing regex with control characters', async () => {
+    const { safeHref } = await import('./links')
+    expect(safeHref('\x00javascript:alert(1)')).toBeNull()
+    expect(safeHref('java\x09script:alert(1)')).toBeNull()
+    expect(safeHref('javascript:alert(1)')).toBeNull()
+    expect(safeHref('about')).toBe('about')
+  })
+})
+
 describe('safe local paths', () => {
   it('accepts site paths and rejects protocol-relative tricks', async () => {
     const { isSafeLocalPath, localizePath } = await import('./links')
