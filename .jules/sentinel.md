@@ -1,0 +1,4 @@
+## 2024-05-18 - XSS Bypass in URL Validation via Control Characters
+**Vulnerability:** The `safeHref` function used regex like `/^[a-z][a-z0-9+.-]*:/i` to block non-HTTP/Mailto/Tel schemes, while falling back to returning relative paths that didn't match. An attacker could prefix a malicious scheme with a control character (e.g., `\x00javascript:alert(1)`). Since `\x00` doesn't match `^[a-z]`, the regex failed, returning the raw string. The browser would then strip the `\x00` and execute the JavaScript.
+**Learning:** Browsers strip C0 control characters and tabs/newlines before parsing URLs. URL validation functions relying on regex structure matching will be bypassed if they do not pre-strip or reject these control characters.
+**Prevention:** Always explicitly strip or reject strings containing C0 control characters and DEL (`[\u0000-\u001f\u007f]`) before validating or returning URLs.
