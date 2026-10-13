@@ -162,8 +162,16 @@ export function HomeStage({
 
   useEffect(() => {
     measureNav()
-    addEventListener('resize', measureNav)
-    return () => removeEventListener('resize', measureNav)
+    let timer: ReturnType<typeof setTimeout>
+    const onResize = () => {
+      clearTimeout(timer)
+      timer = setTimeout(measureNav, 100)
+    }
+    addEventListener('resize', onResize, { passive: true })
+    return () => {
+      clearTimeout(timer)
+      removeEventListener('resize', onResize)
+    }
   }, [measureNav])
 
   useIsoLayoutEffect(() => {
