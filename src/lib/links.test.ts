@@ -67,3 +67,12 @@ describe('safe local paths', () => {
     expect(localizePath('/en', 'en')).toBe('/en')
   })
 })
+
+describe('safeHref', () => {
+  it('rejects URLs containing C0 control characters and DEL', async () => {
+    const { safeHref } = await import('./links')
+    expect(safeHref('\x00javascript:alert(1)')).toBeNull()
+    expect(safeHref(' \x1fjavascript:alert(1)')).toBeNull()
+    expect(safeHref('\x7fjavascript:alert(1)')).toBeNull()
+  })
+})
