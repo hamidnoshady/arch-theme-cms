@@ -35,12 +35,22 @@ export function Reveal() {
       }
     }
     scan()
-    const mo = new MutationObserver(scan)
+    let frame: number | null = null
+    const mo = new MutationObserver(() => {
+      // ⚡ Bolt: Debounce the heavy querySelectorAll scan to run at most once per frame
+      // to avoid O(N) traversals on frequent React micro-mutations that cause jank.
+      if (frame !== null) return
+      frame = requestAnimationFrame(() => {
+        frame = null
+        scan()
+      })
+    })
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
       io.disconnect()
       mo.disconnect()
+      if (frame !== null) cancelAnimationFrame(frame)
     }
   }, [])
 
