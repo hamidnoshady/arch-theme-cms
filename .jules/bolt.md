@@ -1,0 +1,3 @@
+## 2024-10-15 - Debouncing synchronous DOM traversals inside MutationObserver
+**Learning:** Using `document.querySelectorAll` synchronously inside a global `MutationObserver` without debouncing is a common performance anti-pattern in React apps, especially with frequent micro-mutations causing O(N) traversals of the entire document multiple times per frame.
+**Action:** When delegating tasks on DOM node additions/removals across the document, always debounce or throttle the heavy work (e.g. `querySelectorAll`) using `requestAnimationFrame` or `setTimeout` to batch mutations that happen in the same frame.
