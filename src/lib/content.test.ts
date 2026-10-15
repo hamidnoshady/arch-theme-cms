@@ -52,6 +52,9 @@ describe('links', () => {
     expect(safeHref('/projects')).toBe('/projects')
     expect(safeHref('mailto:studio@example.com')).toMatch(/^mailto:/)
     expect(safeHref('javascript:alert(1)')).toBeNull()
+    expect(safeHref('\x01javascript:alert(1)')).toBeNull()
+    expect(safeHref('\x00javascript:alert(1)')).toBeNull()
+    expect(safeHref(' javascript:alert(1)')).toBeNull()
   })
 })
 
