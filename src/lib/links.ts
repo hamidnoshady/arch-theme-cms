@@ -95,7 +95,9 @@ export function resolveLink(
 
 /** Only allow safe URL schemes from CMS content. */
 export function safeHref(url: string): string | null {
-  const trimmed = url.trim()
+  // Strip control characters to prevent XSS scheme bypass (e.g. \x01javascript:)
+  const cleaned = url.replace(/[\u0000-\u001f\u007f]/g, '')
+  const trimmed = cleaned.trim()
   if (trimmed.startsWith('/')) return isSafeLocalPath(trimmed) ? trimmed : null
   if (/^(https?:|mailto:|tel:|geo:|#)/i.test(trimmed)) return trimmed
   if (!/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return trimmed
