@@ -35,12 +35,26 @@ export function Reveal() {
       }
     }
     scan()
-    const mo = new MutationObserver(scan)
+
+    // Performance optimization: debounce the MutationObserver callback.
+    // React frequently performs micro-mutations on the DOM tree. If we run
+    // `document.querySelectorAll` synchronously on every mutation, it triggers
+    // layout thrashing and blocks the main thread. Wrapping the scan call in
+    // `requestAnimationFrame` ensures it only runs once per frame.
+    let rafId: number | null = null
+    const mo = new MutationObserver(() => {
+      if (rafId !== null) return
+      rafId = requestAnimationFrame(() => {
+        scan()
+        rafId = null
+      })
+    })
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
       io.disconnect()
       mo.disconnect()
+      if (rafId !== null) cancelAnimationFrame(rafId)
     }
   }, [])
 
