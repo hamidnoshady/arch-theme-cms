@@ -35,12 +35,25 @@ export function Reveal() {
       }
     }
     scan()
-    const mo = new MutationObserver(scan)
+
+    // ⚡ Bolt: Debounce heavy DOM scans with requestAnimationFrame
+    // React's frequent micro-mutations can trigger MutationObserver multiple times per frame.
+    // By using rAF, we ensure the O(N) document.querySelectorAll only runs once per frame,
+    // preventing layout thrashing and reducing main thread blocking time.
+    let rafId: number | null = null
+    const mo = new MutationObserver(() => {
+      if (rafId !== null) return
+      rafId = requestAnimationFrame(() => {
+        scan()
+        rafId = null
+      })
+    })
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
       io.disconnect()
       mo.disconnect()
+      if (rafId !== null) cancelAnimationFrame(rafId)
     }
   }, [])
 

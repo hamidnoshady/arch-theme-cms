@@ -1,0 +1,3 @@
+## 2024-05-24 - Debouncing Global DOM Scans in React Applications
+**Learning:** When using `MutationObserver` for global DOM node changes in a React/Next.js application, executing heavy operations like `document.querySelectorAll` synchronously on every mutation can cause severe layout thrashing and O(N) traversals multiple times per frame due to React's frequent micro-mutations.
+**Action:** Always debounce heavy DOM scanning operations triggered by `MutationObserver` using `requestAnimationFrame`. This ensures the scan only runs once per frame, significantly reducing main thread blocking time.
