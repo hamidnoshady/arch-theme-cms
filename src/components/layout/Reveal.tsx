@@ -34,13 +34,25 @@ export function Reveal() {
         io.observe(el)
       }
     }
+
+    // ⚡ Bolt Optimization: Debounce the heavy DOM read (querySelectorAll) using requestAnimationFrame.
+    // Calling querySelectorAll synchronously on every MutationObserver callback causes severe layout
+    // thrashing and blocks the main thread during frequent React micro-mutations. This ensures we
+    // only scan the DOM at most once per frame.
+    let rafId: number
+    const debouncedScan = () => {
+      cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(scan)
+    }
+
     scan()
-    const mo = new MutationObserver(scan)
+    const mo = new MutationObserver(debouncedScan)
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
       io.disconnect()
       mo.disconnect()
+      cancelAnimationFrame(rafId)
     }
   }, [])
 
