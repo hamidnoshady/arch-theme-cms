@@ -1,0 +1,4 @@
+## 2024-05-24 - URL Sanitization to Prevent Control Character XSS Bypass
+**Vulnerability:** XSS filter bypass using control characters in URLs (e.g. `\x00javascript:alert(1)`).
+**Learning:** `String.prototype.trim()` in JavaScript does not remove C0 control characters (like `\x00`, `\x01`) or the DEL character. If an attacker injects these characters into a URL, `trim()` fails to remove them. A regex intended to match `javascript:` at the beginning of the string will fail, bypassing the security check, while the browser might still execute the malicious JavaScript when ignoring the control characters in the URL string.
+**Prevention:** Always use `.replace(/[\x00-\x1f\x7f]/g, '').trim()` to thoroughly strip control characters from user-provided URLs before parsing or validating them against a whitelist or blacklist.

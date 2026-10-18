@@ -78,7 +78,8 @@ export function resolveLink(
   if (!link) return null
   const newTab = Boolean(link.newTab)
   if (link.type === 'custom' || (!link.type && link.url)) {
-    const url = link.url?.trim()
+    // Strip control characters that could bypass scheme matching
+    const url = link.url?.replace(/[\x00-\x1f\x7f]/g, '').trim()
     if (!url) return null
     if (EXTERNAL.test(url) || SCHEME.test(url)) return { href: url, external: true, newTab }
     if (url.startsWith('#') || url.startsWith('?')) return { href: url, external: false, newTab }
@@ -95,7 +96,8 @@ export function resolveLink(
 
 /** Only allow safe URL schemes from CMS content. */
 export function safeHref(url: string): string | null {
-  const trimmed = url.trim()
+  // Strip control characters that could bypass scheme matching
+  const trimmed = url.replace(/[\x00-\x1f\x7f]/g, '').trim()
   if (trimmed.startsWith('/')) return isSafeLocalPath(trimmed) ? trimmed : null
   if (/^(https?:|mailto:|tel:|geo:|#)/i.test(trimmed)) return trimmed
   if (!/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return trimmed
