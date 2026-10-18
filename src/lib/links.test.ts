@@ -53,6 +53,10 @@ describe('custom menu URLs follow the visitor’s language', () => {
     expect(resolveLink(custom('data:text/html,x'), 'en')).toBeNull()
     expect(resolveLink(custom('//evil.com'), 'en')?.external).toBe(true) // protocol-relative is external, never local
     expect(resolveLink(custom('/\\evil.com'), 'en')).toBeNull()
+
+    // Control characters must be stripped to prevent regex bypass
+    expect(resolveLink(custom('\x00javascript:alert(1)'), 'en')).toBeNull()
+    expect(resolveLink(custom(' \x01javascript:alert(1)'), 'en')).toBeNull()
   })
 })
 
