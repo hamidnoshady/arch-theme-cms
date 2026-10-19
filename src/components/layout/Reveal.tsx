@@ -28,17 +28,26 @@ export function Reveal() {
       { rootMargin: '0px 0px -8% 0px' },
     )
 
+    let rafId: number | null = null
+
     const scan = () => {
       for (const el of document.querySelectorAll('[data-reveal]')) {
         if (el.getAttribute('data-reveal') === 'in') continue
         io.observe(el)
       }
+      rafId = null
     }
     scan()
-    const mo = new MutationObserver(scan)
+
+    // Debounce mutation observer to avoid layout thrashing and multiple O(N) traversals per frame
+    const mo = new MutationObserver(() => {
+      if (rafId !== null) cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(scan)
+    })
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId)
       io.disconnect()
       mo.disconnect()
     }
