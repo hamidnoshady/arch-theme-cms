@@ -1,0 +1,3 @@
+## 2024-05-20 - Global MutationObserver Layout Thrashing
+**Learning:** Attaching a global `MutationObserver` directly to `document.body` that immediately executes `document.querySelectorAll` across the whole DOM can cause severe layout thrashing and performance degradation, especially during rapid React updates. This leads to an O(N) operation running many times per frame.
+**Action:** Always throttle or debounce expensive DOM traversals originating from frequent events like mutations or scroll/resize listeners using mechanisms like `requestAnimationFrame` to ensure they run at most once per frame. Keep the cleanup phase clean by canceling any pending animation frames on unmount.

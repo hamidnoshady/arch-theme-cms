@@ -28,19 +28,31 @@ export function Reveal() {
       { rootMargin: '0px 0px -8% 0px' },
     )
 
+    // Throttles the potentially expensive querySelectorAll scan using requestAnimationFrame.
+    // This prevents layout thrashing by ensuring that multiple rapid React DOM mutations
+    // within the same frame only trigger a single scan before the next paint.
+    let frameId: number | null = null
     const scan = () => {
+      frameId = null
       for (const el of document.querySelectorAll('[data-reveal]')) {
         if (el.getAttribute('data-reveal') === 'in') continue
         io.observe(el)
       }
     }
+
+    const throttledScan = () => {
+      if (frameId !== null) return
+      frameId = requestAnimationFrame(scan)
+    }
+
     scan()
-    const mo = new MutationObserver(scan)
+    const mo = new MutationObserver(throttledScan)
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
       io.disconnect()
       mo.disconnect()
+      if (frameId !== null) cancelAnimationFrame(frameId)
     }
   }, [])
 
