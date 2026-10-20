@@ -50,6 +50,7 @@ describe('custom menu URLs follow the visitor’s language', () => {
 
   it('refuses scripts and paths a browser would read as another origin', () => {
     expect(resolveLink(custom('javascript:alert(1)'), 'en')).toBeNull()
+    expect(resolveLink(custom('java\x09script:alert(1)'), 'en')).toBeNull()
     expect(resolveLink(custom('data:text/html,x'), 'en')).toBeNull()
     expect(resolveLink(custom('//evil.com'), 'en')?.external).toBe(true) // protocol-relative is external, never local
     expect(resolveLink(custom('/\\evil.com'), 'en')).toBeNull()
