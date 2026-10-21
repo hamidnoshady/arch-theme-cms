@@ -54,16 +54,30 @@ describe('custom menu URLs follow the visitor’s language', () => {
     expect(resolveLink(custom('//evil.com'), 'en')?.external).toBe(true) // protocol-relative is external, never local
     expect(resolveLink(custom('/\\evil.com'), 'en')).toBeNull()
   })
+
+  it('strips control characters that could bypass scheme validation', () => {
+    expect(resolveLink(custom('java\x00script:alert(1)'), 'en')).toBeNull()
+    expect(resolveLink(custom('java\x09script:alert(1)'), 'en')).toBeNull()
+    expect(resolveLink(custom('java\x0ascript:alert(1)'), 'en')).toBeNull()
+    expect(resolveLink(custom('java\x0dscript:alert(1)'), 'en')).toBeNull()
+  })
 })
 
 describe('safe local paths', () => {
   it('accepts site paths and rejects protocol-relative tricks', async () => {
-    const { isSafeLocalPath, localizePath } = await import('./links')
+    const { isSafeLocalPath, localizePath, safeHref } = await import('./links')
     expect(isSafeLocalPath('/thanks')).toBe(true)
     expect(isSafeLocalPath('//evil.com')).toBe(false)
     expect(isSafeLocalPath('/\\evil.com')).toBe(false)
     expect(isSafeLocalPath('/\t/evil.com')).toBe(false)
     expect(isSafeLocalPath('https://x')).toBe(false)
     expect(localizePath('/en', 'en')).toBe('/en')
+
+    // Test safeHref control character stripping
+    expect(safeHref('java\x00script:alert(1)')).toBeNull()
+    expect(safeHref('java\x09script:alert(1)')).toBeNull()
+    expect(safeHref('java\x0ascript:alert(1)')).toBeNull()
+    expect(safeHref('java\x0dscript:alert(1)')).toBeNull()
+    expect(safeHref('https://example.com')).toBe('https://example.com')
   })
 })
