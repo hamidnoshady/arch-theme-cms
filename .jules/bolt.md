@@ -1,0 +1,3 @@
+## 2024-10-21 - Debounce global MutationObservers
+**Learning:** `MutationObserver` triggers synchronously and per-mutation. A single React component mounting with children, or rendering frequently, will dispatch a flurry of callback invocations. When the callback is an O(N) operation like `document.querySelectorAll('[data-reveal]')`, executing this multiple times per frame causes severe layout thrashing and CPU spikes.
+**Action:** When a global DOM node query is necessary inside a `MutationObserver`, always debounce the evaluation. Using `requestAnimationFrame` bounds the processing cost to once per rendering frame, ensuring that multiple micro-mutations consolidate into a single layout traversal.

@@ -35,12 +35,23 @@ export function Reveal() {
       }
     }
     scan()
-    const mo = new MutationObserver(scan)
+
+    let frameId: number | null = null
+    const debouncedScan = () => {
+      if (frameId !== null) return
+      frameId = requestAnimationFrame(() => {
+        scan()
+        frameId = null
+      })
+    }
+
+    const mo = new MutationObserver(debouncedScan)
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
       io.disconnect()
       mo.disconnect()
+      if (frameId !== null) cancelAnimationFrame(frameId)
     }
   }, [])
 
