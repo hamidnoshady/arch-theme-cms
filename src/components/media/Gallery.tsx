@@ -150,7 +150,7 @@ export function Gallery({
               <p className="lightbox__count" aria-live="polite" aria-atomic="true">
                 {counter(index!)}
               </p>
-              <button type="button" className="lightbox__close" onClick={() => dialogRef.current?.close()} autoFocus>
+              <button type="button" className="lightbox__close" title={t.closeImage} onClick={() => dialogRef.current?.close()} autoFocus>
                 <span className="lightbox__close-icon" aria-hidden="true" />
                 <span>{t.closeImage}</span>
               </button>
