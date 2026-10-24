@@ -35,12 +35,22 @@ export function Reveal() {
       }
     }
     scan()
-    const mo = new MutationObserver(scan)
+
+    let rafId: number
+    const debouncedScan = () => {
+      // ⚡ Bolt: Debounce the expensive O(N) querySelectorAll traversal
+      // using requestAnimationFrame to prevent layout thrashing on rapid mutations
+      cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(scan)
+    }
+
+    const mo = new MutationObserver(debouncedScan)
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
       io.disconnect()
       mo.disconnect()
+      cancelAnimationFrame(rafId)
     }
   }, [])
 
