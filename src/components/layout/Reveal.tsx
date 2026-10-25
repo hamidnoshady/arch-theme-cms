@@ -34,13 +34,27 @@ export function Reveal() {
         io.observe(el)
       }
     }
+
+    // Debounce heavy DOM queries using requestAnimationFrame to prevent layout
+    // thrashing during frequent React micro-mutations.
+    let frameId: number | undefined
+    const queueScan = () => {
+      if (frameId !== undefined) {
+        cancelAnimationFrame(frameId)
+      }
+      frameId = requestAnimationFrame(scan)
+    }
+
     scan()
-    const mo = new MutationObserver(scan)
+    const mo = new MutationObserver(queueScan)
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
       io.disconnect()
       mo.disconnect()
+      if (frameId !== undefined) {
+        cancelAnimationFrame(frameId)
+      }
     }
   }, [])
 
