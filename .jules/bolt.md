@@ -1,0 +1,3 @@
+## 2024-10-26 - Prevent Layout Thrashing with Debounced MutationObservers
+**Learning:** React micro-mutations can cause `MutationObserver` callbacks to fire rapidly within a single frame. Performing heavy DOM queries like `document.querySelectorAll` synchronously in these callbacks can lead to layout thrashing and severe performance degradation due to multiple O(N) traversals per frame.
+**Action:** When using `MutationObserver` for global DOM node changes, debounce heavy operations using `requestAnimationFrame`. Type the animation frame ID as `number | undefined` in TypeScript strict mode and check for undefined before calling `cancelAnimationFrame` to avoid compilation errors and ensure proper cleanup.

@@ -35,12 +35,26 @@ export function Reveal() {
       }
     }
     scan()
-    const mo = new MutationObserver(scan)
+
+    let rafId: number | undefined
+    const debouncedScan = () => {
+      if (rafId !== undefined) {
+        cancelAnimationFrame(rafId)
+      }
+      // ⚡ Bolt Optimization: Debounce scan to run at most once per frame.
+      // This prevents layout thrashing and O(N) queries during React micro-mutations.
+      rafId = requestAnimationFrame(scan)
+    }
+
+    const mo = new MutationObserver(debouncedScan)
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
       io.disconnect()
       mo.disconnect()
+      if (rafId !== undefined) {
+        cancelAnimationFrame(rafId)
+      }
     }
   }, [])
 
