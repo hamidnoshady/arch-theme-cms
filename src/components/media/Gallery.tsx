@@ -112,6 +112,7 @@ export function Gallery({
               onClick={() => open(i)}
               aria-haspopup="dialog"
               aria-label={`${t.openImage}: ${describe(image, i)}`}
+              title={`${t.openImage}: ${describe(image, i)}`}
             >
               <MediaFrame
                 as="span"
@@ -163,13 +164,13 @@ export function Gallery({
             </figure>
             {count > 1 ? (
               <div className="lightbox__nav">
-                <button type="button" className="lightbox__step" onClick={() => go(-1)} aria-label={`${t.previous}: ${describe(previous, (index! - 1 + count) % count)}`}>
+                <button type="button" className="lightbox__step" onClick={() => go(-1)} aria-label={`${t.previous}: ${describe(previous, (index! - 1 + count) % count)}`} title={`${t.previous}: ${describe(previous, (index! - 1 + count) % count)}`}>
                   <span className="lightbox__step-label">
                     <span aria-hidden="true" className="arrow arrow--back" /> {t.previous}
                   </span>
                   <Picture media={previous!} sizes="96px" alt="" cover className="lightbox__preview" />
                 </button>
-                <button type="button" className="lightbox__step" onClick={() => go(1)} aria-label={`${t.next}: ${describe(next, (index! + 1) % count)}`}>
+                <button type="button" className="lightbox__step" onClick={() => go(1)} aria-label={`${t.next}: ${describe(next, (index! + 1) % count)}`} title={`${t.next}: ${describe(next, (index! + 1) % count)}`}>
                   <span className="lightbox__step-label">
                     {t.next} <span aria-hidden="true" className="arrow" />
                   </span>
