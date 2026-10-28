@@ -35,12 +35,20 @@ export function Reveal() {
       }
     }
     scan()
-    const mo = new MutationObserver(scan)
+
+    let frameId: number | undefined;
+    // Debounce the MutationObserver callback using requestAnimationFrame to prevent layout
+    // thrashing and O(N) traversals multiple times per frame during frequent React micro-mutations.
+    const mo = new MutationObserver(() => {
+      if (frameId !== undefined) cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(scan);
+    })
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
       io.disconnect()
       mo.disconnect()
+      if (frameId !== undefined) cancelAnimationFrame(frameId);
     }
   }, [])
 
