@@ -35,12 +35,22 @@ export function Reveal() {
       }
     }
     scan()
-    const mo = new MutationObserver(scan)
+    let rafId: number | undefined
+    // Debounce scans to avoid layout thrashing on frequent mutations
+    const mo = new MutationObserver(() => {
+      if (rafId !== undefined) {
+        cancelAnimationFrame(rafId)
+      }
+      rafId = requestAnimationFrame(scan)
+    })
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
       io.disconnect()
       mo.disconnect()
+      if (rafId !== undefined) {
+        cancelAnimationFrame(rafId)
+      }
     }
   }, [])
 
