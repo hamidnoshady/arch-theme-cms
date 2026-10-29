@@ -54,6 +54,13 @@ describe('custom menu URLs follow the visitor’s language', () => {
     expect(resolveLink(custom('//evil.com'), 'en')?.external).toBe(true) // protocol-relative is external, never local
     expect(resolveLink(custom('/\\evil.com'), 'en')).toBeNull()
   })
+
+  it('filters out URLs containing C0 control characters and DEL to prevent robust formatting issues', () => {
+    expect(resolveLink(custom('\x00javascript:alert(1)'), 'en')).toBeNull()
+    expect(resolveLink(custom('\x08javascript:alert(1)'), 'en')).toBeNull()
+    expect(resolveLink(custom('\x1fjavascript:alert(1)'), 'en')).toBeNull()
+    expect(resolveLink(custom('javascript\x00:alert(1)'), 'en')).toBeNull()
+  })
 })
 
 describe('safe local paths', () => {
@@ -65,5 +72,16 @@ describe('safe local paths', () => {
     expect(isSafeLocalPath('/\t/evil.com')).toBe(false)
     expect(isSafeLocalPath('https://x')).toBe(false)
     expect(localizePath('/en', 'en')).toBe('/en')
+  })
+})
+
+describe('safeHref', () => {
+  it('rejects URLs containing C0 control characters and DEL', async () => {
+    const { safeHref } = await import('./links')
+    expect(safeHref('\x00javascript:alert(1)')).toBeNull()
+    expect(safeHref('\x08javascript:alert(1)')).toBeNull()
+    expect(safeHref('\x1fjavascript:alert(1)')).toBeNull()
+    expect(safeHref('javascript\x00:alert(1)')).toBeNull()
+    expect(safeHref('\x7fjavascript:alert(1)')).toBeNull()
   })
 })
