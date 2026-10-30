@@ -66,4 +66,13 @@ describe('safe local paths', () => {
     expect(isSafeLocalPath('https://x')).toBe(false)
     expect(localizePath('/en', 'en')).toBe('/en')
   })
+
+  it('rejects URLs with embedded control characters', async () => {
+    const { safeHref } = await import('./links')
+    expect(safeHref(' \u0001javascript:alert(1)')).toBeNull()
+    expect(safeHref(' \u0000javascript:alert(1)')).toBeNull()
+    expect(safeHref('\u001fjavascript:alert(1)')).toBeNull()
+    expect(safeHref('\tjavascript:alert(1)')).toBeNull()
+    expect(safeHref('https://example.com')).toBe('https://example.com')
+  })
 })
