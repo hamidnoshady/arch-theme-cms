@@ -1,0 +1,3 @@
+## 2026-10-30 - MutationObserver with requestAnimationFrame debouncing
+**Learning:** Frequent React micro-mutations can cause `MutationObserver` callbacks to trigger repeatedly in a single frame. This leads to layout thrashing and O(N) operations being executed multiple times per frame if the callback involves DOM queries (like `document.querySelectorAll`).
+**Action:** When using `MutationObserver` for global DOM changes (like scanning for new elements), debounce the callback using `requestAnimationFrame`. Ensure the frame ID variable is typed as `number | undefined` and call `cancelAnimationFrame` before requesting a new frame and within the observer's cleanup routine.
