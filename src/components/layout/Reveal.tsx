@@ -35,12 +35,30 @@ export function Reveal() {
       }
     }
     scan()
-    const mo = new MutationObserver(scan)
+
+    // ⚡ Bolt: Debounce heavy DOM scans during React micro-mutations using rAF.
+    // This prevents layout thrashing (O(N) traversals per frame) when many
+    // elements are mounted/updated rapidly.
+    let rafId: number | undefined
+    const debouncedScan = () => {
+      if (rafId !== undefined) {
+        cancelAnimationFrame(rafId)
+      }
+      rafId = requestAnimationFrame(() => {
+        scan()
+        rafId = undefined
+      })
+    }
+
+    const mo = new MutationObserver(debouncedScan)
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
       io.disconnect()
       mo.disconnect()
+      if (rafId !== undefined) {
+        cancelAnimationFrame(rafId)
+      }
     }
   }, [])
 
