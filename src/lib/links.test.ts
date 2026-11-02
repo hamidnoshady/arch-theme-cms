@@ -54,6 +54,12 @@ describe('custom menu URLs follow the visitor’s language', () => {
     expect(resolveLink(custom('//evil.com'), 'en')?.external).toBe(true) // protocol-relative is external, never local
     expect(resolveLink(custom('/\\evil.com'), 'en')).toBeNull()
   })
+
+  it('refuses URLs with C0 control characters that can bypass scheme checks', () => {
+    expect(resolveLink(custom('java\x00script:alert(1)'), 'en')).toBeNull()
+    expect(resolveLink(custom('java\x08script:alert(1)'), 'en')).toBeNull()
+    expect(resolveLink(custom('java\x0Bscript:alert(1)'), 'en')).toBeNull()
+  })
 })
 
 describe('safe local paths', () => {
@@ -65,5 +71,13 @@ describe('safe local paths', () => {
     expect(isSafeLocalPath('/\t/evil.com')).toBe(false)
     expect(isSafeLocalPath('https://x')).toBe(false)
     expect(localizePath('/en', 'en')).toBe('/en')
+  })
+
+  it('refuses URLs with C0 control characters in safeHref', async () => {
+    const { safeHref } = await import('./links')
+    expect(safeHref('java\x00script:alert(1)')).toBeNull()
+    expect(safeHref('java\x08script:alert(1)')).toBeNull()
+    expect(safeHref('java\x0Bscript:alert(1)')).toBeNull()
+    expect(safeHref('https://example.com')).toBe('https://example.com')
   })
 })
