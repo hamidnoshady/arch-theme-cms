@@ -35,12 +35,27 @@ export function Reveal() {
       }
     }
     scan()
-    const mo = new MutationObserver(scan)
+
+    let rafId: number | undefined
+    // Debounce the scan function using requestAnimationFrame to prevent layout thrashing
+    // and O(N) DOM queries during frequent React micro-mutations. This limits scanning
+    // to at most once per frame.
+    const debouncedScan = () => {
+      if (rafId !== undefined) {
+        cancelAnimationFrame(rafId)
+      }
+      rafId = requestAnimationFrame(scan)
+    }
+
+    const mo = new MutationObserver(debouncedScan)
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
       io.disconnect()
       mo.disconnect()
+      if (rafId !== undefined) {
+        cancelAnimationFrame(rafId)
+      }
     }
   }, [])
 
