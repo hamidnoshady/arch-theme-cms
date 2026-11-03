@@ -67,3 +67,29 @@ describe('safe local paths', () => {
     expect(localizePath('/en', 'en')).toBe('/en')
   })
 })
+
+describe('safeHref', () => {
+  it('rejects URLs with C0 control characters', async () => {
+    const { safeHref } = await import('./links')
+    expect(safeHref('java\x00script:alert(1)')).toBeNull()
+    expect(safeHref('java\x09script:alert(1)')).toBeNull() // Tab character
+    expect(safeHref('javascript\x0A:alert(1)')).toBeNull() // Newline character
+    expect(safeHref('\x1Bjavascript:alert(1)')).toBeNull() // Escape character
+  })
+
+  it('accepts normal safe URLs', async () => {
+    const { safeHref } = await import('./links')
+    expect(safeHref('https://example.com')).toBe('https://example.com')
+    expect(safeHref('/about')).toBe('/about')
+    expect(safeHref('mailto:test@example.com')).toBe('mailto:test@example.com')
+    expect(safeHref('tel:+1234567890')).toBe('tel:+1234567890')
+    expect(safeHref('#top')).toBe('#top')
+  })
+
+  it('rejects dangerous URLs', async () => {
+    const { safeHref } = await import('./links')
+    expect(safeHref('javascript:alert(1)')).toBeNull()
+    expect(safeHref('data:text/html,<script>alert(1)</script>')).toBeNull()
+    expect(safeHref('vbscript:msgbox("hello")')).toBeNull()
+  })
+})
