@@ -35,10 +35,21 @@ export function Reveal() {
       }
     }
     scan()
-    const mo = new MutationObserver(scan)
+
+    let rafId: number | undefined
+    const mo = new MutationObserver(() => {
+      // Debounce via rAF: avoid multiple O(N) DOM scans per frame if React heavily mutates
+      if (rafId !== undefined) {
+        cancelAnimationFrame(rafId)
+      }
+      rafId = requestAnimationFrame(scan)
+    })
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
+      if (rafId !== undefined) {
+        cancelAnimationFrame(rafId)
+      }
       io.disconnect()
       mo.disconnect()
     }
