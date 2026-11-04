@@ -1,0 +1,3 @@
+## 2024-11-04 - Debouncing Global MutationObservers
+**Learning:** When using `MutationObserver` on `document.body` for global DOM changes (like scanning for newly injected `[data-reveal]` elements), React's micro-mutations can trigger the observer callback multiple times per frame. If the callback performs heavy operations like `document.querySelectorAll`, this causes severe layout thrashing and O(N) traversals multiple times per frame.
+**Action:** Always debounce heavy `MutationObserver` callbacks using `requestAnimationFrame`. Type the animation frame ID variable as `number | undefined` in TypeScript strict mode and verify it is not undefined before calling `cancelAnimationFrame` to avoid compilation errors and ensure proper cleanup.
