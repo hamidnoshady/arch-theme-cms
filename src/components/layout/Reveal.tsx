@@ -35,12 +35,21 @@ export function Reveal() {
       }
     }
     scan()
-    const mo = new MutationObserver(scan)
+    let frame: number | undefined
+    // Debounce the global DOM scan to prevent layout thrashing on rapid micro-mutations
+    const mo = new MutationObserver(() => {
+      if (frame !== undefined) cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        frame = undefined
+        scan()
+      })
+    })
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
       io.disconnect()
       mo.disconnect()
+      if (frame !== undefined) cancelAnimationFrame(frame)
     }
   }, [])
 
