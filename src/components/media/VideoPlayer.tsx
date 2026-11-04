@@ -66,7 +66,7 @@ export function VideoPlayer({ media, locale }: { media: ResolvedMedia; locale: L
           </p>
         </video>
       ) : (
-        <button type="button" className="video__poster" onClick={() => setActive(true)} aria-label={label}>
+        <button type="button" className="video__poster" onClick={() => setActive(true)} aria-label={label} title={label}>
           {media.poster ? (
             // eslint-disable-next-line @next/next/no-img-element -- poster comes from CMS media sizes.
             <img className="video__still" src={media.poster} alt="" loading="lazy" decoding="async" />
