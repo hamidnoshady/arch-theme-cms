@@ -34,11 +34,23 @@ export function Reveal() {
         io.observe(el)
       }
     }
+
+    let frameId: number | undefined;
+    const queueScan = () => {
+      if (frameId !== undefined) {
+        cancelAnimationFrame(frameId)
+      }
+      frameId = requestAnimationFrame(scan)
+    }
+
     scan()
-    const mo = new MutationObserver(scan)
+    const mo = new MutationObserver(queueScan)
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
+      if (frameId !== undefined) {
+        cancelAnimationFrame(frameId)
+      }
       io.disconnect()
       mo.disconnect()
     }
