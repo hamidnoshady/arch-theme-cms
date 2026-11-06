@@ -35,10 +35,19 @@ export function Reveal() {
       }
     }
     scan()
-    const mo = new MutationObserver(scan)
+
+    // ⚡ Bolt: Debounce MutationObserver callback with requestAnimationFrame.
+    // Why: Prevents expensive O(N) `querySelectorAll` on every React micro-mutation.
+    // Impact: Limits DOM scans to max 1 per frame (~60/sec instead of potentially hundreds).
+    let rafId: number | undefined
+    const mo = new MutationObserver(() => {
+      if (rafId !== undefined) cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(scan)
+    })
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
+      if (rafId !== undefined) cancelAnimationFrame(rafId)
       io.disconnect()
       mo.disconnect()
     }
