@@ -28,14 +28,30 @@ export function Reveal() {
       { rootMargin: '0px 0px -8% 0px' },
     )
 
-    const scan = () => {
-      for (const el of document.querySelectorAll('[data-reveal]')) {
+    const scan = (root: Element | Document = document) => {
+      for (const el of root.querySelectorAll('[data-reveal]')) {
         if (el.getAttribute('data-reveal') === 'in') continue
         io.observe(el)
       }
     }
+
+    // Initial scan of the whole document
     scan()
-    const mo = new MutationObserver(scan)
+
+    const mo = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const node of mutation.addedNodes) {
+          if (node instanceof Element) {
+            // Check the node itself
+            if (node.hasAttribute('data-reveal') && node.getAttribute('data-reveal') !== 'in') {
+              io.observe(node)
+            }
+            // Check its descendants
+            scan(node)
+          }
+        }
+      }
+    })
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
