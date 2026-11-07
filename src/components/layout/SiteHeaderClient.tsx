@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useMemo } from 'react'
 
 import { Logo } from '@/components/brand/Logo'
 import { copy, href } from '@/lib/i18n'
@@ -34,7 +35,20 @@ type Props = {
  * router between client navigations.
  */
 export function SiteHeaderClient({ locale, items, branding, homeLabel, language }: Props) {
-  const activeIndex = items.findIndex((item) => item.current)
+  const activeIndex = useMemo(() => items.findIndex((item) => item.current), [items])
+  const mobileMenuItems = useMemo(
+    () =>
+      items.map(({ key, href: h, label, number, current, external, newTab }) => ({
+        key,
+        href: h,
+        label,
+        number,
+        current: Boolean(current),
+        external,
+        newTab,
+      })),
+    [items],
+  )
 
   return (
     <header className="site-header">
@@ -92,15 +106,7 @@ export function SiteHeaderClient({ locale, items, branding, homeLabel, language 
           <MobileMenu
             locale={locale}
             branding={branding}
-            items={items.map(({ key, href: h, label, number, current, external, newTab }) => ({
-              key,
-              href: h,
-              label,
-              number,
-              current: Boolean(current),
-              external,
-              newTab,
-            }))}
+            items={mobileMenuItems}
             language={language}
           />
         </div>
