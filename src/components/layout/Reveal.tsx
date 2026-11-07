@@ -28,14 +28,26 @@ export function Reveal() {
       { rootMargin: '0px 0px -8% 0px' },
     )
 
-    const scan = () => {
-      for (const el of document.querySelectorAll('[data-reveal]')) {
+    const scan = (root: Element | Document) => {
+      for (const el of root.querySelectorAll('[data-reveal]')) {
         if (el.getAttribute('data-reveal') === 'in') continue
         io.observe(el)
       }
     }
-    scan()
-    const mo = new MutationObserver(scan)
+    scan(document)
+
+    const mo = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const node of mutation.addedNodes) {
+          if (node.nodeType !== Node.ELEMENT_NODE) continue
+          const el = node as Element
+          if (el.hasAttribute('data-reveal') && el.getAttribute('data-reveal') !== 'in') {
+            io.observe(el)
+          }
+          scan(el)
+        }
+      }
+    })
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
