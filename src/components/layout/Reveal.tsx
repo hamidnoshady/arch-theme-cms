@@ -35,12 +35,25 @@ export function Reveal() {
       }
     }
     scan()
-    const mo = new MutationObserver(scan)
+
+    // Debounce the heavy O(N) global `querySelectorAll` scan using `requestAnimationFrame`.
+    // This prevents layout thrashing and main thread blocking if React triggers
+    // dozens of micro-mutations in a single frame.
+    let frameId: number | undefined
+    const mo = new MutationObserver(() => {
+      if (frameId !== undefined) {
+        cancelAnimationFrame(frameId)
+      }
+      frameId = requestAnimationFrame(scan)
+    })
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
       io.disconnect()
       mo.disconnect()
+      if (frameId !== undefined) {
+        cancelAnimationFrame(frameId)
+      }
     }
   }, [])
 
