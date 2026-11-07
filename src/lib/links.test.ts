@@ -67,3 +67,14 @@ describe('safe local paths', () => {
     expect(localizePath('/en', 'en')).toBe('/en')
   })
 })
+
+describe('safeHref', () => {
+  it('blocks control characters that bypass scheme checks', async () => {
+    const { safeHref } = await import('./links')
+    expect(safeHref('java\x00script:alert(1)')).toBeNull()
+    expect(safeHref('java\nscript:alert(1)')).toBeNull()
+    expect(safeHref('java\tscript:alert(1)')).toBeNull()
+    expect(safeHref('javascript:alert(1)')).toBeNull()
+    expect(safeHref('  \n  https://example.com  \t  ')).toBe('https://example.com')
+  })
+})
