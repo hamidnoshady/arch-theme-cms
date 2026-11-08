@@ -28,17 +28,33 @@ export function Reveal() {
       { rootMargin: '0px 0px -8% 0px' },
     )
 
+    let rafId: number | undefined
+
     const scan = () => {
       for (const el of document.querySelectorAll('[data-reveal]')) {
         if (el.getAttribute('data-reveal') === 'in') continue
         io.observe(el)
       }
     }
+
+    // Initial scan
     scan()
-    const mo = new MutationObserver(scan)
+
+    // ⚡ Bolt: Debounce the heavy querySelectorAll operation using requestAnimationFrame
+    // React micro-mutations can trigger the observer multiple times per frame.
+    // Debouncing ensures we only scan the DOM once per frame at most, preventing layout thrashing.
+    const mo = new MutationObserver(() => {
+      if (rafId !== undefined) {
+        cancelAnimationFrame(rafId)
+      }
+      rafId = requestAnimationFrame(scan)
+    })
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
+      if (rafId !== undefined) {
+        cancelAnimationFrame(rafId)
+      }
       io.disconnect()
       mo.disconnect()
     }
