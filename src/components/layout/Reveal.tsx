@@ -35,10 +35,22 @@ export function Reveal() {
       }
     }
     scan()
-    const mo = new MutationObserver(scan)
+    let rafId: number | undefined
+
+    // ⚡ Bolt: Debounce global document.querySelectorAll scan to prevent layout thrashing
+    // and O(N) traversals multiple times per frame on frequent React micro-mutations.
+    const mo = new MutationObserver(() => {
+      if (rafId !== undefined) {
+        cancelAnimationFrame(rafId)
+      }
+      rafId = requestAnimationFrame(scan)
+    })
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
+      if (rafId !== undefined) {
+        cancelAnimationFrame(rafId)
+      }
       io.disconnect()
       mo.disconnect()
     }
