@@ -1,0 +1,3 @@
+## 2026-11-10 - Debouncing Global MutationObserver
+**Learning:** Using a global MutationObserver on document.body for tasks like `data-reveal` scanning triggers a callback for every small DOM change, which is frequent during React's rendering lifecycle. Doing O(N) operations like `document.querySelectorAll` multiple times per frame causes severe layout thrashing and high CPU usage.
+**Action:** Always debounce global MutationObservers. Using `requestAnimationFrame` to batch DOM reads to the next frame is an effective pattern, especially in strict mode, by storing the frame ID in a variable `let frameId: number | undefined` and cancelling previous frames before scheduling a new one.
