@@ -1,0 +1,4 @@
+## 2025-02-27 - URL Validation Bypass via Control Characters
+**Vulnerability:** URL validation could be bypassed using control characters such as `\x00` in order to obfuscate malicious schemes like `java\x00script:alert(1)`, which passed standard regex scheme checks.
+**Learning:** Checking for safe URL schemes via regex without first rejecting C0 control characters and DEL allows evasion. Browsers ignore these control characters and parse the underlying scheme. The `trim()` method only removes standard whitespace, so embedded null bytes or other control chars are not removed.
+**Prevention:** Always explicitly check for and reject C0 control characters and DEL (`[\u0000-\u001f\u007f]`) before, or shortly after `trim()` and before running pattern matching, when validating URLs or safe schemes.
