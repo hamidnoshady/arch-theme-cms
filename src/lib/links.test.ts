@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { resolveLink } from './links'
+import { resolveLink, safeHref } from './links'
 import type { PageRole } from './theme/sections'
 
 const ABOUT = '0a7f1c6e-1111-4a2b-8c3d-000000000001'
@@ -65,5 +65,11 @@ describe('safe local paths', () => {
     expect(isSafeLocalPath('/\t/evil.com')).toBe(false)
     expect(isSafeLocalPath('https://x')).toBe(false)
     expect(localizePath('/en', 'en')).toBe('/en')
+  })
+})
+
+describe('safeHref', () => {
+  it('refuses control characters', () => {
+    expect(safeHref('java\x00script:alert(1)')).toBeNull()
   })
 })
