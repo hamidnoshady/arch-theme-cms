@@ -34,13 +34,21 @@ export function Reveal() {
         io.observe(el)
       }
     }
+    let scanFrame: number | undefined
+    const queueScan = () => {
+      if (scanFrame !== undefined) cancelAnimationFrame(scanFrame)
+      scanFrame = requestAnimationFrame(scan)
+    }
+
     scan()
-    const mo = new MutationObserver(scan)
+    // Optimization: Debounce heavy querySelectorAll on frequent React mutations
+    const mo = new MutationObserver(queueScan)
     mo.observe(document.body, { childList: true, subtree: true })
 
     return () => {
       io.disconnect()
       mo.disconnect()
+      if (scanFrame !== undefined) cancelAnimationFrame(scanFrame)
     }
   }, [])
 
